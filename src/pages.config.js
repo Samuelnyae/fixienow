@@ -12,6 +12,7 @@ import TechnicianEarnings from './pages/TechnicianEarnings';
 import TechnicianProfile from './pages/TechnicianProfile';
 import AdminDashboard from './pages/AdminDashboard';
 import Settings from './pages/Settings';
+import Wallet from './pages/Wallet';
 import __Layout from './Layout.jsx';
 
 
@@ -30,6 +31,7 @@ export const PAGES = {
     "TechnicianProfile": TechnicianProfile,
     "AdminDashboard": AdminDashboard,
     "Settings": Settings,
+    "Wallet": Wallet,
 }
 
 export const pagesConfig = {
