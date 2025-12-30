@@ -15,7 +15,8 @@ import {
   CheckCircle2,
   Clock,
   LogOut,
-  Loader2
+  Loader2,
+  ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -258,6 +259,23 @@ export default function TechnicianProfile() {
             KES {technician?.hourly_rate?.toLocaleString() || 500}
           </p>
         </div>
+
+        {/* Wallet Link */}
+        <Link 
+          to={createPageUrl('Wallet')}
+          className="w-full bg-white rounded-2xl p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors border-2 border-teal-100"
+        >
+          <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <p className="font-medium">My Wallet</p>
+            <p className="text-sm text-gray-500">Manage earnings & payments</p>
+          </div>
+          <ChevronRight className="w-5 h-5 text-gray-400" />
+        </Link>
 
         {/* Logout */}
         <button 

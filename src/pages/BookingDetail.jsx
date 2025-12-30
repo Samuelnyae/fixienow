@@ -120,15 +120,55 @@ export default function BookingDetail() {
 
   const paymentMutation = useMutation({
     mutationFn: async () => {
+      const amount = booking.final_price || booking.estimated_price;
+      
+      // Create payment record
       await base44.entities.Payment.create({
         booking_id: bookingId,
         user_id: booking.user_id,
         technician_id: booking.technician_id,
-        amount: booking.final_price || booking.estimated_price,
+        amount: amount,
         method: 'mpesa',
         mpesa_phone: mpesaPhone,
         status: 'completed',
       });
+
+      // Get user and technician wallets
+      const userWallets = await base44.entities.Wallet.filter({ user_id: booking.user_id });
+      const techWallets = await base44.entities.Wallet.filter({ user_id: technician?.user_id });
+
+      if (userWallets.length > 0 && techWallets.length > 0) {
+        const userWallet = userWallets[0];
+        const techWallet = techWallets[0];
+
+        // Create wallet transaction
+        await base44.entities.Transaction.create({
+          transaction_id: `tx_${Date.now()}_${bookingId}`,
+          from_wallet_id: userWallet.id,
+          to_wallet_id: techWallet.id,
+          from_address: userWallet.wallet_address,
+          to_address: techWallet.wallet_address,
+          amount: amount,
+          currency: 'KES',
+          transaction_type: 'booking_payment',
+          status: 'completed',
+          payment_method: 'mpesa',
+          description: `Payment for ${booking.category} service`,
+          metadata: { booking_id: bookingId }
+        });
+
+        // Update technician wallet balance
+        const techBalances = [...techWallet.balances];
+        const kesIndex = techBalances.findIndex(b => b.currency === 'KES');
+        if (kesIndex !== -1) {
+          techBalances[kesIndex].amount += amount;
+        }
+        await base44.entities.Wallet.update(techWallet.id, { 
+          balances: techBalances,
+          total_received: (techWallet.total_received || 0) + amount
+        });
+      }
+
       await base44.entities.Booking.update(bookingId, { payment_status: 'paid' });
     },
     onSuccess: () => {

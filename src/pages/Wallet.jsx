@@ -14,7 +14,8 @@ import {
   Shield,
   Zap,
   TrendingUp,
-  Filter
+  Filter,
+  ArrowLeftRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -23,6 +24,7 @@ import TransactionItem from '../components/wallet/TransactionItem';
 import SendMoneyDialog from '../components/wallet/SendMoneyDialog';
 import DepositDialog from '../components/wallet/DepositDialog';
 import WithdrawDialog from '../components/wallet/WithdrawDialog';
+import ExchangeDialog from '../components/wallet/ExchangeDialog';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import EmptyState from '../components/common/EmptyState';
 
@@ -31,6 +33,7 @@ export default function Wallet() {
   const [showSend, setShowSend] = useState(false);
   const [showDeposit, setShowDeposit] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
+  const [showExchange, setShowExchange] = useState(false);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -204,6 +207,58 @@ export default function Wallet() {
     },
   });
 
+  // Exchange mutation
+  const exchangeMutation = useMutation({
+    mutationFn: async (data) => {
+      const txId = `tx_${Date.now()}_exchange`;
+
+      // Update balances
+      const balances = [...wallet.balances];
+      
+      // Deduct from source currency
+      let fromIndex = balances.findIndex(b => b.currency === data.fromCurrency);
+      balances[fromIndex].amount -= data.amount;
+
+      // Add to target currency
+      let toIndex = balances.findIndex(b => b.currency === data.toCurrency);
+      if (toIndex === -1) {
+        const toCurrency = currencies.find(c => c.code === data.toCurrency);
+        balances.push({ 
+          currency: data.toCurrency, 
+          amount: data.convertedAmount,
+          currency_symbol: toCurrency?.symbol || data.toCurrency
+        });
+      } else {
+        balances[toIndex].amount += data.convertedAmount;
+      }
+
+      await base44.entities.Wallet.update(wallet.id, { balances });
+
+      // Create transaction record
+      await base44.entities.Transaction.create({
+        transaction_id: txId,
+        from_wallet_id: wallet.id,
+        to_wallet_id: wallet.id,
+        from_address: wallet.wallet_address,
+        to_address: wallet.wallet_address,
+        amount: data.amount,
+        currency: data.fromCurrency,
+        transaction_type: 'exchange',
+        status: 'completed',
+        payment_method: 'wallet',
+        from_currency: data.fromCurrency,
+        to_currency: data.toCurrency,
+        exchange_rate: data.exchangeRate,
+        description: `Exchanged ${data.amount} ${data.fromCurrency} to ${data.convertedAmount.toFixed(2)} ${data.toCurrency}`,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['myWallet']);
+      queryClient.invalidateQueries(['myTransactions']);
+      setShowExchange(false);
+    },
+  });
+
   // Withdraw mutation
   const withdrawMutation = useMutation({
     mutationFn: async (data) => {
@@ -270,7 +325,7 @@ export default function Wallet() {
         <WalletCard wallet={wallet} />
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-4 gap-3">
           <button
             onClick={() => setShowSend(true)}
             className="bg-white rounded-2xl p-4 hover:shadow-md transition-all border-2 border-transparent hover:border-teal-200"
@@ -302,6 +357,17 @@ export default function Wallet() {
             </div>
             <p className="font-semibold text-gray-900">Withdraw</p>
             <p className="text-xs text-gray-500">Cash out</p>
+          </button>
+
+          <button
+            onClick={() => setShowExchange(true)}
+            className="bg-white rounded-2xl p-4 hover:shadow-md transition-all border-2 border-transparent hover:border-purple-200"
+          >
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <ArrowLeftRight className="w-6 h-6 text-purple-600" />
+            </div>
+            <p className="font-semibold text-gray-900">Exchange</p>
+            <p className="text-xs text-gray-500">Convert</p>
           </button>
         </div>
 
@@ -386,6 +452,14 @@ export default function Wallet() {
         wallet={wallet}
         onWithdraw={(data) => withdrawMutation.mutate(data)}
         isLoading={withdrawMutation.isPending}
+      />
+
+      <ExchangeDialog
+        open={showExchange}
+        onOpenChange={setShowExchange}
+        wallet={wallet}
+        onExchange={(data) => exchangeMutation.mutate(data)}
+        isLoading={exchangeMutation.isPending}
       />
     </div>
   );
