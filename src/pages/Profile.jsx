@@ -15,7 +15,8 @@ import {
   Shield,
   LogOut,
   Wrench,
-  Loader2
+  Loader2,
+  CreditCard
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -203,6 +204,20 @@ export default function Profile() {
 
         {/* Quick Links */}
         <div className="bg-white rounded-2xl overflow-hidden">
+          <Link 
+            to={createPageUrl('Wallet')}
+            className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors border-b"
+          >
+            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+              <CreditCard className="w-5 h-5 text-green-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium">My Wallet</p>
+              <p className="text-sm text-gray-500">Manage your funds</p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </Link>
+
           <Link 
             to={createPageUrl('TechnicianRegister')}
             className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors border-b"

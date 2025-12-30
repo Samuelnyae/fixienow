@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPageUrl } from '../utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
@@ -94,9 +95,14 @@ export default function TechnicianEarnings() {
             <p className="text-4xl font-bold mb-6">
               KES {(technician?.wallet_balance || 0).toLocaleString()}
             </p>
-            <Button className="bg-white text-teal-600 hover:bg-teal-50">
-              <Wallet className="w-4 h-4 mr-2" />
-              Withdraw
+            <Button 
+              asChild
+              className="bg-white text-teal-600 hover:bg-teal-50"
+            >
+              <a href={createPageUrl('Wallet')}>
+                <Wallet className="w-4 h-4 mr-2" />
+                Open Wallet
+              </a>
             </Button>
           </CardContent>
         </Card>
