@@ -8,6 +8,10 @@ import Profile from './pages/Profile';
 import TechnicianRegister from './pages/TechnicianRegister';
 import TechnicianDashboard from './pages/TechnicianDashboard';
 import TechnicianJobs from './pages/TechnicianJobs';
+import TechnicianEarnings from './pages/TechnicianEarnings';
+import TechnicianProfile from './pages/TechnicianProfile';
+import AdminDashboard from './pages/AdminDashboard';
+import Settings from './pages/Settings';
 import __Layout from './Layout.jsx';
 
 
@@ -22,6 +26,10 @@ export const PAGES = {
     "TechnicianRegister": TechnicianRegister,
     "TechnicianDashboard": TechnicianDashboard,
     "TechnicianJobs": TechnicianJobs,
+    "TechnicianEarnings": TechnicianEarnings,
+    "TechnicianProfile": TechnicianProfile,
+    "AdminDashboard": AdminDashboard,
+    "Settings": Settings,
 }
 
 export const pagesConfig = {
