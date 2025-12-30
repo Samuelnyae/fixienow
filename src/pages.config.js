@@ -5,6 +5,9 @@ import BookService from './pages/BookService';
 import MyBookings from './pages/MyBookings';
 import BookingDetail from './pages/BookingDetail';
 import Profile from './pages/Profile';
+import TechnicianRegister from './pages/TechnicianRegister';
+import TechnicianDashboard from './pages/TechnicianDashboard';
+import TechnicianJobs from './pages/TechnicianJobs';
 import __Layout from './Layout.jsx';
 
 
@@ -16,6 +19,9 @@ export const PAGES = {
     "MyBookings": MyBookings,
     "BookingDetail": BookingDetail,
     "Profile": Profile,
+    "TechnicianRegister": TechnicianRegister,
+    "TechnicianDashboard": TechnicianDashboard,
+    "TechnicianJobs": TechnicianJobs,
 }
 
 export const pagesConfig = {
