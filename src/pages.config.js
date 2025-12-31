@@ -1,36 +1,36 @@
-import Home from './pages/Home';
-import Services from './pages/Services';
-import TechnicianDetail from './pages/TechnicianDetail';
-import BookService from './pages/BookService';
-import MyBookings from './pages/MyBookings';
-import BookingDetail from './pages/BookingDetail';
-import Profile from './pages/Profile';
-import TechnicianRegister from './pages/TechnicianRegister';
-import TechnicianDashboard from './pages/TechnicianDashboard';
-import TechnicianJobs from './pages/TechnicianJobs';
-import TechnicianEarnings from './pages/TechnicianEarnings';
-import TechnicianProfile from './pages/TechnicianProfile';
 import AdminDashboard from './pages/AdminDashboard';
+import BookService from './pages/BookService';
+import BookingDetail from './pages/BookingDetail';
+import Home from './pages/Home';
+import MyBookings from './pages/MyBookings';
+import Profile from './pages/Profile';
+import Services from './pages/Services';
 import Settings from './pages/Settings';
+import TechnicianDashboard from './pages/TechnicianDashboard';
+import TechnicianDetail from './pages/TechnicianDetail';
+import TechnicianEarnings from './pages/TechnicianEarnings';
+import TechnicianJobs from './pages/TechnicianJobs';
+import TechnicianProfile from './pages/TechnicianProfile';
+import TechnicianRegister from './pages/TechnicianRegister';
 import Wallet from './pages/Wallet';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Home": Home,
-    "Services": Services,
-    "TechnicianDetail": TechnicianDetail,
-    "BookService": BookService,
-    "MyBookings": MyBookings,
-    "BookingDetail": BookingDetail,
-    "Profile": Profile,
-    "TechnicianRegister": TechnicianRegister,
-    "TechnicianDashboard": TechnicianDashboard,
-    "TechnicianJobs": TechnicianJobs,
-    "TechnicianEarnings": TechnicianEarnings,
-    "TechnicianProfile": TechnicianProfile,
     "AdminDashboard": AdminDashboard,
+    "BookService": BookService,
+    "BookingDetail": BookingDetail,
+    "Home": Home,
+    "MyBookings": MyBookings,
+    "Profile": Profile,
+    "Services": Services,
     "Settings": Settings,
+    "TechnicianDashboard": TechnicianDashboard,
+    "TechnicianDetail": TechnicianDetail,
+    "TechnicianEarnings": TechnicianEarnings,
+    "TechnicianJobs": TechnicianJobs,
+    "TechnicianProfile": TechnicianProfile,
+    "TechnicianRegister": TechnicianRegister,
     "Wallet": Wallet,
 }
 

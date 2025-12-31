@@ -102,16 +102,20 @@ export default function Wallet() {
     mutationFn: async (data) => {
       const txId = `tx_${Date.now()}_${Math.random().toString(36).substring(7)}`;
       
-      // Get recipient wallet
+      // Get recipient wallet by address
       const recipientWallets = await base44.entities.Wallet.filter({ 
-        wallet_address: data.recipient 
+        wallet_address: data.recipient.trim()
       });
 
       if (recipientWallets.length === 0) {
-        throw new Error('Recipient wallet not found');
+        throw new Error('Recipient wallet not found. Please verify the wallet address.');
       }
 
       const recipientWallet = recipientWallets[0];
+
+      if (recipientWallet.id === wallet.id) {
+        throw new Error('Cannot send money to yourself');
+      }
 
       // Create transaction
       const transaction = await base44.entities.Transaction.create({

@@ -333,11 +333,11 @@ export default function TechnicianRegister() {
             <div className="space-y-4">
               <div>
                 <Label>ID Document (National ID/Passport)</Label>
-                <div className="mt-2 border-2 border-dashed rounded-xl p-6 text-center">
+                <div className="mt-2 border-2 border-dashed rounded-xl p-6 text-center relative">
                   {idDocument ? (
-                    <div className="flex items-center justify-center gap-2 text-teal-600">
+                    <div className="flex items-center justify-center gap-2 text-teal-600 mb-2">
                       <CheckCircle2 className="w-5 h-5" />
-                      <span>{idDocument.name}</span>
+                      <span className="text-sm">{idDocument.name}</span>
                     </div>
                   ) : (
                     <>
@@ -345,31 +345,33 @@ export default function TechnicianRegister() {
                       <p className="text-sm text-gray-500 mb-2">Click to upload or drag and drop</p>
                     </>
                   )}
+                  <Button 
+                    variant="outline" 
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById('id-upload').click();
+                    }}
+                  >
+                    Select File
+                  </Button>
                   <input
+                    id="id-upload"
                     type="file"
                     accept="image/*,.pdf"
                     onChange={(e) => handleFileChange(e, 'id')}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    className="hidden"
                   />
-                  <Button variant="outline" className="relative">
-                    Select File
-                    <input
-                      type="file"
-                      accept="image/*,.pdf"
-                      onChange={(e) => handleFileChange(e, 'id')}
-                      className="absolute inset-0 opacity-0 cursor-pointer"
-                    />
-                  </Button>
                 </div>
               </div>
 
               <div>
                 <Label>Professional Certificate (Optional)</Label>
-                <div className="mt-2 border-2 border-dashed rounded-xl p-6 text-center">
+                <div className="mt-2 border-2 border-dashed rounded-xl p-6 text-center relative">
                   {certificate ? (
-                    <div className="flex items-center justify-center gap-2 text-teal-600">
+                    <div className="flex items-center justify-center gap-2 text-teal-600 mb-2">
                       <CheckCircle2 className="w-5 h-5" />
-                      <span>{certificate.name}</span>
+                      <span className="text-sm">{certificate.name}</span>
                     </div>
                   ) : (
                     <>
@@ -377,15 +379,23 @@ export default function TechnicianRegister() {
                       <p className="text-sm text-gray-500 mb-2">Upload certification documents</p>
                     </>
                   )}
-                  <Button variant="outline" className="relative">
+                  <Button 
+                    variant="outline"
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById('cert-upload').click();
+                    }}
+                  >
                     Select File
-                    <input
-                      type="file"
-                      accept="image/*,.pdf"
-                      onChange={(e) => handleFileChange(e, 'cert')}
-                      className="absolute inset-0 opacity-0 cursor-pointer"
-                    />
                   </Button>
+                  <input
+                    id="cert-upload"
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={(e) => handleFileChange(e, 'cert')}
+                    className="hidden"
+                  />
                 </div>
               </div>
             </div>
