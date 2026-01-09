@@ -30,6 +30,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -38,6 +39,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import ChatWindow from '../components/chat/ChatWindow';
 
 const iconMap = {
   mechanic: Wrench,
@@ -64,11 +66,24 @@ export default function BookingDetail() {
   const bookingId = urlParams.get('id');
   const queryClient = useQueryClient();
 
+  const [user, setUser] = useState(null);
   const [showPayment, setShowPayment] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [rating, setRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [mpesaPhone, setMpesaPhone] = useState('');
+
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const userData = await base44.auth.me();
+        setUser(userData);
+      } catch (e) {
+        base44.auth.redirectToLogin(window.location.href);
+      }
+    };
+    loadUser();
+  }, []);
 
   const { data: booking, isLoading } = useQuery({
     queryKey: ['booking', bookingId],
@@ -227,6 +242,13 @@ export default function BookingDetail() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+        <Tabs defaultValue="details" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="chat">Chat</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="details" className="space-y-6">
         {/* Status Banner */}
         <div className={`rounded-2xl p-4 ${status.color.replace('text-', 'bg-').replace('700', '50')}`}>
           <div className="flex items-center justify-between">

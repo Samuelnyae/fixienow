@@ -12,7 +12,8 @@ import {
   XCircle,
   Navigation,
   Play,
-  Loader2
+  Loader2,
+  MessageCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -269,48 +270,80 @@ export default function TechnicianJobs() {
                       )}
 
                       {job.status === 'accepted' && (
-                        <div className="flex gap-3 mt-4">
+                        <div className="grid grid-cols-3 gap-2 mt-4">
                           <Button 
                             variant="outline"
-                            className="flex-1"
+                            asChild
+                          >
+                            <Link to={createPageUrl('BookingDetail') + `?id=${job.id}`}>
+                              <MessageCircle className="w-4 h-4 mr-1" />
+                              Chat
+                            </Link>
+                          </Button>
+                          <Button 
+                            variant="outline"
                           >
                             <Phone className="w-4 h-4 mr-1" />
                             Call
                           </Button>
                           <Button 
                             onClick={() => handleStartRoute(job)}
-                            className="flex-1 bg-purple-600 hover:bg-purple-700"
+                            className="bg-purple-600 hover:bg-purple-700"
                             disabled={updateJobMutation.isPending}
                           >
                             <Navigation className="w-4 h-4 mr-1" />
-                            Start Route
+                            Route
                           </Button>
                         </div>
                       )}
 
                       {job.status === 'en_route' && (
-                        <Button 
-                          onClick={() => handleStartWork(job)}
-                          className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700"
-                          disabled={updateJobMutation.isPending}
-                        >
-                          <Play className="w-4 h-4 mr-1" />
-                          Arrived - Start Work
-                        </Button>
+                        <div className="flex gap-3 mt-4">
+                          <Button 
+                            variant="outline"
+                            asChild
+                            className="flex-1"
+                          >
+                            <Link to={createPageUrl('BookingDetail') + `?id=${job.id}`}>
+                              <MessageCircle className="w-4 h-4 mr-1" />
+                              Chat
+                            </Link>
+                          </Button>
+                          <Button 
+                            onClick={() => handleStartWork(job)}
+                            className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                            disabled={updateJobMutation.isPending}
+                          >
+                            <Play className="w-4 h-4 mr-1" />
+                            Arrived
+                          </Button>
+                        </div>
                       )}
 
                       {job.status === 'in_progress' && (
-                        <Button 
-                          onClick={() => {
-                            setSelectedJob(job);
-                            setFinalPrice(job.estimated_price?.toString() || '');
-                            setShowCompleteDialog(true);
-                          }}
-                          className="w-full mt-4 bg-green-600 hover:bg-green-700"
-                        >
-                          <CheckCircle2 className="w-4 h-4 mr-1" />
-                          Complete Job
-                        </Button>
+                        <div className="flex gap-3 mt-4">
+                          <Button 
+                            variant="outline"
+                            asChild
+                            className="flex-1"
+                          >
+                            <Link to={createPageUrl('BookingDetail') + `?id=${job.id}`}>
+                              <MessageCircle className="w-4 h-4 mr-1" />
+                              Chat
+                            </Link>
+                          </Button>
+                          <Button 
+                            onClick={() => {
+                              setSelectedJob(job);
+                              setFinalPrice(job.estimated_price?.toString() || '');
+                              setShowCompleteDialog(true);
+                            }}
+                            className="flex-1 bg-green-600 hover:bg-green-700"
+                          >
+                            <CheckCircle2 className="w-4 h-4 mr-1" />
+                            Complete
+                          </Button>
+                        </div>
                       )}
                     </div>
                   ))}
