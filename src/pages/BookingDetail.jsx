@@ -396,6 +396,23 @@ export default function BookingDetail() {
             </Button>
           )}
         </div>
+          </TabsContent>
+
+          <TabsContent value="chat" className="h-[600px]">
+            <div className="bg-white rounded-2xl border h-full overflow-hidden">
+              {user && (
+                <ChatWindow
+                  bookingId={bookingId}
+                  currentUserId={user.id}
+                  currentUserName={user.full_name}
+                  currentUserType={booking?.user_id === user.id ? 'user' : 'technician'}
+                  otherUserName={booking?.user_id === user.id ? technician?.name : booking?.user_name}
+                  otherUserPhoto={booking?.user_id === user.id ? technician?.profile_photo : null}
+                />
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Payment Dialog */}
