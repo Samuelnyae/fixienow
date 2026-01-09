@@ -138,7 +138,27 @@ export default function BookService() {
 
   const createBookingMutation = useMutation({
     mutationFn: async (bookingData) => {
-      return base44.entities.Booking.create(bookingData);
+      const booking = await base44.entities.Booking.create(bookingData);
+
+      // Create notification for technician if assigned
+      if (bookingData.technician_id) {
+        const techs = await base44.entities.Technician.filter({ id: bookingData.technician_id });
+        if (techs.length > 0 && techs[0].user_id) {
+          await base44.entities.Notification.create({
+            user_id: techs[0].user_id,
+            type: 'booking_new',
+            title: 'New Job Request',
+            message: `New ${categoryLabels[bookingData.category]} service request from ${bookingData.user_name}`,
+            booking_id: booking.id,
+            metadata: {
+              category: bookingData.category,
+              amount: bookingData.estimated_price
+            }
+          });
+        }
+      }
+
+      return booking;
     },
     onSuccess: (booking) => {
       navigate(createPageUrl(`BookingDetail?id=${booking.id}`));
