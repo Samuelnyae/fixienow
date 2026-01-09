@@ -13,6 +13,7 @@ import TechnicianJobs from './pages/TechnicianJobs';
 import TechnicianProfile from './pages/TechnicianProfile';
 import TechnicianRegister from './pages/TechnicianRegister';
 import Wallet from './pages/Wallet';
+import NotificationCenter from './pages/NotificationCenter';
 import __Layout from './Layout.jsx';
 
 
@@ -32,6 +33,7 @@ export const PAGES = {
     "TechnicianProfile": TechnicianProfile,
     "TechnicianRegister": TechnicianRegister,
     "Wallet": Wallet,
+    "NotificationCenter": NotificationCenter,
 }
 
 export const pagesConfig = {
