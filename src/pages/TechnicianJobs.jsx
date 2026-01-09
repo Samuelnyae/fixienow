@@ -85,8 +85,21 @@ export default function TechnicianJobs() {
     },
   });
 
-  const handleAccept = (job) => {
-    updateJobMutation.mutate({ jobId: job.id, data: { status: 'accepted' } });
+  const handleAccept = async (job) => {
+    await updateJobMutation.mutateAsync({ jobId: job.id, data: { status: 'accepted' } });
+    
+    // Create notification for user
+    await base44.entities.Notification.create({
+      user_id: job.user_id,
+      type: 'booking_accepted',
+      title: 'Booking Accepted',
+      message: `${technician?.name || 'A technician'} has accepted your ${job.category?.replace('_', ' ')} service request`,
+      booking_id: job.id,
+      metadata: {
+        category: job.category,
+        technician_name: technician?.name
+      }
+    });
   };
 
   const handleDecline = (job) => {
@@ -97,17 +110,32 @@ export default function TechnicianJobs() {
     updateJobMutation.mutate({ jobId: job.id, data: { status: 'en_route' } });
   };
 
-  const handleStartWork = (job) => {
-    updateJobMutation.mutate({ jobId: job.id, data: { status: 'in_progress' } });
+  const handleStartWork = async (job) => {
+    await updateJobMutation.mutateAsync({ jobId: job.id, data: { status: 'in_progress' } });
+    
+    // Create notification for user
+    await base44.entities.Notification.create({
+      user_id: job.user_id,
+      type: 'booking_started',
+      title: 'Work Started',
+      message: `${technician?.name || 'Your technician'} has started working on your ${job.category?.replace('_', ' ')} service`,
+      booking_id: job.id,
+      metadata: {
+        category: job.category,
+        technician_name: technician?.name
+      }
+    });
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     if (selectedJob) {
-      updateJobMutation.mutate({ 
+      const price = parseFloat(finalPrice) || selectedJob.estimated_price;
+      
+      await updateJobMutation.mutateAsync({ 
         jobId: selectedJob.id, 
         data: { 
           status: 'completed', 
-          final_price: parseFloat(finalPrice) || selectedJob.estimated_price 
+          final_price: price
         } 
       });
 
@@ -115,9 +143,23 @@ export default function TechnicianJobs() {
       if (technician) {
         base44.entities.Technician.update(technician.id, {
           total_jobs: (technician.total_jobs || 0) + 1,
-          wallet_balance: (technician.wallet_balance || 0) + (parseFloat(finalPrice) || selectedJob.estimated_price)
+          wallet_balance: (technician.wallet_balance || 0) + price
         });
       }
+
+      // Create notification for user
+      await base44.entities.Notification.create({
+        user_id: selectedJob.user_id,
+        type: 'booking_completed',
+        title: 'Service Completed',
+        message: `Your ${selectedJob.category?.replace('_', ' ')} service has been completed. Total: KES ${price.toLocaleString()}`,
+        booking_id: selectedJob.id,
+        metadata: {
+          category: selectedJob.category,
+          technician_name: technician?.name,
+          amount: price
+        }
+      });
     }
   };
 

@@ -110,6 +110,18 @@ export default function BookingDetail() {
           rating: newRating,
           total_reviews: newTotal,
         });
+
+        // Create notification for technician
+        await base44.entities.Notification.create({
+          user_id: technician.user_id,
+          type: 'review_received',
+          title: 'New Review',
+          message: `You received a ${rating}-star review from ${booking.user_name}`,
+          booking_id: bookingId,
+          metadata: {
+            rating: rating
+          }
+        });
       }
     },
     onSuccess: () => {
