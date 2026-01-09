@@ -15,7 +15,8 @@ import {
   Zap,
   TrendingUp,
   Filter,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Repeat
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -25,6 +26,8 @@ import SendMoneyDialog from '../components/wallet/SendMoneyDialog';
 import DepositDialog from '../components/wallet/DepositDialog';
 import WithdrawDialog from '../components/wallet/WithdrawDialog';
 import ExchangeDialog from '../components/wallet/ExchangeDialog';
+import RecurringTransactionDialog from '../components/wallet/RecurringTransactionDialog';
+import RecurringTransactionCard from '../components/wallet/RecurringTransactionCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import EmptyState from '../components/common/EmptyState';
 
@@ -34,6 +37,7 @@ export default function Wallet() {
   const [showDeposit, setShowDeposit] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [showExchange, setShowExchange] = useState(false);
+  const [showRecurring, setShowRecurring] = useState(false);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -94,6 +98,16 @@ export default function Wallet() {
         new Date(b.created_date) - new Date(a.created_date)
       );
     },
+    enabled: !!wallet,
+  });
+
+  const { data: recurringTransactions = [], isLoading: recurringLoading } = useQuery({
+    queryKey: ['recurringTransactions', wallet?.id],
+    queryFn: () => base44.entities.RecurringTransaction.filter(
+      { wallet_id: wallet.id },
+      '-created_date',
+      100
+    ),
     enabled: !!wallet,
   });
 
@@ -263,6 +277,29 @@ export default function Wallet() {
     },
   });
 
+  // Recurring transaction mutation
+  const createRecurringMutation = useMutation({
+    mutationFn: (data) => base44.entities.RecurringTransaction.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['recurringTransactions']);
+      setShowRecurring(false);
+    },
+  });
+
+  const updateRecurringMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.RecurringTransaction.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['recurringTransactions']);
+    },
+  });
+
+  const deleteRecurringMutation = useMutation({
+    mutationFn: (id) => base44.entities.RecurringTransaction.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['recurringTransactions']);
+    },
+  });
+
   // Withdraw mutation
   const withdrawMutation = useMutation({
     mutationFn: async (data) => {
@@ -329,7 +366,7 @@ export default function Wallet() {
         <WalletCard wallet={wallet} />
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-5 gap-3">
           <button
             onClick={() => setShowSend(true)}
             className="bg-white rounded-2xl p-4 hover:shadow-md transition-all border-2 border-transparent hover:border-teal-200"
@@ -373,7 +410,59 @@ export default function Wallet() {
             <p className="font-semibold text-gray-900">Exchange</p>
             <p className="text-xs text-gray-500">Convert</p>
           </button>
-        </div>
+
+          <button
+            onClick={() => setShowRecurring(true)}
+            className="bg-white rounded-2xl p-4 hover:shadow-md transition-all border-2 border-transparent hover:border-indigo-200"
+          >
+            <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Repeat className="w-6 h-6 text-indigo-600" />
+            </div>
+            <p className="font-semibold text-gray-900">Recurring</p>
+            <p className="text-xs text-gray-500">Automate</p>
+          </button>
+          </div>
+
+        {/* Recurring Transactions */}
+        {recurringTransactions.length > 0 && (
+          <div className="bg-white rounded-2xl border">
+            <div className="p-6 border-b">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Repeat className="w-5 h-5 text-indigo-600" />
+                  <h2 className="text-lg font-semibold">Recurring Payments</h2>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setShowRecurring(true)}
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  New
+                </Button>
+              </div>
+            </div>
+
+            <div className="p-4 space-y-3">
+              {recurringTransactions.map((recurring) => (
+                <RecurringTransactionCard
+                  key={recurring.id}
+                  recurring={recurring}
+                  onPause={(rec) => updateRecurringMutation.mutate({ 
+                    id: rec.id, 
+                    data: { status: 'paused' }
+                  })}
+                  onResume={(rec) => updateRecurringMutation.mutate({ 
+                    id: rec.id, 
+                    data: { status: 'active' }
+                  })}
+                  onDelete={(rec) => deleteRecurringMutation.mutate(rec.id)}
+                  isLoading={updateRecurringMutation.isPending || deleteRecurringMutation.isPending}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Features */}
         <div className="grid md:grid-cols-3 gap-4">
@@ -465,6 +554,14 @@ export default function Wallet() {
         onExchange={(data) => exchangeMutation.mutate(data)}
         isLoading={exchangeMutation.isPending}
       />
-    </div>
-  );
-}
+
+      <RecurringTransactionDialog
+        open={showRecurring}
+        onOpenChange={setShowRecurring}
+        wallet={wallet}
+        onSave={(data) => createRecurringMutation.mutate(data)}
+        isLoading={createRecurringMutation.isPending}
+      />
+      </div>
+      );
+      }
