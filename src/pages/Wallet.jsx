@@ -348,94 +348,106 @@ export default function Wallet() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b sticky top-16 z-40">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-teal-50/30 to-gray-50">
+      {/* Enhanced Header */}
+      <div className="bg-white/80 backdrop-blur-lg border-b border-gray-200 sticky top-16 z-40">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link 
             to={createPageUrl('Profile')}
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-            Back
+            <span className="font-medium">Wallet</span>
           </Link>
+          <div className="flex items-center gap-2">
+            <div className="px-3 py-1 rounded-full bg-teal-50 border border-teal-200">
+              <span className="text-xs font-semibold text-teal-700">Demo Mode</span>
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-        {/* Wallet Card */}
+        {/* Enhanced Wallet Card */}
         <WalletCard wallet={wallet} />
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-5 gap-3">
-          <button
-            onClick={() => setShowSend(true)}
-            className="bg-white rounded-2xl p-4 hover:shadow-md transition-all border-2 border-transparent hover:border-teal-200"
-          >
-            <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Send className="w-6 h-6 text-teal-600" />
-            </div>
-            <p className="font-semibold text-gray-900">Send</p>
-            <p className="text-xs text-gray-500">Transfer money</p>
-          </button>
+        {/* Quick Actions - Modern Grid */}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 px-1">Quick Actions</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <button
+              onClick={() => setShowSend(true)}
+              className="group bg-white rounded-2xl p-5 hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-teal-300 active:scale-[0.98]"
+            >
+              <div className="w-14 h-14 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-teal-500/30 group-hover:shadow-xl group-hover:shadow-teal-500/40 transition-shadow">
+                <Send className="w-7 h-7 text-white" />
+              </div>
+              <p className="font-semibold text-gray-900 text-base">Send Money</p>
+              <p className="text-xs text-gray-500 mt-1">Transfer funds</p>
+            </button>
 
-          <button
-            onClick={() => setShowDeposit(true)}
-            className="bg-white rounded-2xl p-4 hover:shadow-md transition-all border-2 border-transparent hover:border-green-200"
-          >
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Plus className="w-6 h-6 text-green-600" />
-            </div>
-            <p className="font-semibold text-gray-900">Deposit</p>
-            <p className="text-xs text-gray-500">Add funds</p>
-          </button>
+            <button
+              onClick={() => setShowDeposit(true)}
+              className="group bg-white rounded-2xl p-5 hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-green-300 active:scale-[0.98]"
+            >
+              <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-green-500/30 group-hover:shadow-xl group-hover:shadow-green-500/40 transition-shadow">
+                <Plus className="w-7 h-7 text-white" />
+              </div>
+              <p className="font-semibold text-gray-900 text-base">Add Funds</p>
+              <p className="text-xs text-gray-500 mt-1">Deposit money</p>
+            </button>
 
-          <button
-            onClick={() => setShowWithdraw(true)}
-            className="bg-white rounded-2xl p-4 hover:shadow-md transition-all border-2 border-transparent hover:border-orange-200"
-          >
-            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Download className="w-6 h-6 text-orange-600" />
-            </div>
-            <p className="font-semibold text-gray-900">Withdraw</p>
-            <p className="text-xs text-gray-500">Cash out</p>
-          </button>
+            <button
+              onClick={() => setShowWithdraw(true)}
+              className="group bg-white rounded-2xl p-5 hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-orange-300 active:scale-[0.98]"
+            >
+              <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-orange-500/30 group-hover:shadow-xl group-hover:shadow-orange-500/40 transition-shadow">
+                <Download className="w-7 h-7 text-white" />
+              </div>
+              <p className="font-semibold text-gray-900 text-base">Withdraw</p>
+              <p className="text-xs text-gray-500 mt-1">Cash out</p>
+            </button>
 
-          <button
-            onClick={() => setShowExchange(true)}
-            className="bg-white rounded-2xl p-4 hover:shadow-md transition-all border-2 border-transparent hover:border-purple-200"
-          >
-            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <ArrowLeftRight className="w-6 h-6 text-purple-600" />
-            </div>
-            <p className="font-semibold text-gray-900">Exchange</p>
-            <p className="text-xs text-gray-500">Convert</p>
-          </button>
+            <button
+              onClick={() => setShowExchange(true)}
+              className="group bg-white rounded-2xl p-5 hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-purple-300 active:scale-[0.98]"
+            >
+              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-purple-500/30 group-hover:shadow-xl group-hover:shadow-purple-500/40 transition-shadow">
+                <ArrowLeftRight className="w-7 h-7 text-white" />
+              </div>
+              <p className="font-semibold text-gray-900 text-base">Convert</p>
+              <p className="text-xs text-gray-500 mt-1">Exchange currency</p>
+            </button>
 
-          <button
-            onClick={() => setShowRecurring(true)}
-            className="bg-white rounded-2xl p-4 hover:shadow-md transition-all border-2 border-transparent hover:border-indigo-200"
-          >
-            <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Repeat className="w-6 h-6 text-indigo-600" />
-            </div>
-            <p className="font-semibold text-gray-900">Recurring</p>
-            <p className="text-xs text-gray-500">Automate</p>
-          </button>
+            <button
+              onClick={() => setShowRecurring(true)}
+              className="group bg-white rounded-2xl p-5 hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-indigo-300 active:scale-[0.98]"
+            >
+              <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-indigo-500/30 group-hover:shadow-xl group-hover:shadow-indigo-500/40 transition-shadow">
+                <Repeat className="w-7 h-7 text-white" />
+              </div>
+              <p className="font-semibold text-gray-900 text-base">Recurring</p>
+              <p className="text-xs text-gray-500 mt-1">Automate payments</p>
+            </button>
           </div>
+        </div>
 
         {/* Recurring Transactions */}
         {recurringTransactions.length > 0 && (
-          <div className="bg-white rounded-2xl border">
-            <div className="p-6 border-b">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
+            <div className="p-6 border-b border-gray-100">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Repeat className="w-5 h-5 text-indigo-600" />
-                  <h2 className="text-lg font-semibold">Recurring Payments</h2>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+                    <Repeat className="w-5 h-5 text-indigo-600" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-gray-900">Recurring Payments</h2>
                 </div>
                 <Button 
                   variant="ghost" 
                   size="sm"
                   onClick={() => setShowRecurring(true)}
+                  className="hover:bg-indigo-50"
                 >
                   <Plus className="w-4 h-4 mr-1" />
                   New
@@ -464,34 +476,42 @@ export default function Wallet() {
           </div>
         )}
 
-        {/* Features */}
+        {/* Enhanced Feature Cards */}
         <div className="grid md:grid-cols-3 gap-4">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-4">
-            <Globe className="w-8 h-8 text-blue-600 mb-2" />
-            <h3 className="font-semibold text-blue-900">Global Transfers</h3>
-            <p className="text-sm text-blue-700 mt-1">Send to any country, any currency</p>
+          <div className="group bg-white rounded-2xl p-6 border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-200">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-blue-500/30">
+              <Globe className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="font-semibold text-gray-900 mb-2">Global Transfers</h3>
+            <p className="text-sm text-gray-600">Send money across regions</p>
           </div>
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-4">
-            <Shield className="w-8 h-8 text-purple-600 mb-2" />
-            <h3 className="font-semibold text-purple-900">Secure & Safe</h3>
-            <p className="text-sm text-purple-700 mt-1">Bank-level security protection</p>
+          <div className="group bg-white rounded-2xl p-6 border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all duration-200">
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-purple-500/30">
+              <Shield className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="font-semibold text-gray-900 mb-2">Secure Access</h3>
+            <p className="text-sm text-gray-600">Encrypted & protected transactions</p>
           </div>
-          <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-4">
-            <Zap className="w-8 h-8 text-amber-600 mb-2" />
-            <h3 className="font-semibold text-amber-900">Instant</h3>
-            <p className="text-sm text-amber-700 mt-1">Transactions in seconds</p>
+          <div className="group bg-white rounded-2xl p-6 border border-gray-200 hover:border-amber-300 hover:shadow-lg transition-all duration-200">
+            <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-amber-500/30">
+              <Zap className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="font-semibold text-gray-900 mb-2">Instant Processing</h3>
+            <p className="text-sm text-gray-600">Transactions complete in seconds</p>
           </div>
         </div>
 
         {/* Transactions */}
-        <div className="bg-white rounded-2xl border">
-          <div className="p-6 border-b">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
+          <div className="p-6 border-b border-gray-100">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <History className="w-5 h-5 text-gray-400" />
-                <h2 className="text-lg font-semibold">Transaction History</h2>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
+                  <History className="w-5 h-5 text-gray-600" />
+                </div>
+                <h2 className="text-lg font-semibold text-gray-900">Transaction History</h2>
               </div>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" className="hover:bg-gray-50">
                 <Filter className="w-4 h-4 mr-1" />
                 Filter
               </Button>

@@ -3,6 +3,7 @@ import BookService from './pages/BookService';
 import BookingDetail from './pages/BookingDetail';
 import Home from './pages/Home';
 import MyBookings from './pages/MyBookings';
+import NotificationCenter from './pages/NotificationCenter';
 import Profile from './pages/Profile';
 import Services from './pages/Services';
 import Settings from './pages/Settings';
@@ -13,7 +14,6 @@ import TechnicianJobs from './pages/TechnicianJobs';
 import TechnicianProfile from './pages/TechnicianProfile';
 import TechnicianRegister from './pages/TechnicianRegister';
 import Wallet from './pages/Wallet';
-import NotificationCenter from './pages/NotificationCenter';
 import __Layout from './Layout.jsx';
 
 
@@ -23,6 +23,7 @@ export const PAGES = {
     "BookingDetail": BookingDetail,
     "Home": Home,
     "MyBookings": MyBookings,
+    "NotificationCenter": NotificationCenter,
     "Profile": Profile,
     "Services": Services,
     "Settings": Settings,
@@ -33,7 +34,6 @@ export const PAGES = {
     "TechnicianProfile": TechnicianProfile,
     "TechnicianRegister": TechnicianRegister,
     "Wallet": Wallet,
-    "NotificationCenter": NotificationCenter,
 }
 
 export const pagesConfig = {
