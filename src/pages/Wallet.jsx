@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { base44 } from '@/api/base44Client';
@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import WalletCard from '../components/wallet/WalletCard';
 import TransactionItem from '../components/wallet/TransactionItem';
+import TransactionFilters from '../components/wallet/TransactionFilters';
 import SendMoneyDialog from '../components/wallet/SendMoneyDialog';
 import DepositDialog from '../components/wallet/DepositDialog';
 import WithdrawDialog from '../components/wallet/WithdrawDialog';
@@ -38,6 +39,15 @@ export default function Wallet() {
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [showExchange, setShowExchange] = useState(false);
   const [showRecurring, setShowRecurring] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    type: 'all',
+    currency: 'all',
+    status: 'all',
+    dateFrom: '',
+    dateTo: '',
+    sortBy: 'date-desc',
+  });
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -100,6 +110,57 @@ export default function Wallet() {
     },
     enabled: !!wallet,
   });
+
+  // Filter and sort transactions
+  const filteredTransactions = React.useMemo(() => {
+    let filtered = [...transactions];
+
+    // Filter by type
+    if (filters.type !== 'all') {
+      filtered = filtered.filter(tx => tx.transaction_type === filters.type);
+    }
+
+    // Filter by currency
+    if (filters.currency !== 'all') {
+      filtered = filtered.filter(tx => tx.currency === filters.currency);
+    }
+
+    // Filter by status
+    if (filters.status !== 'all') {
+      filtered = filtered.filter(tx => tx.status === filters.status);
+    }
+
+    // Filter by date range
+    if (filters.dateFrom) {
+      const fromDate = new Date(filters.dateFrom);
+      fromDate.setHours(0, 0, 0, 0);
+      filtered = filtered.filter(tx => new Date(tx.created_date) >= fromDate);
+    }
+
+    if (filters.dateTo) {
+      const toDate = new Date(filters.dateTo);
+      toDate.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(tx => new Date(tx.created_date) <= toDate);
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      switch (filters.sortBy) {
+        case 'date-desc':
+          return new Date(b.created_date) - new Date(a.created_date);
+        case 'date-asc':
+          return new Date(a.created_date) - new Date(b.created_date);
+        case 'amount-desc':
+          return b.amount - a.amount;
+        case 'amount-asc':
+          return a.amount - b.amount;
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [transactions, filters]);
 
   const { data: recurringTransactions = [], isLoading: recurringLoading } = useQuery({
     queryKey: ['recurringTransactions', wallet?.id],
@@ -509,21 +570,48 @@ export default function Wallet() {
                 <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
                   <History className="w-5 h-5 text-gray-600" />
                 </div>
-                <h2 className="text-lg font-semibold text-gray-900">Transaction History</h2>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">Transaction History</h2>
+                  {transactions.length > 0 && (
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Showing {filteredTransactions.length} of {transactions.length} transactions
+                    </p>
+                  )}
+                </div>
               </div>
-              <Button variant="ghost" size="sm" className="hover:bg-gray-50">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="hover:bg-gray-50"
+                onClick={() => setShowFilters(!showFilters)}
+              >
                 <Filter className="w-4 h-4 mr-1" />
-                Filter
+                {showFilters ? 'Hide Filters' : 'Show Filters'}
               </Button>
             </div>
           </div>
 
+          {showFilters && (
+            <TransactionFilters
+              filters={filters}
+              onFiltersChange={setFilters}
+              onClearFilters={() => setFilters({
+                type: 'all',
+                currency: 'all',
+                status: 'all',
+                dateFrom: '',
+                dateTo: '',
+                sortBy: 'date-desc',
+              })}
+            />
+          )}
+
           <div>
             {txLoading ? (
               <LoadingSpinner />
-            ) : transactions.length > 0 ? (
+            ) : filteredTransactions.length > 0 ? (
               <div className="divide-y">
-                {transactions.map((tx) => (
+                {filteredTransactions.map((tx) => (
                   <TransactionItem 
                     key={tx.id} 
                     transaction={tx} 
@@ -531,6 +619,21 @@ export default function Wallet() {
                   />
                 ))}
               </div>
+            ) : transactions.length > 0 ? (
+              <EmptyState
+                icon={Filter}
+                title="No matching transactions"
+                description="Try adjusting your filters"
+                actionLabel="Clear Filters"
+                onAction={() => setFilters({
+                  type: 'all',
+                  currency: 'all',
+                  status: 'all',
+                  dateFrom: '',
+                  dateTo: '',
+                  sortBy: 'date-desc',
+                })}
+              />
             ) : (
               <EmptyState
                 icon={History}
