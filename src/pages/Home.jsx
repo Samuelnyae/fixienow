@@ -183,7 +183,7 @@ export default function Home() {
 
       {/* How It Works Section */}
       <section className="max-w-7xl mx-auto px-4 py-10 pb-20">
-        <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">How FixNow Works</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">How Fixie Works</h2>
         
         <div className="grid md:grid-cols-3 gap-6">
           {[
