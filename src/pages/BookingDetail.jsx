@@ -40,6 +40,7 @@ import {
 } from '@/components/ui/dialog';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ChatWindow from '../components/chat/ChatWindow';
+import TechnicianTrackingMap from '../components/booking/TechnicianTrackingMap';
 
 const iconMap = {
   mechanic: Wrench,
