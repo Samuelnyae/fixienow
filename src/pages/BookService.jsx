@@ -207,7 +207,7 @@ Return ONLY the id of the best technician and a brief reason.`,
   });
 
   const handleSubmit = async () => {
-    const techId = formData.technician_id || (availableTechnicians[0]?.id);
+    const techId = formData.technician_id || bestTechnicianId;
     const tech = selectedTechnician || availableTechnicians.find(t => t.id === techId);
     
     const bookingData = {
