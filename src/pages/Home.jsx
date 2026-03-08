@@ -224,7 +224,7 @@ export default function Home() {
             Are you a skilled technician?
           </h2>
           <p className="text-gray-300 mb-6 max-w-md mx-auto">
-            Join FixNow and grow your business. Get verified, find customers, and earn more.
+            Join Fixie and grow your business. Get verified, find customers, and earn more.
           </p>
           <Button 
             asChild
