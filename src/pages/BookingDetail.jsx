@@ -264,6 +264,11 @@ export default function BookingDetail() {
           </div>
         </div>
 
+        {/* Live Tracking Map - shown when technician is en route */}
+        {booking.status === 'en_route' && technician && (
+          <TechnicianTrackingMap booking={booking} technician={technician} />
+        )}
+
         {/* Service Details */}
         <div className="bg-white rounded-2xl p-6">
           <div className="flex items-start gap-4 pb-4 border-b">
