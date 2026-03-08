@@ -17,6 +17,7 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import EmptyState from '../components/common/EmptyState';
 import DashboardJobCard from '../components/technician/DashboardJobCard';
 import EarningsSummary from '../components/technician/EarningsSummary';
+import AISuggestionsPanel from '../components/technician/AISuggestionsPanel';
 
 export default function TechnicianDashboard() {
   const [user, setUser] = useState(null);
