@@ -480,12 +480,17 @@ Return ONLY the id of the best technician and a brief reason.`,
                   <span className="font-medium text-right max-w-[200px] truncate">{formData.address}</span>
                 </div>
 
-                {(selectedTechnician || availableTechnicians[0]) && (
+                {(selectedTechnician || availableTechnicians.length > 0) && (
                   <div className="flex items-center justify-between py-2">
                     <span className="text-gray-500">Technician</span>
-                    <span className="font-medium">
-                      {selectedTechnician?.name || availableTechnicians[0]?.name || 'Auto-assigned'}
-                    </span>
+                    <div className="text-right">
+                      <p className="font-medium">
+                        {selectedTechnician?.name || availableTechnicians.find(t => t.id === bestTechnicianId)?.name || 'Auto-assigned'}
+                      </p>
+                      {!preselectedTechId && aiDispatchResult?.reason && (
+                        <p className="text-xs text-indigo-600 max-w-[180px]">✨ AI matched: {aiDispatchResult.reason}</p>
+                      )}
+                    </div>
                   </div>
                 )}
 
