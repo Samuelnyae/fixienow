@@ -368,6 +368,9 @@ export default function TechnicianDashboard() {
           </TabsContent>
         </Tabs>
 
+        {/* AI Suggestions Panel */}
+        <AISuggestionsPanel technician={technician} completedJobs={completedJobs} />
+
         {/* Quick Navigation */}
         <div className="grid grid-cols-3 gap-3 pb-4">
           {[
