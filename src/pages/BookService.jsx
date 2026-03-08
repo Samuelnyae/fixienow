@@ -131,10 +131,51 @@ export default function BookService() {
         profession: formData.category,
         verification_status: 'approved',
         is_available: true
-      }, '-rating', 10);
+      }, '-rating', 20);
     },
     enabled: !!formData.category && !preselectedTechId,
   });
+
+  // AI dispatch: pick best technician using AI reasoning
+  const { data: aiDispatchResult } = useQuery({
+    queryKey: ['aiDispatch', formData.category, formData.address, availableTechnicians.map(t => t.id).join(',')],
+    queryFn: async () => {
+      if (availableTechnicians.length === 0) return null;
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are a smart job dispatcher for a home services platform.
+
+A customer needs a service and you must select the single BEST technician from the list below.
+
+Customer request:
+- Service needed: ${formData.category}
+- Location: ${formData.address || 'not specified'}
+- Description: ${formData.description || 'not provided'}
+
+Available technicians:
+${availableTechnicians.map((t, i) => `${i + 1}. ID: ${t.id}, Name: ${t.name}, Rating: ${t.rating || 0}/5, Reviews: ${t.total_reviews || 0}, Experience: ${t.years_experience || 0} years, Areas: ${(t.service_areas || []).join(', ')}`).join('\n')}
+
+Select the BEST technician based on:
+1. Rating (higher is better)
+2. Number of reviews (more = more reliable)
+3. Years of experience
+4. Service area match with customer location
+
+Return ONLY the id of the best technician and a brief reason.`,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            technician_id: { type: 'string' },
+            reason: { type: 'string' }
+          }
+        }
+      });
+      return result;
+    },
+    enabled: availableTechnicians.length > 1 && !!formData.category && !!formData.description,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const bestTechnicianId = aiDispatchResult?.technician_id || availableTechnicians[0]?.id;
 
   const createBookingMutation = useMutation({
     mutationFn: async (bookingData) => {
