@@ -84,6 +84,10 @@ export default function AdminDashboard() {
       queryClient.invalidateQueries(['allTechnicians']);
       setSelectedTechnician(null);
     },
+    onError: (error) => {
+      console.error('Approve/reject failed:', error);
+      alert('Failed to update technician status: ' + (error?.message || 'Permission denied. Make sure you are logged in as admin.'));
+    },
   });
 
   const pendingTechnicians = technicians.filter(t => t.verification_status === 'pending');
@@ -244,6 +248,7 @@ export default function AdminDashboard() {
                           <div className="flex gap-2">
                             <Button 
                               size="sm"
+                              disabled={approveMutation.isPending}
                               onClick={() => approveMutation.mutate({ id: tech.id, status: 'approved' })}
                               className="bg-green-600 hover:bg-green-700"
                             >
@@ -253,6 +258,7 @@ export default function AdminDashboard() {
                             <Button 
                               size="sm"
                               variant="destructive"
+                              disabled={approveMutation.isPending}
                               onClick={() => approveMutation.mutate({ id: tech.id, status: 'rejected' })}
                             >
                               <XCircle className="w-4 h-4 mr-1" />
