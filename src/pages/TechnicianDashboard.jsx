@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, subDays, startOfDay, endOfDay, isToday, isFuture } from 'date-fns';
 import {
   Briefcase, Star, Bell, AlertCircle, Clock, CheckCircle2,
-  Wrench, ChevronRight, CalendarDays, Zap, User, Settings, Wallet
+  Wrench, ChevronRight, CalendarDays, Zap, User, Settings, Wallet, Package
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -372,11 +372,12 @@ export default function TechnicianDashboard() {
         <AISuggestionsPanel technician={technician} completedJobs={completedJobs} />
 
         {/* Quick Navigation */}
-        <div className="grid grid-cols-3 gap-3 pb-4">
+        <div className="grid grid-cols-4 gap-3 pb-4">
           {[
             { label: 'All Jobs',   icon: Briefcase, page: 'TechnicianJobs',    color: 'bg-teal-50 text-teal-600 border-teal-200' },
             { label: 'Earnings',   icon: Wallet,    page: 'TechnicianEarnings', color: 'bg-green-50 text-green-600 border-green-200' },
             { label: 'My Profile', icon: User,      page: 'TechnicianProfile',  color: 'bg-purple-50 text-purple-600 border-purple-200' },
+            { label: 'Tool Shop',  icon: Package,   page: 'ToolsMarketplace',   color: 'bg-orange-50 text-orange-600 border-orange-200' },
           ].map(nav => (
             <Link
               key={nav.page}

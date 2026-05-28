@@ -32,6 +32,18 @@ import RecurringTransactionCard from '../components/wallet/RecurringTransactionC
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import EmptyState from '../components/common/EmptyState';
 
+const currencies = [
+  { code: 'KES', name: 'Kenyan Shilling', symbol: 'KSh' },
+  { code: 'USD', name: 'US Dollar', symbol: '$' },
+  { code: 'EUR', name: 'Euro', symbol: '€' },
+  { code: 'GBP', name: 'British Pound', symbol: '£' },
+  { code: 'JPY', name: 'Japanese Yen', symbol: '¥' },
+  { code: 'CNY', name: 'Chinese Yuan', symbol: '¥' },
+  { code: 'INR', name: 'Indian Rupee', symbol: '₹' },
+  { code: 'NGN', name: 'Nigerian Naira', symbol: '₦' },
+  { code: 'ZAR', name: 'South African Rand', symbol: 'R' },
+];
+
 export default function Wallet() {
   const [user, setUser] = useState(null);
   const [showSend, setShowSend] = useState(false);

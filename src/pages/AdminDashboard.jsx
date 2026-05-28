@@ -15,7 +15,8 @@ import {
   Eye,
   Shield,
   FileText,
-  ArrowLeft
+  ArrowLeft,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -110,6 +111,16 @@ export default function AdminDashboard() {
             <p className="text-gray-500">Manage your platform</p>
           </div>
         </div>
+
+        {/* Quick Links */}
+        <Link
+          to={createPageUrl('FraudDetection')}
+          className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 hover:bg-red-100 transition-colors w-fit"
+        >
+          <AlertTriangle className="w-5 h-5 text-red-600" />
+          <span className="font-medium text-red-700">AI Fraud Detection</span>
+          <Shield className="w-4 h-4 text-red-400" />
+        </Link>
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
