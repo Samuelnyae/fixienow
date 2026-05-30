@@ -86,9 +86,11 @@ export default function Layout({ children, currentPageName }) {
       <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link to={createPageUrl('Home')} className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-teal-700 rounded-xl flex items-center justify-center">
-              <Wrench className="w-5 h-5 text-white" />
-            </div>
+            <img 
+              src="https://media.base44.com/images/public/695420244ced3f7c551d2538/02372e571_Gemini_Generated_Image_rczaamrczaamrcza.png"
+              alt="Fixie"
+              className="w-10 h-10 rounded-full object-cover"
+            />
             <span className="text-xl font-bold text-gray-900">Fixie</span>
           </Link>
 
