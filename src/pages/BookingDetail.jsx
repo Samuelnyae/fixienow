@@ -41,6 +41,7 @@ import {
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ChatWindow from '../components/chat/ChatWindow';
 import TechnicianTrackingMap from '../components/booking/TechnicianTrackingMap';
+import ReceiptDialog from '../components/booking/ReceiptDialog';
 
 const iconMap = {
   mechanic: Wrench,
@@ -70,6 +71,7 @@ export default function BookingDetail() {
   const [user, setUser] = useState(null);
   const [showPayment, setShowPayment] = useState(false);
   const [showReview, setShowReview] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
   const [rating, setRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [mpesaPhone, setMpesaPhone] = useState('');
@@ -198,9 +200,55 @@ export default function BookingDetail() {
       }
 
       await base44.entities.Booking.update(bookingId, { payment_status: 'paid' });
+
+      // Send in-app notification receipt
+      await base44.entities.Notification.create({
+        user_id: booking.user_id,
+        type: 'payment_received',
+        title: 'Payment Confirmed ✓',
+        message: `Your payment of KES ${amount.toLocaleString()} for ${booking.category?.replace('_', ' ')} service has been confirmed. Receipt: RCP-${bookingId?.slice(-8).toUpperCase()}`,
+        booking_id: bookingId,
+        metadata: { amount, category: booking.category },
+      });
+
+      // Send email receipt
+      if (user?.email) {
+        const receiptDate = new Date().toLocaleString('en-KE', { dateStyle: 'full', timeStyle: 'short' });
+        await base44.integrations.Core.SendEmail({
+          to: user.email,
+          subject: `Payment Receipt – KES ${amount.toLocaleString()} | Fixie`,
+          body: `
+Hi ${user.full_name || 'there'},
+
+Your payment has been confirmed. Here is your receipt:
+
+──────────────────────────────
+         FIXIE DIGITAL RECEIPT
+──────────────────────────────
+Receipt No:    RCP-${bookingId?.slice(-8).toUpperCase()}
+Date:          ${receiptDate}
+
+Service:       ${booking.category?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} Service
+Technician:    ${booking.technician_name || 'N/A'}
+Location:      ${booking.location?.address || 'N/A'}
+Payment Method: M-Pesa (${mpesaPhone})
+
+──────────────────────────────
+Total Paid:    KES ${amount.toLocaleString()}
+──────────────────────────────
+
+Thank you for using Fixie!
+
+If you have any questions, please reply to this email.
+
+– The Fixie Team
+          `.trim(),
+        });
+      }
     },
     onSuccess: () => {
       setShowPayment(false);
+      setShowReceipt(true);
       queryClient.invalidateQueries(['booking', bookingId]);
     },
   });
@@ -463,6 +511,15 @@ export default function BookingDetail() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Receipt Dialog */}
+      <ReceiptDialog
+        open={showReceipt}
+        onOpenChange={setShowReceipt}
+        booking={booking}
+        technician={technician}
+        paymentMethod={`M-Pesa (${mpesaPhone})`}
+      />
 
       {/* Review Dialog */}
       <Dialog open={showReview} onOpenChange={setShowReview}>
