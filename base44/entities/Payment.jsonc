@@ -1,0 +1,48 @@
+{
+  "name": "Payment",
+  "type": "object",
+  "properties": {
+    "booking_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "technician_id": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Amount in KES"
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "mpesa",
+        "card",
+        "cash"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "failed",
+        "refunded"
+      ],
+      "default": "pending"
+    },
+    "mpesa_transaction_code": {
+      "type": "string"
+    },
+    "mpesa_phone": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "booking_id",
+    "amount",
+    "method"
+  ]
+}

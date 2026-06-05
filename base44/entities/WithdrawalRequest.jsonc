@@ -1,0 +1,89 @@
+{
+  "name": "WithdrawalRequest",
+  "type": "object",
+  "properties": {
+    "wallet_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "currency": {
+      "type": "string",
+      "default": "KES"
+    },
+    "withdrawal_method": {
+      "type": "string",
+      "enum": [
+        "mpesa",
+        "bank_transfer",
+        "paypal",
+        "crypto"
+      ],
+      "description": "Withdrawal method"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "completed",
+        "failed",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "destination": {
+      "type": "object",
+      "description": "Withdrawal destination details",
+      "properties": {
+        "phone_number": {
+          "type": "string"
+        },
+        "account_number": {
+          "type": "string"
+        },
+        "account_name": {
+          "type": "string"
+        },
+        "bank_name": {
+          "type": "string"
+        },
+        "bank_code": {
+          "type": "string"
+        },
+        "paypal_email": {
+          "type": "string"
+        },
+        "crypto_address": {
+          "type": "string"
+        },
+        "network": {
+          "type": "string"
+        }
+      }
+    },
+    "fee": {
+      "type": "number",
+      "default": 0
+    },
+    "net_amount": {
+      "type": "number",
+      "description": "Amount after fees"
+    },
+    "external_reference": {
+      "type": "string"
+    },
+    "admin_notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "wallet_id",
+    "amount",
+    "withdrawal_method"
+  ]
+}

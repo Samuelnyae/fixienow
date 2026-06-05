@@ -1,0 +1,111 @@
+{
+  "name": "Booking",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "User who made the booking"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "user_phone": {
+      "type": "string"
+    },
+    "technician_id": {
+      "type": "string",
+      "description": "Assigned technician ID"
+    },
+    "technician_name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "mechanic",
+        "plumber",
+        "electrician",
+        "carpenter",
+        "painter",
+        "hvac",
+        "appliance_repair",
+        "locksmith"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "description": "Problem description"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "en_route",
+        "in_progress",
+        "completed",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "booking_type": {
+      "type": "string",
+      "enum": [
+        "instant",
+        "scheduled"
+      ],
+      "default": "instant"
+    },
+    "scheduled_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "scheduled_time": {
+      "type": "string"
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        }
+      }
+    },
+    "estimated_price": {
+      "type": "number",
+      "description": "Estimated price in KES"
+    },
+    "final_price": {
+      "type": "number",
+      "description": "Final price after completion"
+    },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "paid",
+        "refunded"
+      ],
+      "default": "pending"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "mpesa",
+        "card",
+        "cash"
+      ]
+    }
+  },
+  "required": [
+    "user_id",
+    "category",
+    "description"
+  ]
+}

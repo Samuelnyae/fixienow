@@ -518,6 +518,7 @@ If you have any questions, please reply to this email.
         onOpenChange={setShowReceipt}
         booking={booking}
         technician={technician}
+        user={user}
         paymentMethod={`M-Pesa (${mpesaPhone})`}
       />
 

@@ -1,0 +1,61 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Recipient user ID"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "booking_new",
+        "booking_accepted",
+        "booking_started",
+        "booking_completed",
+        "booking_cancelled",
+        "payment_received",
+        "review_received"
+      ],
+      "description": "Notification type"
+    },
+    "title": {
+      "type": "string",
+      "description": "Notification title"
+    },
+    "message": {
+      "type": "string",
+      "description": "Notification message"
+    },
+    "booking_id": {
+      "type": "string",
+      "description": "Related booking ID"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Read status"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional data",
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "technician_name": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number"
+        }
+      }
+    }
+  },
+  "required": [
+    "user_id",
+    "type",
+    "title",
+    "message"
+  ]
+}

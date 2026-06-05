@@ -1,0 +1,40 @@
+{
+  "name": "ServiceCategory",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string",
+      "enum": [
+        "mechanic",
+        "plumber",
+        "electrician",
+        "carpenter",
+        "painter",
+        "hvac",
+        "appliance_repair",
+        "locksmith"
+      ]
+    },
+    "icon": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "base_price": {
+      "type": "number",
+      "description": "Starting price in KES"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "slug"
+  ]
+}

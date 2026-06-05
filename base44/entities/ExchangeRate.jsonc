@@ -1,0 +1,32 @@
+{
+  "name": "ExchangeRate",
+  "type": "object",
+  "properties": {
+    "from_currency": {
+      "type": "string"
+    },
+    "to_currency": {
+      "type": "string"
+    },
+    "rate": {
+      "type": "number",
+      "description": "Exchange rate"
+    },
+    "inverse_rate": {
+      "type": "number"
+    },
+    "source": {
+      "type": "string",
+      "description": "Rate source (API, manual, etc)"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "from_currency",
+    "to_currency",
+    "rate"
+  ]
+}

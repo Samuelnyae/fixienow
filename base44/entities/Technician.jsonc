@@ -1,0 +1,118 @@
+{
+  "name": "Technician",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Reference to User entity"
+    },
+    "name": {
+      "type": "string",
+      "description": "Full name"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email address"
+    },
+    "profession": {
+      "type": "string",
+      "enum": [
+        "mechanic",
+        "plumber",
+        "electrician",
+        "carpenter",
+        "painter",
+        "hvac",
+        "appliance_repair",
+        "locksmith"
+      ],
+      "description": "Primary profession"
+    },
+    "bio": {
+      "type": "string",
+      "description": "Short bio/description"
+    },
+    "profile_photo": {
+      "type": "string",
+      "description": "Profile photo URL"
+    },
+    "id_document_url": {
+      "type": "string",
+      "description": "ID document upload URL"
+    },
+    "certificate_url": {
+      "type": "string",
+      "description": "Professional certificate URL"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Admin verification status"
+    },
+    "is_available": {
+      "type": "boolean",
+      "default": false,
+      "description": "Currently available for jobs"
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        }
+      }
+    },
+    "service_areas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Areas where technician operates"
+    },
+    "hourly_rate": {
+      "type": "number",
+      "description": "Hourly rate in KES"
+    },
+    "rating": {
+      "type": "number",
+      "default": 0,
+      "description": "Average rating"
+    },
+    "total_reviews": {
+      "type": "number",
+      "default": 0
+    },
+    "total_jobs": {
+      "type": "number",
+      "default": 0
+    },
+    "wallet_balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Earnings balance in KES"
+    },
+    "years_experience": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "name",
+    "phone",
+    "profession"
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "name": "Wallet",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Owner of the wallet"
+    },
+    "technician_id": {
+      "type": "string",
+      "description": "If wallet belongs to technician"
+    },
+    "wallet_address": {
+      "type": "string",
+      "description": "Unique wallet identifier"
+    },
+    "balances": {
+      "type": "array",
+      "description": "Multi-currency balances",
+      "items": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency_symbol": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "primary_currency": {
+      "type": "string",
+      "default": "KES",
+      "description": "Default currency"
+    },
+    "wallet_type": {
+      "type": "string",
+      "enum": [
+        "standard",
+        "business",
+        "technician"
+      ],
+      "default": "standard"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "suspended",
+        "frozen"
+      ],
+      "default": "active"
+    },
+    "kyc_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "KYC verification status"
+    },
+    "daily_limit": {
+      "type": "number",
+      "default": 1000000,
+      "description": "Daily transaction limit"
+    },
+    "total_received": {
+      "type": "number",
+      "default": 0
+    },
+    "total_sent": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "user_id"
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "name": "DepositRequest",
+  "type": "object",
+  "properties": {
+    "wallet_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "currency": {
+      "type": "string",
+      "default": "KES"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "mpesa",
+        "bank_transfer",
+        "card",
+        "paypal",
+        "crypto"
+      ],
+      "description": "Deposit method"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "completed",
+        "failed",
+        "expired"
+      ],
+      "default": "pending"
+    },
+    "payment_details": {
+      "type": "object",
+      "description": "Payment method specific details",
+      "properties": {
+        "phone_number": {
+          "type": "string"
+        },
+        "account_number": {
+          "type": "string"
+        },
+        "bank_name": {
+          "type": "string"
+        },
+        "card_last4": {
+          "type": "string"
+        },
+        "crypto_address": {
+          "type": "string"
+        },
+        "network": {
+          "type": "string"
+        }
+      }
+    },
+    "external_reference": {
+      "type": "string",
+      "description": "Payment provider reference"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "wallet_id",
+    "amount",
+    "payment_method"
+  ]
+}

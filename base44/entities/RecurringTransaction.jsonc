@@ -1,0 +1,94 @@
+{
+  "name": "RecurringTransaction",
+  "type": "object",
+  "properties": {
+    "wallet_id": {
+      "type": "string",
+      "description": "Source wallet ID"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Owner user ID"
+    },
+    "recipient_address": {
+      "type": "string",
+      "description": "Recipient wallet address"
+    },
+    "recipient_name": {
+      "type": "string",
+      "description": "Recipient name/label"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Transaction amount"
+    },
+    "currency": {
+      "type": "string",
+      "default": "KES",
+      "description": "Transaction currency"
+    },
+    "frequency": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "biweekly",
+        "monthly",
+        "yearly"
+      ],
+      "description": "Frequency of recurrence"
+    },
+    "next_execution_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Next scheduled execution date"
+    },
+    "last_execution_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Last execution date"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Start date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Optional end date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "completed",
+        "cancelled"
+      ],
+      "default": "active",
+      "description": "Status of recurring transaction"
+    },
+    "description": {
+      "type": "string",
+      "description": "Transaction description"
+    },
+    "execution_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of times executed"
+    },
+    "max_executions": {
+      "type": "number",
+      "description": "Optional maximum number of executions"
+    }
+  },
+  "required": [
+    "wallet_id",
+    "user_id",
+    "recipient_address",
+    "amount",
+    "currency",
+    "frequency"
+  ]
+}

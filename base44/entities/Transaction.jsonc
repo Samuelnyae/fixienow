@@ -1,0 +1,107 @@
+{
+  "name": "Transaction",
+  "type": "object",
+  "properties": {
+    "transaction_id": {
+      "type": "string",
+      "description": "Unique transaction hash"
+    },
+    "from_wallet_id": {
+      "type": "string"
+    },
+    "to_wallet_id": {
+      "type": "string"
+    },
+    "from_address": {
+      "type": "string"
+    },
+    "to_address": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "currency": {
+      "type": "string",
+      "default": "KES"
+    },
+    "transaction_type": {
+      "type": "string",
+      "enum": [
+        "send",
+        "receive",
+        "deposit",
+        "withdraw",
+        "booking_payment",
+        "refund",
+        "exchange"
+      ],
+      "description": "Type of transaction"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "completed",
+        "failed",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "wallet",
+        "mpesa",
+        "bank",
+        "paypal",
+        "card",
+        "crypto"
+      ],
+      "description": "Payment method used"
+    },
+    "external_reference": {
+      "type": "string",
+      "description": "External payment reference (M-Pesa code, bank ref, etc)"
+    },
+    "fee": {
+      "type": "number",
+      "default": 0,
+      "description": "Transaction fee"
+    },
+    "exchange_rate": {
+      "type": "number",
+      "description": "If currency exchange happened"
+    },
+    "from_currency": {
+      "type": "string"
+    },
+    "to_currency": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional transaction data",
+      "properties": {
+        "booking_id": {
+          "type": "string"
+        },
+        "ip_address": {
+          "type": "string"
+        },
+        "device": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "amount",
+    "currency",
+    "transaction_type"
+  ]
+}
