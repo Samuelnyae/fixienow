@@ -69,9 +69,9 @@ export default function SendMoneyDialog({ open, onOpenChange, wallet, onSend, is
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 border-orange-200">
         <DialogHeader>
-          <DialogTitle>Send Money</DialogTitle>
+          <DialogTitle className="text-orange-900">Send Money</DialogTitle>
           <DialogDescription>
             Send money to any wallet address worldwide
           </DialogDescription>

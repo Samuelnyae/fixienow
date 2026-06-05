@@ -97,9 +97,9 @@ export default function ExchangeDialog({ open, onOpenChange, wallet, onExchange,
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 border-purple-200">
         <DialogHeader>
-          <DialogTitle>Exchange Currency</DialogTitle>
+          <DialogTitle className="text-purple-900">Exchange Currency</DialogTitle>
           <DialogDescription>
             Convert between different currencies instantly
           </DialogDescription>

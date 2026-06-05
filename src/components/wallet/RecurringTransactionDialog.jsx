@@ -81,9 +81,9 @@ export default function RecurringTransactionDialog({ open, onOpenChange, wallet,
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto bg-gradient-to-br from-indigo-50 via-cyan-50 to-teal-50 border-teal-200">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-teal-900">
             <Repeat className="w-5 h-5 text-teal-600" />
             Set Up Recurring Payment
           </DialogTitle>

@@ -81,9 +81,9 @@ export default function WithdrawDialog({ open, onOpenChange, wallet, onWithdraw,
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-gradient-to-br from-red-50 via-orange-50 to-rose-50 border-orange-200">
         <DialogHeader>
-          <DialogTitle>Withdraw Funds</DialogTitle>
+          <DialogTitle className="text-orange-900">Withdraw Funds</DialogTitle>
           <DialogDescription>
             Transfer money from your wallet to external accounts
           </DialogDescription>

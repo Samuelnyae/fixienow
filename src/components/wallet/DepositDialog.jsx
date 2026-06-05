@@ -72,9 +72,9 @@ export default function DepositDialog({ open, onOpenChange, wallet, onDeposit, i
       onOpenChange(o);
       if (!o) setStep(1);
     }}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 border-green-200">
         <DialogHeader>
-          <DialogTitle>Deposit Money</DialogTitle>
+          <DialogTitle className="text-green-900">Deposit Money</DialogTitle>
           <DialogDescription>
             Add funds to your wallet from multiple sources
           </DialogDescription>
