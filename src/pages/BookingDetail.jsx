@@ -36,12 +36,12 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from '@/components/ui/dialog';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ChatWindow from '../components/chat/ChatWindow';
 import TechnicianTrackingMap from '../components/booking/TechnicianTrackingMap';
 import ReceiptDialog from '../components/booking/ReceiptDialog';
+import PaymentDialog from '../components/booking/PaymentDialog';
 
 const iconMap = {
   mechanic: Wrench,
@@ -75,6 +75,7 @@ export default function BookingDetail() {
   const [rating, setRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [mpesaPhone, setMpesaPhone] = useState('');
+  const [paymentInfo, setPaymentInfo] = useState({ method: 'mpesa', currency: 'KES', paymentMethodLabel: '' });
 
   useEffect(() => {
     const loadUser = async () => {
@@ -149,7 +150,7 @@ export default function BookingDetail() {
   });
 
   const paymentMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async ({ method, currency, phone, paymentMethodLabel } = {}) => {
       const amount = booking.final_price || booking.estimated_price;
       
       // Create payment record
@@ -158,8 +159,8 @@ export default function BookingDetail() {
         user_id: booking.user_id,
         technician_id: booking.technician_id,
         amount: amount,
-        method: 'mpesa',
-        mpesa_phone: mpesaPhone,
+        method: method || 'mpesa',
+        mpesa_phone: phone || '',
         status: 'completed',
       });
 
@@ -179,10 +180,10 @@ export default function BookingDetail() {
           from_address: userWallet.wallet_address,
           to_address: techWallet.wallet_address,
           amount: amount,
-          currency: 'KES',
+          currency: currency || 'KES',
           transaction_type: 'booking_payment',
           status: 'completed',
-          payment_method: 'mpesa',
+          payment_method: method || 'mpesa',
           description: `Payment for ${booking.category} service`,
           metadata: { booking_id: bookingId }
         });
@@ -206,7 +207,7 @@ export default function BookingDetail() {
         user_id: booking.user_id,
         type: 'payment_received',
         title: 'Payment Confirmed ✓',
-        message: `Your payment of KES ${amount.toLocaleString()} for ${booking.category?.replace('_', ' ')} service has been confirmed. Receipt: RCP-${bookingId?.slice(-8).toUpperCase()}`,
+        message: `Your payment of ${currency || 'KES'} ${amount.toLocaleString()} for ${booking.category?.replace('_', ' ')} service has been confirmed. Receipt: RCP-${bookingId?.slice(-8).toUpperCase()}`,
         booking_id: bookingId,
         metadata: { amount, category: booking.category },
       });
@@ -216,7 +217,7 @@ export default function BookingDetail() {
         const receiptDate = new Date().toLocaleString('en-KE', { dateStyle: 'full', timeStyle: 'short' });
         await base44.integrations.Core.SendEmail({
           to: user.email,
-          subject: `Payment Receipt – KES ${amount.toLocaleString()} | Fixie`,
+          subject: `Payment Receipt – ${currency || 'KES'} ${amount.toLocaleString()} | Fixie`,
           body: `
 Hi ${user.full_name || 'there'},
 
@@ -231,10 +232,10 @@ Date:          ${receiptDate}
 Service:       ${booking.category?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} Service
 Technician:    ${booking.technician_name || 'N/A'}
 Location:      ${booking.location?.address || 'N/A'}
-Payment Method: M-Pesa (${mpesaPhone})
+Payment Method: ${paymentMethodLabel || method || 'M-Pesa'}
 
 ──────────────────────────────
-Total Paid:    KES ${amount.toLocaleString()}
+Total Paid:    ${currency || 'KES'} ${amount.toLocaleString()}
 ──────────────────────────────
 
 Thank you for using Fixie!
@@ -246,7 +247,8 @@ If you have any questions, please reply to this email.
         });
       }
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      setPaymentInfo(variables || {});
       setShowPayment(false);
       setShowReceipt(true);
       queryClient.invalidateQueries(['booking', bookingId]);
@@ -470,47 +472,13 @@ If you have any questions, please reply to this email.
       </div>
 
       {/* Payment Dialog */}
-      <Dialog open={showPayment} onOpenChange={setShowPayment}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Pay with M-Pesa</DialogTitle>
-            <DialogDescription>
-              Enter your phone number to receive the payment prompt
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Phone Number</label>
-              <input
-                type="tel"
-                placeholder="254700000000"
-                value={mpesaPhone}
-                onChange={(e) => setMpesaPhone(e.target.value)}
-                className="w-full h-12 px-4 border rounded-xl"
-              />
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4">
-              <div className="flex justify-between mb-2">
-                <span className="text-gray-500">Amount</span>
-                <span className="font-semibold">
-                  KES {(booking?.final_price || booking?.estimated_price)?.toLocaleString()}
-                </span>
-              </div>
-            </div>
-            <Button 
-              onClick={() => paymentMutation.mutate()}
-              className="w-full h-12 bg-green-600 hover:bg-green-700"
-              disabled={!mpesaPhone || paymentMutation.isPending}
-            >
-              {paymentMutation.isPending ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                'Send Payment Request'
-              )}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <PaymentDialog
+        open={showPayment}
+        onOpenChange={setShowPayment}
+        booking={booking}
+        isPending={paymentMutation.isPending}
+        onConfirm={(info) => paymentMutation.mutate(info)}
+      />
 
       {/* Receipt Dialog */}
       <ReceiptDialog
@@ -519,7 +487,8 @@ If you have any questions, please reply to this email.
         booking={booking}
         technician={technician}
         user={user}
-        paymentMethod={`M-Pesa (${mpesaPhone})`}
+        currency={paymentInfo.currency}
+        paymentMethod={paymentInfo.paymentMethodLabel || 'Online Payment'}
       />
 
       {/* Review Dialog */}

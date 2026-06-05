@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { generateInvoicePDF } from '@/utils/generateInvoicePDF';
 
-export default function ReceiptDialog({ open, onOpenChange, booking, technician, user, paymentMethod = 'M-Pesa' }) {
+export default function ReceiptDialog({ open, onOpenChange, booking, technician, user, paymentMethod = 'Online Payment', currency = 'KES' }) {
   if (!booking) return null;
 
   const amount     = booking.final_price || booking.estimated_price || 0;
@@ -18,7 +18,7 @@ export default function ReceiptDialog({ open, onOpenChange, booking, technician,
   const paidAt     = format(new Date(), 'MMM d, yyyy · h:mm a');
 
   const handleDownloadPDF = () => {
-    generateInvoicePDF({ booking, technician, user, paymentMethod });
+    generateInvoicePDF({ booking, technician, user, paymentMethod, currency });
   };
 
   return (
@@ -37,7 +37,7 @@ export default function ReceiptDialog({ open, onOpenChange, booking, technician,
             <CheckCircle2 className="w-12 h-12 text-green-500 mb-2" />
             <p className="font-semibold text-green-800">Payment Successful</p>
             <p className="text-2xl font-bold text-green-700 mt-1">
-              KES {amount.toLocaleString()}
+              {currency} {amount.toLocaleString()}
             </p>
           </div>
 
@@ -77,7 +77,7 @@ export default function ReceiptDialog({ open, onOpenChange, booking, technician,
             </div>
             <div className="border-t pt-3 flex justify-between font-semibold">
               <span>Total Paid</span>
-              <span className="text-teal-600">KES {amount.toLocaleString()}</span>
+              <span className="text-teal-600">{currency} {amount.toLocaleString()}</span>
             </div>
           </div>
 

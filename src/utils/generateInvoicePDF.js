@@ -6,8 +6,9 @@ import jsPDF from 'jspdf';
  * @param {Object} technician - Technician entity record
  * @param {Object} user - Current user (customer)
  * @param {string} paymentMethod - e.g. "M-Pesa (254700000000)"
+ * @param {string} currency - e.g. "USD", "KES", "GBP"
  */
-export function generateInvoicePDF({ booking, technician, user, paymentMethod = 'M-Pesa' }) {
+export function generateInvoicePDF({ booking, technician, user, paymentMethod = 'Online Payment', currency = 'KES' }) {
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
 
   const W = doc.internal.pageSize.getWidth();
@@ -117,7 +118,7 @@ export function generateInvoicePDF({ booking, technician, user, paymentMethod = 
     ? new Date(booking.scheduled_date).toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' })
     : new Date(booking.created_date).toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' });
   doc.text(serviceDate, 310, y);
-  doc.text(amount.toLocaleString('en-KE', { minimumFractionDigits: 2 }), W - 56, y, { align: 'right' });
+  doc.text(`${currency} ${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, W - 56, y, { align: 'right' });
 
   // Description sub-line
   if (booking.description) {
@@ -147,13 +148,13 @@ export function generateInvoicePDF({ booking, technician, user, paymentMethod = 
   doc.setTextColor(...mutedColor);
   doc.text('Subtotal', W - 180, y);
   doc.setTextColor(...darkColor);
-  doc.text(`KES ${amount.toLocaleString('en-KE', { minimumFractionDigits: 2 })}`, W - 56, y, { align: 'right' });
+  doc.text(`${currency} ${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, W - 56, y, { align: 'right' });
 
   y += 18;
   doc.setTextColor(...mutedColor);
   doc.text('Tax (0%)', W - 180, y);
   doc.setTextColor(...darkColor);
-  doc.text('KES 0.00', W - 56, y, { align: 'right' });
+  doc.text(`${currency} 0.00`, W - 56, y, { align: 'right' });
 
   // Total band
   y += 28;
@@ -163,7 +164,7 @@ export function generateInvoicePDF({ booking, technician, user, paymentMethod = 
   doc.setFontSize(13);
   doc.setTextColor(255, 255, 255);
   doc.text('TOTAL PAID', 60, y + 8);
-  doc.text(`KES ${amount.toLocaleString('en-KE', { minimumFractionDigits: 2 })}`, W - 56, y + 8, { align: 'right' });
+  doc.text(`${currency} ${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, W - 56, y + 8, { align: 'right' });
 
   // ── Notes ─────────────────────────────────────────────────────────
   y += 60;
