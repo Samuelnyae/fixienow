@@ -52,7 +52,7 @@ export default function ServiceCategoryCard({ category }) {
 
   return (
     <Link 
-      to={createPageUrl(`BookService?category=${category.slug}`)}
+      to={createPageUrl(`Services?category=${category.slug}`)}
       className="group"
     >
       <div className={`${bgColor} rounded-2xl p-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]`}>
