@@ -133,7 +133,7 @@ export default function WithdrawDialog({ open, onOpenChange, wallet, onWithdraw,
             <div className="bg-gray-50 rounded-lg p-3">
               <p className="text-sm text-gray-500">Available Balance</p>
               <p className="font-semibold text-lg">
-                KSh {balance.amount.toLocaleString()}
+                {balance.currency_symbol || balance.currency} {balance.amount.toLocaleString()}
               </p>
             </div>
           )}
@@ -210,15 +210,15 @@ export default function WithdrawDialog({ open, onOpenChange, wallet, onWithdraw,
           <div className="bg-blue-50 rounded-lg p-3 space-y-1">
             <div className="flex justify-between text-sm">
               <span className="text-blue-900">Amount</span>
-              <span className="font-medium">KSh {formData.amount || '0.00'}</span>
+              <span className="font-medium">{formData.amount || '0.00'} {formData.currency}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-blue-900">Transaction Fee</span>
-              <span className="font-medium">KSh {selectedMethod?.fee || 0}</span>
+              <span className="font-medium">{selectedMethod?.fee || 0} {formData.currency}</span>
             </div>
             <div className="flex justify-between text-sm pt-2 border-t border-blue-200">
               <span className="text-blue-900 font-semibold">You'll receive</span>
-              <span className="font-bold">KSh {formData.amount || '0.00'}</span>
+              <span className="font-bold">{formData.amount || '0.00'} {formData.currency}</span>
             </div>
           </div>
 

@@ -87,7 +87,7 @@ export default function Layout({ children, currentPageName }) {
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link to={createPageUrl('Home')} className="flex items-center gap-2">
             <img 
-              src="https://media.base44.com/images/public/695420244ced3f7c551d2538/02372e571_Gemini_Generated_Image_rczaamrczaamrcza.png"
+              src="https://media.base44.com/images/public/695420244ced3f7c551d2538/c32b9fbf9_Gemini_Generated_Image_5ukoir5ukoir5uko.png"
               alt="Fixie"
               className="w-10 h-10 rounded-full object-cover"
             />

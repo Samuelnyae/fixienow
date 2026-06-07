@@ -76,12 +76,19 @@ export default function Home() {
         
         <div className="relative max-w-7xl mx-auto px-4 pt-8 pb-16">
           <div className="text-center text-white mb-8">
+            <div className="flex justify-center mb-6">
+              <img
+                src="https://media.base44.com/images/public/695420244ced3f7c551d2538/c32b9fbf9_Gemini_Generated_Image_5ukoir5ukoir5uko.png"
+                alt="Fixie"
+                className="w-24 h-24 rounded-full object-cover shadow-2xl border-4 border-white/30"
+              />
+            </div>
             <h1 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
               Expert Help,{' '}
               <span className="text-amber-400">Right Now</span>
             </h1>
             <p className="text-teal-100 text-lg max-w-md mx-auto">
-              Connect with certified technicians for fast, reliable service at your doorstep
+              Connect with certified technicians worldwide for fast, reliable service at your doorstep
             </p>
           </div>
 

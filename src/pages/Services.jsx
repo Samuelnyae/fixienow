@@ -119,7 +119,7 @@ export default function Services() {
                 </SheetHeader>
                 <div className="mt-6 space-y-6">
                   <div>
-                    <label className="text-sm font-medium mb-3 block">Price Range (KES/hour)</label>
+                    <label className="text-sm font-medium mb-3 block">Price Range (per hour)</label>
                     <Slider
                       defaultValue={priceRange}
                       max={5000}
@@ -128,8 +128,8 @@ export default function Services() {
                       className="mb-2"
                     />
                     <div className="flex justify-between text-sm text-gray-500">
-                      <span>KES {priceRange[0]}</span>
-                      <span>KES {priceRange[1]}</span>
+                      <span>{priceRange[0]}</span>
+                      <span>{priceRange[1]}</span>
                     </div>
                   </div>
 

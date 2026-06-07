@@ -61,7 +61,7 @@ export default function ServiceCategoryCard({ category }) {
         </div>
         <h3 className="font-semibold text-gray-900 mb-1">{category.name}</h3>
         <p className="text-sm text-gray-500">
-          From KES {category.base_price?.toLocaleString() || '500'}
+          From {category.base_price?.toLocaleString() || '500'}
         </p>
       </div>
     </Link>
