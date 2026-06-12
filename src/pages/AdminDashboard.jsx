@@ -187,90 +187,126 @@ export default function AdminDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="pending">
-          <TabsList className="bg-white border">
-            <TabsTrigger value="pending">
-              Pending Approvals ({pendingTechnicians.length})
+          <TabsList className="bg-white border w-full flex">
+            <TabsTrigger value="pending" className="flex-1 text-xs sm:text-sm">
+              Pending ({pendingTechnicians.length})
             </TabsTrigger>
-            <TabsTrigger value="technicians">All Technicians</TabsTrigger>
-            <TabsTrigger value="bookings">Bookings</TabsTrigger>
+            <TabsTrigger value="technicians" className="flex-1 text-xs sm:text-sm">Technicians</TabsTrigger>
+            <TabsTrigger value="bookings" className="flex-1 text-xs sm:text-sm">Bookings</TabsTrigger>
           </TabsList>
 
           {/* Pending Approvals */}
           <TabsContent value="pending" className="mt-6">
             {pendingTechnicians.length > 0 ? (
-              <div className="bg-white rounded-xl border overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Technician</TableHead>
-                      <TableHead>Profession</TableHead>
-                      <TableHead>Applied</TableHead>
-                      <TableHead>Documents</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {pendingTechnicians.map((tech) => (
-                      <TableRow key={tech.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="w-10 h-10">
-                              <AvatarImage src={tech.profile_photo} />
-                              <AvatarFallback>{tech.name?.[0]}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium">{tech.name}</p>
-                              <p className="text-sm text-gray-500">{tech.phone}</p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="capitalize">{tech.profession?.replace('_', ' ')}</TableCell>
-                        <TableCell>{format(new Date(tech.created_date), 'MMM d, yyyy')}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            {tech.id_document_url && (
-                              <a href={tech.id_document_url} target="_blank" rel="noopener noreferrer">
-                                <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">
-                                  <FileText className="w-3 h-3 mr-1" /> ID
-                                </Badge>
-                              </a>
-                            )}
-                            {tech.certificate_url && (
-                              <a href={tech.certificate_url} target="_blank" rel="noopener noreferrer">
-                                <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">
-                                  <FileText className="w-3 h-3 mr-1" /> Cert
-                                </Badge>
-                              </a>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button 
-                              size="sm"
-                              disabled={approveMutation.isPending}
-                              onClick={() => approveMutation.mutate({ id: tech.id, status: 'approved' })}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              <CheckCircle2 className="w-4 h-4 mr-1" />
-                              Approve
-                            </Button>
-                            <Button 
-                              size="sm"
-                              variant="destructive"
-                              disabled={approveMutation.isPending}
-                              onClick={() => approveMutation.mutate({ id: tech.id, status: 'rejected' })}
-                            >
-                              <XCircle className="w-4 h-4 mr-1" />
-                              Reject
-                            </Button>
-                          </div>
-                        </TableCell>
+              <>
+                {/* Mobile cards */}
+                <div className="md:hidden space-y-3">
+                  {pendingTechnicians.map((tech) => (
+                    <div key={tech.id} className="bg-white rounded-xl border p-4 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-10 h-10">
+                          <AvatarImage src={tech.profile_photo} />
+                          <AvatarFallback>{tech.name?.[0]}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{tech.name}</p>
+                          <p className="text-sm text-gray-500 capitalize">{tech.profession?.replace('_', ' ')} · {tech.phone}</p>
+                        </div>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Applied</span>
+                        <span>{format(new Date(tech.created_date), 'MMM d, yyyy')}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        {tech.id_document_url && (
+                          <a href={tech.id_document_url} target="_blank" rel="noopener noreferrer">
+                            <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">
+                              <FileText className="w-3 h-3 mr-1" /> ID
+                            </Badge>
+                          </a>
+                        )}
+                        {tech.certificate_url && (
+                          <a href={tech.certificate_url} target="_blank" rel="noopener noreferrer">
+                            <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">
+                              <FileText className="w-3 h-3 mr-1" /> Cert
+                            </Badge>
+                          </a>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" disabled={approveMutation.isPending} onClick={() => approveMutation.mutate({ id: tech.id, status: 'approved' })} className="bg-green-600 hover:bg-green-700 flex-1">
+                          <CheckCircle2 className="w-4 h-4 mr-1" /> Approve
+                        </Button>
+                        <Button size="sm" variant="destructive" disabled={approveMutation.isPending} onClick={() => approveMutation.mutate({ id: tech.id, status: 'rejected' })} className="flex-1">
+                          <XCircle className="w-4 h-4 mr-1" /> Reject
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {/* Desktop table */}
+                <div className="hidden md:block bg-white rounded-xl border overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Technician</TableHead>
+                        <TableHead>Profession</TableHead>
+                        <TableHead>Applied</TableHead>
+                        <TableHead>Documents</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {pendingTechnicians.map((tech) => (
+                        <TableRow key={tech.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <Avatar className="w-10 h-10">
+                                <AvatarImage src={tech.profile_photo} />
+                                <AvatarFallback>{tech.name?.[0]}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">{tech.name}</p>
+                                <p className="text-sm text-gray-500">{tech.phone}</p>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="capitalize">{tech.profession?.replace('_', ' ')}</TableCell>
+                          <TableCell>{format(new Date(tech.created_date), 'MMM d, yyyy')}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              {tech.id_document_url && (
+                                <a href={tech.id_document_url} target="_blank" rel="noopener noreferrer">
+                                  <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">
+                                    <FileText className="w-3 h-3 mr-1" /> ID
+                                  </Badge>
+                                </a>
+                              )}
+                              {tech.certificate_url && (
+                                <a href={tech.certificate_url} target="_blank" rel="noopener noreferrer">
+                                  <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">
+                                    <FileText className="w-3 h-3 mr-1" /> Cert
+                                  </Badge>
+                                </a>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button size="sm" disabled={approveMutation.isPending} onClick={() => approveMutation.mutate({ id: tech.id, status: 'approved' })} className="bg-green-600 hover:bg-green-700">
+                                <CheckCircle2 className="w-4 h-4 mr-1" /> Approve
+                              </Button>
+                              <Button size="sm" variant="destructive" disabled={approveMutation.isPending} onClick={() => approveMutation.mutate({ id: tech.id, status: 'rejected' })}>
+                                <XCircle className="w-4 h-4 mr-1" /> Reject
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             ) : (
               <div className="bg-white rounded-xl p-12 text-center">
                 <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
@@ -282,7 +318,44 @@ export default function AdminDashboard() {
 
           {/* All Technicians */}
           <TabsContent value="technicians" className="mt-6">
-            <div className="bg-white rounded-xl border overflow-hidden">
+            {/* Mobile cards */}
+            <div className="md:hidden space-y-3">
+              {technicians.map((tech) => (
+                <div key={tech.id} className="bg-white rounded-xl border p-4 space-y-2">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="w-10 h-10">
+                      <AvatarImage src={tech.profile_photo} />
+                      <AvatarFallback>{tech.name?.[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{tech.name}</p>
+                      <p className="text-xs text-gray-500 capitalize truncate">{tech.profession?.replace('_', ' ')}</p>
+                    </div>
+                    <Badge className={
+                      tech.verification_status === 'approved' ? 'bg-green-100 text-green-700'
+                      : tech.verification_status === 'pending' ? 'bg-amber-100 text-amber-700'
+                      : 'bg-red-100 text-red-700'
+                    }>
+                      {tech.verification_status}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Rating</span>
+                    <span>{tech.rating?.toFixed(1) || '0.0'} ({tech.total_reviews || 0})</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Jobs</span>
+                    <span>{tech.total_jobs || 0}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Earnings</span>
+                    <span className="font-semibold">{(tech.wallet_balance || 0).toLocaleString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Desktop table */}
+            <div className="hidden md:block bg-white rounded-xl border overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -312,7 +385,7 @@ export default function AdminDashboard() {
                       <TableCell className="capitalize">{tech.profession?.replace('_', ' ')}</TableCell>
                       <TableCell>
                         <Badge className={
-                          tech.verification_status === 'approved' 
+                          tech.verification_status === 'approved'
                             ? 'bg-green-100 text-green-700'
                             : tech.verification_status === 'pending'
                             ? 'bg-amber-100 text-amber-700'
@@ -328,7 +401,7 @@ export default function AdminDashboard() {
                         </div>
                       </TableCell>
                       <TableCell>{tech.total_jobs || 0}</TableCell>
-                      <TableCell>KES {(tech.wallet_balance || 0).toLocaleString()}</TableCell>
+                      <TableCell>{(tech.wallet_balance || 0).toLocaleString()}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
