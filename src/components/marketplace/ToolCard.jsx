@@ -7,8 +7,8 @@ export default function ToolCard({ tool, onAddToCart, cart }) {
   const inCart = cart.some(i => i.id === tool.id);
 
   return (
-    <div className="bg-white rounded-2xl border overflow-hidden hover:shadow-md transition-shadow flex flex-col">
-      <div className="relative h-44 overflow-hidden bg-gray-100">
+    <div className="bg-white rounded-2xl border hover:shadow-md transition-shadow flex flex-col">
+      <div className="relative h-44 overflow-hidden bg-gray-100 rounded-t-2xl">
         <img
           src={tool.image}
           alt={tool.name}
