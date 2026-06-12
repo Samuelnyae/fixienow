@@ -338,7 +338,47 @@ export default function AdminDashboard() {
 
           {/* Bookings */}
           <TabsContent value="bookings" className="mt-6">
-            <div className="bg-white rounded-xl border overflow-hidden">
+            {/* Mobile cards */}
+            <div className="md:hidden space-y-3">
+              {bookings.slice(0, 20).map((booking) => (
+                <div key={booking.id} className="bg-white rounded-xl border p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs text-gray-500">#{booking.id?.slice(-8).toUpperCase()}</span>
+                    <Badge className={
+                      booking.status === 'completed'
+                        ? 'bg-green-100 text-green-700'
+                        : booking.status === 'cancelled'
+                        ? 'bg-red-100 text-red-700'
+                        : 'bg-blue-100 text-blue-700'
+                    }>
+                      {booking.status}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Customer</span>
+                    <span className="font-medium">{booking.user_name || 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Service</span>
+                    <span className="capitalize">{booking.category?.replace('_', ' ')}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Technician</span>
+                    <span>{booking.technician_name || 'Unassigned'}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Amount</span>
+                    <span className="font-semibold">{(booking.final_price || booking.estimated_price)?.toLocaleString() || '—'}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Date</span>
+                    <span>{format(new Date(booking.created_date), 'MMM d, yyyy')}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Desktop table */}
+            <div className="hidden md:block bg-white rounded-xl border overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -362,7 +402,7 @@ export default function AdminDashboard() {
                       <TableCell>{booking.technician_name || 'Unassigned'}</TableCell>
                       <TableCell>
                         <Badge className={
-                          booking.status === 'completed' 
+                          booking.status === 'completed'
                             ? 'bg-green-100 text-green-700'
                             : booking.status === 'cancelled'
                             ? 'bg-red-100 text-red-700'
@@ -372,7 +412,7 @@ export default function AdminDashboard() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        KES {(booking.final_price || booking.estimated_price)?.toLocaleString()}
+                        {(booking.final_price || booking.estimated_price)?.toLocaleString() || '—'}
                       </TableCell>
                       <TableCell>
                         {format(new Date(booking.created_date), 'MMM d, yyyy')}
