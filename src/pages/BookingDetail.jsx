@@ -98,6 +98,17 @@ export default function BookingDetail() {
     enabled: !!bookingId,
   });
 
+  // Real-time booking status updates (e.g. technician sets en_route)
+  useEffect(() => {
+    if (!bookingId) return;
+    const unsubscribe = base44.entities.Booking.subscribe((event) => {
+      if (event.data?.id === bookingId && event.type !== 'delete') {
+        queryClient.invalidateQueries(['booking', bookingId]);
+      }
+    });
+    return () => unsubscribe();
+  }, [bookingId]);
+
   const { data: technician } = useQuery({
     queryKey: ['bookingTechnician', booking?.technician_id],
     queryFn: async () => {

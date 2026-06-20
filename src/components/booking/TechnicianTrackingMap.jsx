@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Navigation, Clock, MapPin } from 'lucide-react';
+import { Navigation, Clock, MapPin, Radio } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 // Fix default leaflet marker icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -12,7 +13,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-// Custom technician marker (teal van icon)
 const technicianIcon = new L.DivIcon({
   html: `
     <div style="
@@ -32,7 +32,6 @@ const technicianIcon = new L.DivIcon({
   popupAnchor: [0, -40],
 });
 
-// Customer destination marker
 const destinationIcon = new L.DivIcon({
   html: `
     <div style="
@@ -60,55 +59,127 @@ function FitBounds({ positions }) {
   return null;
 }
 
-// Simulates technician moving towards the customer
-function useSimulatedLocation(techStart, destination, isActive) {
+// Smoothly animate marker to new position
+function AnimatedMarker({ position, icon, children }) {
+  const markerRef = useRef(null);
+  const prevPos = useRef(position);
+
+  useEffect(() => {
+    if (!markerRef.current) return;
+    const [prevLat, prevLng] = prevPos.current;
+    const [newLat, newLng] = position;
+    if (prevLat === newLat && prevLng === newLng) return;
+
+    const steps = 20;
+    let step = 0;
+    const interval = setInterval(() => {
+      step++;
+      const t = step / steps;
+      const lat = prevLat + (newLat - prevLat) * t;
+      const lng = prevLng + (newLng - prevLng) * t;
+      markerRef.current?.setLatLng([lat, lng]);
+      if (step >= steps) {
+        clearInterval(interval);
+        prevPos.current = position;
+      }
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [position]);
+
+  return (
+    <Marker position={position} icon={icon} ref={markerRef}>
+      {children}
+    </Marker>
+  );
+}
+
+// Fallback: simulate movement toward destination when no real GPS
+function useSimulatedLocation(techStart, destination) {
   const [position, setPosition] = useState(techStart);
-  const [eta, setEta] = useState(null);
+  const [eta, setEta] = useState(15);
   const stepRef = useRef(0);
   const totalSteps = 30;
 
   useEffect(() => {
-    if (!isActive || !techStart || !destination) return;
+    if (!techStart || !destination) return;
     setPosition(techStart);
     stepRef.current = 0;
 
     const interval = setInterval(() => {
       stepRef.current += 1;
       const progress = stepRef.current / totalSteps;
-
       if (progress >= 1) {
         clearInterval(interval);
         setPosition(destination);
         setEta(0);
         return;
       }
-
-      // Interpolate with slight curve for realism
       const lat = techStart[0] + (destination[0] - techStart[0]) * progress;
       const lng = techStart[1] + (destination[1] - techStart[1]) * progress;
-      const remaining = Math.round((1 - progress) * 15); // ~15 min total ETA
       setPosition([lat, lng]);
-      setEta(remaining);
-    }, 3000); // update every 3 seconds
+      setEta(Math.round((1 - progress) * 15));
+    }, 3000);
 
     return () => clearInterval(interval);
-  }, [isActive]);
+  }, []);
 
   return { position, eta };
 }
 
-export default function TechnicianTrackingMap({ booking, technician }) {
+export default function TechnicianTrackingMap({ booking, technician: initialTechnician }) {
+  const [technician, setTechnician] = useState(initialTechnician);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [isLive, setIsLive] = useState(false);
+
   // Customer location
   const customerLat = booking?.location?.lat || -1.2921;
   const customerLng = booking?.location?.lng || 36.8219;
   const customerPos = [customerLat, customerLng];
 
-  // Technician starting location (slightly offset from customer)
-  const techLat = (technician?.location?.lat) || customerLat - 0.03;
-  const techLng = (technician?.location?.lng) || customerLng - 0.04;
+  // Technician base location
+  const techLat = technician?.location?.lat || customerLat - 0.03;
+  const techLng = technician?.location?.lng || customerLng - 0.04;
   const techStart = [techLat, techLng];
 
-  const { position: techPos, eta } = useSimulatedLocation(techStart, customerPos, true);
+  const hasRealGPS = !!(technician?.location?.lat && technician?.location?.lng);
+
+  // Real-time GPS position from technician entity
+  const [realPos, setRealPos] = useState(techStart);
+  const [eta, setEta] = useState(null);
+
+  // Subscribe to real-time technician location updates
+  useEffect(() => {
+    if (!initialTechnician?.id) return;
+
+    const unsubscribe = base44.entities.Technician.subscribe((event) => {
+      if (event.data?.id === initialTechnician.id && event.type !== 'delete') {
+        const updated = event.data;
+        setTechnician(updated);
+
+        if (updated.location?.lat && updated.location?.lng) {
+          setRealPos([updated.location.lat, updated.location.lng]);
+          setIsLive(true);
+          setLastUpdated(new Date());
+
+          // Rough ETA estimate based on distance
+          const dLat = customerLat - updated.location.lat;
+          const dLng = customerLng - updated.location.lng;
+          const distKm = Math.sqrt(dLat * dLat + dLng * dLng) * 111;
+          setEta(Math.max(0, Math.round(distKm / 0.5))); // ~30km/h avg
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [initialTechnician?.id]);
+
+  // Fallback simulation if no real GPS
+  const simulation = useSimulatedLocation(techStart, customerPos);
+
+  // Use real position if available, otherwise fall back to simulation
+  const techPos = isLive ? realPos : simulation.position;
+  const displayEta = isLive ? eta : simulation.eta;
 
   const routeLine = [techPos, customerPos];
 
@@ -119,12 +190,17 @@ export default function TechnicianTrackingMap({ booking, technician }) {
         <div className="flex items-center gap-2 text-white">
           <Navigation className="w-5 h-5 animate-pulse" />
           <span className="font-semibold">Technician En Route</span>
+          {isLive && (
+            <span className="flex items-center gap-1 bg-green-500/30 rounded-full px-2 py-0.5 text-xs">
+              <Radio className="w-3 h-3 animate-pulse" /> LIVE
+            </span>
+          )}
         </div>
-        {eta !== null && (
+        {displayEta !== null && (
           <div className="flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1">
             <Clock className="w-4 h-4 text-white" />
             <span className="text-white text-sm font-medium">
-              {eta === 0 ? 'Arriving now' : `~${eta} min`}
+              {displayEta === 0 ? 'Arriving now' : `~${displayEta} min`}
             </span>
           </div>
         )}
@@ -144,23 +220,25 @@ export default function TechnicianTrackingMap({ booking, technician }) {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          {/* Dashed route line */}
           <Polyline
             positions={routeLine}
             pathOptions={{ color: '#7c3aed', weight: 3, dashArray: '8 6', opacity: 0.8 }}
           />
 
-          {/* Technician marker */}
-          <Marker position={techPos} icon={technicianIcon}>
+          <AnimatedMarker position={techPos} icon={technicianIcon}>
             <Popup>
               <div className="text-center">
                 <p className="font-semibold">{technician?.name || 'Technician'}</p>
                 <p className="text-xs text-gray-500">On the way to you</p>
+                {lastUpdated && (
+                  <p className="text-xs text-green-600 mt-1">
+                    Updated {lastUpdated.toLocaleTimeString()}
+                  </p>
+                )}
               </div>
             </Popup>
-          </Marker>
+          </AnimatedMarker>
 
-          {/* Customer/destination marker */}
           <Marker position={customerPos} icon={destinationIcon}>
             <Popup>
               <p className="font-semibold text-sm">Your Location</p>
@@ -172,13 +250,18 @@ export default function TechnicianTrackingMap({ booking, technician }) {
         </MapContainer>
       </div>
 
-      {/* Footer info */}
+      {/* Footer */}
       <div className="px-4 py-3 bg-purple-50 flex items-center gap-3">
         <MapPin className="w-4 h-4 text-purple-500 shrink-0" />
         <p className="text-sm text-purple-700">
           {technician?.name || 'Your technician'} is heading to{' '}
           <span className="font-medium">{booking?.location?.address || 'your location'}</span>
         </p>
+        {isLive && lastUpdated && (
+          <span className="ml-auto text-xs text-green-600 shrink-0">
+            Live · {lastUpdated.toLocaleTimeString()}
+          </span>
+        )}
       </div>
     </div>
   );
