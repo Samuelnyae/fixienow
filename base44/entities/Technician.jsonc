@@ -20,17 +20,7 @@
     },
     "profession": {
       "type": "string",
-      "enum": [
-        "mechanic",
-        "plumber",
-        "electrician",
-        "carpenter",
-        "painter",
-        "hvac",
-        "appliance_repair",
-        "locksmith"
-      ],
-      "description": "Primary profession"
+      "description": "Primary profession / skill"
     },
     "bio": {
       "type": "string",

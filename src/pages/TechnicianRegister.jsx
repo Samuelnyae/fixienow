@@ -21,24 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 
-const professions = [
-  { value: 'mechanic', label: 'Mechanic' },
-  { value: 'plumber', label: 'Plumber' },
-  { value: 'electrician', label: 'Electrician' },
-  { value: 'carpenter', label: 'Carpenter' },
-  { value: 'painter', label: 'Painter' },
-  { value: 'hvac', label: 'HVAC Technician' },
-  { value: 'appliance_repair', label: 'Appliance Repair' },
-  { value: 'locksmith', label: 'Locksmith' },
-];
 
 export default function TechnicianRegister() {
   const navigate = useNavigate();
@@ -157,7 +140,7 @@ export default function TechnicianRegister() {
             <Wrench className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            Join FixNow as a Technician
+            Join Fixie as a Technician
           </h1>
           <p className="text-gray-500">
             {step < 4 
@@ -216,20 +199,14 @@ export default function TechnicianRegister() {
                 />
               </div>
               <div>
-                <Label htmlFor="profession">Profession</Label>
-                <Select
+                <Label htmlFor="profession">Profession / Skill</Label>
+                <Input
+                  id="profession"
+                  placeholder="e.g., Plumber, Electrician, Welder..."
                   value={formData.profession}
-                  onValueChange={(value) => setFormData({ ...formData, profession: value })}
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select profession" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {professions.map((p) => (
-                      <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
+                  className="mt-1"
+                />
               </div>
             </div>
 
@@ -430,7 +407,7 @@ export default function TechnicianRegister() {
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-3">Application Submitted!</h2>
             <p className="text-gray-500 mb-6 max-w-md mx-auto">
-              Thank you for applying to become a FixNow technician. Our team will review your application and documents within 24-48 hours.
+              Thank you for applying to become a Fixie technician. Our team will review your application and documents within 24-48 hours.
             </p>
             <Button asChild className="bg-teal-600 hover:bg-teal-700">
               <Link to={createPageUrl('Home')}>Back to Home</Link>
