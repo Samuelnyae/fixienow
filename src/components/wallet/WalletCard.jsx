@@ -47,7 +47,7 @@ export default function WalletCard({ wallet, showBalance = true }) {
               <Wrench className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-xl">FixNow</h3>
+              <h3 className="font-bold text-xl">Fixie</h3>
               <p className="text-teal-100 text-sm">Digital Wallet</p>
             </div>
           </div>
@@ -77,10 +77,7 @@ export default function WalletCard({ wallet, showBalance = true }) {
           ) : (
             <h2 className="text-5xl font-bold tracking-tight">••••••</h2>
           )}
-          <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm">
-            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-            <span className="text-xs font-medium">Demo Mode</span>
-          </div>
+
         </div>
 
         {/* Multi-Currency Balances */}
