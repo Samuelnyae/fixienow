@@ -432,11 +432,7 @@ export default function Wallet() {
             <ArrowLeft className="w-5 h-5" />
             <span className="font-medium">Wallet</span>
           </Link>
-          <div className="flex items-center gap-2">
-            <div className="px-3 py-1 rounded-full bg-teal-50 border border-teal-200">
-              <span className="text-xs font-semibold text-teal-700">Demo Mode</span>
-            </div>
-          </div>
+
         </div>
       </div>
 
