@@ -1,0 +1,67 @@
+{
+  "name": "Refund",
+  "type": "object",
+  "properties": {
+    "booking_id": {
+      "type": "string",
+      "description": "Related booking"
+    },
+    "payment_id": {
+      "type": "string",
+      "description": "Original payment being refunded"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Customer receiving the refund"
+    },
+    "technician_id": {
+      "type": "string",
+      "description": "Technician involved"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Refund amount in KES"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Reason for refund"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "completed",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "refund_method": {
+      "type": "string",
+      "enum": [
+        "mpesa",
+        "card",
+        "wallet",
+        "manual"
+      ]
+    },
+    "external_reference": {
+      "type": "string",
+      "description": "Provider reversal reference (e.g. M-Pesa reversal ID)"
+    },
+    "approved_by_id": {
+      "type": "string",
+      "description": "Admin who approved the refund"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "booking_id",
+    "user_id",
+    "amount",
+    "reason"
+  ]
+}

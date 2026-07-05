@@ -1,0 +1,50 @@
+{
+  "name": "Tip",
+  "type": "object",
+  "properties": {
+    "booking_id": {
+      "type": "string",
+      "description": "Related booking ID"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Customer who tipped"
+    },
+    "technician_id": {
+      "type": "string",
+      "description": "Technician who received the tip"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Tip amount in KES"
+    },
+    "message": {
+      "type": "string",
+      "description": "Optional thank-you message"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "mpesa",
+        "card",
+        "cash",
+        "wallet"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "failed"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "booking_id",
+    "user_id",
+    "technician_id",
+    "amount"
+  ]
+}

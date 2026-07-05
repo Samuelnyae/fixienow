@@ -1,0 +1,49 @@
+{
+  "name": "UserAddress",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Owner user ID"
+    },
+    "label": {
+      "type": "string",
+      "description": "Label e.g. Home, Work, Other"
+    },
+    "address": {
+      "type": "string",
+      "description": "Street address"
+    },
+    "building": {
+      "type": "string",
+      "description": "Building/apartment name or number"
+    },
+    "floor": {
+      "type": "string"
+    },
+    "instructions": {
+      "type": "string",
+      "description": "Access instructions for the technician"
+    },
+    "lat": {
+      "type": "number"
+    },
+    "lng": {
+      "type": "number"
+    },
+    "area_name": {
+      "type": "string",
+      "description": "Neighbourhood/area name"
+    },
+    "is_default": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is the user's default address"
+    }
+  },
+  "required": [
+    "user_id",
+    "label",
+    "address"
+  ]
+}

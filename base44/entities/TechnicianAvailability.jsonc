@@ -1,0 +1,47 @@
+{
+  "name": "TechnicianAvailability",
+  "type": "object",
+  "properties": {
+    "technician_id": {
+      "type": "string",
+      "description": "Technician this availability belongs to"
+    },
+    "day_of_week": {
+      "type": "string",
+      "enum": [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday"
+      ],
+      "description": "Day of the week"
+    },
+    "start_time": {
+      "type": "string",
+      "description": "Start time HH:mm"
+    },
+    "end_time": {
+      "type": "string",
+      "description": "End time HH:mm"
+    },
+    "is_available": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether technician is available during this slot"
+    },
+    "specific_date": {
+      "type": "string",
+      "format": "date",
+      "description": "If set, overrides recurring day_of_week for a specific date (e.g. holiday/unavailable)"
+    }
+  },
+  "required": [
+    "technician_id",
+    "day_of_week",
+    "start_time",
+    "end_time"
+  ]
+}

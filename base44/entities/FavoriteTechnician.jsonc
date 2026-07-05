@@ -1,0 +1,27 @@
+{
+  "name": "FavoriteTechnician",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Customer user ID"
+    },
+    "technician_id": {
+      "type": "string",
+      "description": "Favorited technician ID"
+    },
+    "technician_name": {
+      "type": "string"
+    },
+    "technician_profession": {
+      "type": "string"
+    },
+    "technician_photo": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_id",
+    "technician_id"
+  ]
+}

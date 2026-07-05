@@ -1,0 +1,84 @@
+{
+  "name": "Dispute",
+  "type": "object",
+  "properties": {
+    "booking_id": {
+      "type": "string",
+      "description": "Related booking ID"
+    },
+    "raised_by_id": {
+      "type": "string",
+      "description": "User ID who raised the dispute"
+    },
+    "raised_by_name": {
+      "type": "string"
+    },
+    "raised_by_role": {
+      "type": "string",
+      "enum": [
+        "user",
+        "technician"
+      ],
+      "description": "Role of the person raising the dispute"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Dispute subject/title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed dispute description"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "under_review",
+        "resolved",
+        "dismissed"
+      ],
+      "default": "open"
+    },
+    "resolution": {
+      "type": "string",
+      "description": "Admin resolution notes"
+    },
+    "resolution_type": {
+      "type": "string",
+      "enum": [
+        "refund",
+        "partial_refund",
+        "rework",
+        "no_action",
+        "other"
+      ],
+      "description": "Type of resolution applied"
+    },
+    "refund_amount": {
+      "type": "number",
+      "description": "Refund amount in KES if applicable"
+    },
+    "evidence_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Uploaded evidence files (photos, docs)"
+    },
+    "assigned_admin_id": {
+      "type": "string",
+      "description": "Admin user handling the dispute"
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "booking_id",
+    "raised_by_id",
+    "raised_by_role",
+    "subject",
+    "description"
+  ]
+}

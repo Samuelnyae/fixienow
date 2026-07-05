@@ -1,0 +1,52 @@
+{
+  "name": "ServiceArea",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Area name (e.g. Westlands, Kilimani)"
+    },
+    "city": {
+      "type": "string",
+      "default": "Nairobi"
+    },
+    "county": {
+      "type": "string"
+    },
+    "polygon": {
+      "type": "object",
+      "description": "GeoJSON polygon for the area boundary",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "coordinates": {
+          "type": "array"
+        }
+      }
+    },
+    "center_lat": {
+      "type": "number"
+    },
+    "center_lng": {
+      "type": "number"
+    },
+    "radius_km": {
+      "type": "number",
+      "description": "Service radius in km from center (simplified area)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "base_delivery_fee": {
+      "type": "number",
+      "default": 0,
+      "description": "Base travel/callout fee for this area in KES"
+    }
+  },
+  "required": [
+    "name",
+    "city"
+  ]
+}
