@@ -77,8 +77,9 @@ export default function TechnicianJobs() {
     enabled: !!technician,
   });
 
-  const updateJobMutation = useMutation({
-    mutationFn: ({ jobId, data }) => base44.entities.Booking.update(jobId, data),
+  const lifecycleMutation = useMutation({
+    mutationFn: ({ booking_id, action, final_price }) =>
+      base44.functions.invoke('booking_lifecycle', { booking_id, action, final_price }),
     onSuccess: () => {
       queryClient.invalidateQueries(['techJobs']);
       setShowCompleteDialog(false);
@@ -86,82 +87,15 @@ export default function TechnicianJobs() {
     },
   });
 
-  const handleAccept = async (job) => {
-    await updateJobMutation.mutateAsync({ jobId: job.id, data: { status: 'accepted' } });
-    
-    // Create notification for user
-    await base44.entities.Notification.create({
-      user_id: job.user_id,
-      type: 'booking_accepted',
-      title: 'Booking Accepted',
-      message: `${technician?.name || 'A technician'} has accepted your ${job.category?.replace('_', ' ')} service request`,
-      booking_id: job.id,
-      metadata: {
-        category: job.category,
-        technician_name: technician?.name
-      }
-    });
-  };
+  const handleAccept = (job) => lifecycleMutation.mutate({ booking_id: job.id, action: 'accept' });
+  const handleDecline = (job) => lifecycleMutation.mutate({ booking_id: job.id, action: 'decline' });
+  const handleStartRoute = (job) => lifecycleMutation.mutate({ booking_id: job.id, action: 'en_route' });
+  const handleStartWork = (job) => lifecycleMutation.mutate({ booking_id: job.id, action: 'start_work' });
 
-  const handleDecline = (job) => {
-    updateJobMutation.mutate({ jobId: job.id, data: { status: 'cancelled' } });
-  };
-
-  const handleStartRoute = (job) => {
-    updateJobMutation.mutate({ jobId: job.id, data: { status: 'en_route' } });
-  };
-
-  const handleStartWork = async (job) => {
-    await updateJobMutation.mutateAsync({ jobId: job.id, data: { status: 'in_progress' } });
-    
-    // Create notification for user
-    await base44.entities.Notification.create({
-      user_id: job.user_id,
-      type: 'booking_started',
-      title: 'Work Started',
-      message: `${technician?.name || 'Your technician'} has started working on your ${job.category?.replace('_', ' ')} service`,
-      booking_id: job.id,
-      metadata: {
-        category: job.category,
-        technician_name: technician?.name
-      }
-    });
-  };
-
-  const handleComplete = async () => {
-    if (selectedJob) {
-      const price = parseFloat(finalPrice) || selectedJob.estimated_price;
-      
-      await updateJobMutation.mutateAsync({ 
-        jobId: selectedJob.id, 
-        data: { 
-          status: 'completed', 
-          final_price: price
-        } 
-      });
-
-      // Update technician stats
-      if (technician) {
-        base44.entities.Technician.update(technician.id, {
-          total_jobs: (technician.total_jobs || 0) + 1,
-          wallet_balance: (technician.wallet_balance || 0) + price
-        });
-      }
-
-      // Create notification for user
-      await base44.entities.Notification.create({
-        user_id: selectedJob.user_id,
-        type: 'booking_completed',
-        title: 'Service Completed',
-        message: `Your ${selectedJob.category?.replace('_', ' ')} service has been completed. Total: KES ${price.toLocaleString()}`,
-        booking_id: selectedJob.id,
-        metadata: {
-          category: selectedJob.category,
-          technician_name: technician?.name,
-          amount: price
-        }
-      });
-    }
+  const handleComplete = () => {
+    if (!selectedJob) return;
+    const price = parseFloat(finalPrice) || selectedJob.estimated_price;
+    lifecycleMutation.mutate({ booking_id: selectedJob.id, action: 'complete', final_price: price });
   };
 
   const pendingJobs = jobs.filter(j => j.status === 'pending');
@@ -253,7 +187,7 @@ export default function TechnicianJobs() {
                             variant="outline"
                             onClick={() => handleDecline(job)}
                             className="flex-1"
-                            disabled={updateJobMutation.isPending}
+                            disabled={lifecycleMutation.isPending}
                           >
                             <XCircle className="w-4 h-4 mr-1" />
                             Decline
@@ -261,7 +195,7 @@ export default function TechnicianJobs() {
                           <Button 
                             onClick={() => handleAccept(job)}
                             className="flex-1 bg-teal-600 hover:bg-teal-700"
-                            disabled={updateJobMutation.isPending}
+                            disabled={lifecycleMutation.isPending}
                           >
                             <CheckCircle2 className="w-4 h-4 mr-1" />
                             Accept
@@ -289,7 +223,7 @@ export default function TechnicianJobs() {
                           <Button 
                             onClick={() => handleStartRoute(job)}
                             className="bg-purple-600 hover:bg-purple-700"
-                            disabled={updateJobMutation.isPending}
+                            disabled={lifecycleMutation.isPending}
                           >
                             <Navigation className="w-4 h-4 mr-1" />
                             Route
@@ -312,7 +246,7 @@ export default function TechnicianJobs() {
                           <Button 
                             onClick={() => handleStartWork(job)}
                             className="flex-1 bg-indigo-600 hover:bg-indigo-700"
-                            disabled={updateJobMutation.isPending}
+                            disabled={lifecycleMutation.isPending}
                           >
                             <Play className="w-4 h-4 mr-1" />
                             Arrived
@@ -384,9 +318,9 @@ export default function TechnicianJobs() {
             <Button 
               onClick={handleComplete}
               className="w-full bg-green-600 hover:bg-green-700"
-              disabled={updateJobMutation.isPending}
+              disabled={lifecycleMutation.isPending}
             >
-              {updateJobMutation.isPending ? (
+              {lifecycleMutation.isPending ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
                 'Mark as Complete'

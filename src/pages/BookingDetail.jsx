@@ -124,36 +124,12 @@ export default function BookingDetail() {
   });
 
   const submitReviewMutation = useMutation({
-    mutationFn: async () => {
-      await base44.entities.Review.create({
+    mutationFn: () =>
+      base44.functions.invoke('submit_review', {
         booking_id: bookingId,
-        technician_id: booking.technician_id,
         rating,
         comment: reviewComment,
-      });
-      
-      // Update technician rating
-      if (technician) {
-        const newTotal = (technician.total_reviews || 0) + 1;
-        const newRating = ((technician.rating || 0) * (technician.total_reviews || 0) + rating) / newTotal;
-        await base44.entities.Technician.update(technician.id, {
-          rating: newRating,
-          total_reviews: newTotal,
-        });
-
-        // Create notification for technician
-        await base44.entities.Notification.create({
-          user_id: technician.user_id,
-          type: 'review_received',
-          title: 'New Review',
-          message: `You received a ${rating}-star review from ${booking.user_name}`,
-          booking_id: bookingId,
-          metadata: {
-            rating: rating
-          }
-        });
-      }
-    },
+      }),
     onSuccess: () => {
       setShowReview(false);
       queryClient.invalidateQueries(['booking', bookingId]);
@@ -161,103 +137,12 @@ export default function BookingDetail() {
   });
 
   const paymentMutation = useMutation({
-    mutationFn: async ({ method, currency, phone, paymentMethodLabel } = {}) => {
-      const amount = booking.final_price || booking.estimated_price;
-      
-      // Create payment record
-      await base44.entities.Payment.create({
+    mutationFn: ({ method, currency, phone, paymentMethodLabel } = {}) =>
+      base44.functions.invoke('process_payment', {
         booking_id: bookingId,
-        user_id: booking.user_id,
-        technician_id: booking.technician_id,
-        amount: amount,
         method: method || 'mpesa',
-        mpesa_phone: phone || '',
-        status: 'completed',
-      });
-
-      // Get user and technician wallets
-      const userWallets = await base44.entities.Wallet.filter({ user_id: booking.user_id });
-      const techWallets = await base44.entities.Wallet.filter({ user_id: technician?.user_id });
-
-      if (userWallets.length > 0 && techWallets.length > 0) {
-        const userWallet = userWallets[0];
-        const techWallet = techWallets[0];
-
-        // Create wallet transaction
-        await base44.entities.Transaction.create({
-          transaction_id: `tx_${Date.now()}_${bookingId}`,
-          from_wallet_id: userWallet.id,
-          to_wallet_id: techWallet.id,
-          from_address: userWallet.wallet_address,
-          to_address: techWallet.wallet_address,
-          amount: amount,
-          currency: currency || 'KES',
-          transaction_type: 'booking_payment',
-          status: 'completed',
-          payment_method: method || 'mpesa',
-          description: `Payment for ${booking.category} service`,
-          metadata: { booking_id: bookingId }
-        });
-
-        // Update technician wallet balance
-        const techBalances = [...techWallet.balances];
-        const kesIndex = techBalances.findIndex(b => b.currency === 'KES');
-        if (kesIndex !== -1) {
-          techBalances[kesIndex].amount += amount;
-        }
-        await base44.entities.Wallet.update(techWallet.id, { 
-          balances: techBalances,
-          total_received: (techWallet.total_received || 0) + amount
-        });
-      }
-
-      await base44.entities.Booking.update(bookingId, { payment_status: 'paid' });
-
-      // Send in-app notification receipt
-      await base44.entities.Notification.create({
-        user_id: booking.user_id,
-        type: 'payment_received',
-        title: 'Payment Confirmed ✓',
-        message: `Your payment of ${currency || 'KES'} ${amount.toLocaleString()} for ${booking.category?.replace('_', ' ')} service has been confirmed. Receipt: RCP-${bookingId?.slice(-8).toUpperCase()}`,
-        booking_id: bookingId,
-        metadata: { amount, category: booking.category },
-      });
-
-      // Send email receipt
-      if (user?.email) {
-        const receiptDate = new Date().toLocaleString('en-KE', { dateStyle: 'full', timeStyle: 'short' });
-        await base44.integrations.Core.SendEmail({
-          to: user.email,
-          subject: `Payment Receipt – ${currency || 'KES'} ${amount.toLocaleString()} | Fixie`,
-          body: `
-Hi ${user.full_name || 'there'},
-
-Your payment has been confirmed. Here is your receipt:
-
-──────────────────────────────
-         FIXIE DIGITAL RECEIPT
-──────────────────────────────
-Receipt No:    RCP-${bookingId?.slice(-8).toUpperCase()}
-Date:          ${receiptDate}
-
-Service:       ${booking.category?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} Service
-Technician:    ${booking.technician_name || 'N/A'}
-Location:      ${booking.location?.address || 'N/A'}
-Payment Method: ${paymentMethodLabel || method || 'M-Pesa'}
-
-──────────────────────────────
-Total Paid:    ${currency || 'KES'} ${amount.toLocaleString()}
-──────────────────────────────
-
-Thank you for using Fixie!
-
-If you have any questions, please reply to this email.
-
-– The Fixie Team
-          `.trim(),
-        });
-      }
-    },
+        currency: currency || 'KES',
+      }),
     onSuccess: (_, variables) => {
       setPaymentInfo(variables || {});
       setShowPayment(false);
