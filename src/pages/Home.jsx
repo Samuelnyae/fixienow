@@ -76,15 +76,13 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-[#004d40]">
-        {/* Technician image */}
-        <div className="absolute inset-0 right-0 hidden sm:block">
-          <img
-            src="https://images.unsplash.com/photo-16219054191784-6cb4d76fa1e6?w=900&q=80"
-            alt="Technician"
-            className="absolute right-0 top-0 h-full w-1/2 object-cover object-center"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#004d40] via-[#004d40]/80 to-transparent" />
-        </div>
+        {/* Technician image - visible on all screens */}
+        <img
+          src="https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=1200&q=80"
+          alt="Technician"
+          className="absolute right-0 top-0 h-full w-full sm:w-3/5 object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#004d40] via-[#004d40]/85 to-[#004d40]/30 sm:to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-4 py-10 sm:py-16">
           <div className="max-w-lg text-white">
@@ -94,7 +92,7 @@ export default function Home() {
             </div>
 
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3 leading-tight">
-              Expert Help, Right When You Need It
+              Expert Help, <span className="text-yellow-400">Right When You Need It</span>
             </h1>
             <p className="text-teal-100/80 text-sm sm:text-base mb-6 max-w-md">
               Connect with certified technicians worldwide for fast, reliable service at your doorstep.
@@ -180,30 +178,24 @@ export default function Home() {
         <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-100">
           <h2 className="text-lg font-bold text-gray-900 text-center mb-6">How Fixie Works</h2>
 
-          <div className="flex items-start justify-between gap-1 sm:gap-4">
-            {howItWorks.map((item, idx) => {
-              const Icon = item.icon;
-              return (
-                <React.Fragment key={item.step}>
-                  <div className="flex flex-col items-center text-center flex-1">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+          <div className="relative">
+            {/* Dotted connector line behind circles */}
+            <div className="absolute top-7 sm:top-8 left-[12%] right-[12%] border-t-2 border-dashed border-gray-200" />
+
+            <div className="relative flex items-start justify-between gap-1 sm:gap-4">
+              {howItWorks.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.step} className="flex flex-col items-center text-center flex-1">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white border-2 border-gray-100 rounded-full flex items-center justify-center mb-3 z-10">
                       <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-[#004d40]" />
                     </div>
                     <h3 className="font-semibold text-gray-900 text-sm mb-1">{item.step}. {item.title}</h3>
                     <p className="text-xs text-gray-500 leading-tight">{item.desc}</p>
                   </div>
-                  {idx < howItWorks.length - 1 && (
-                    <div className="flex items-center pt-7 sm:pt-8">
-                      <div className="flex gap-0.5">
-                        <div className="w-1 h-1 rounded-full bg-gray-300" />
-                        <div className="w-1 h-1 rounded-full bg-gray-300" />
-                        <div className="w-1 h-1 rounded-full bg-gray-300" />
-                      </div>
-                    </div>
-                  )}
-                </React.Fragment>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
