@@ -72,13 +72,13 @@ export default function Layout({ children, currentPageName }) {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <style>{`
         :root {
-          --primary: #0F766E;
-          --primary-light: #14B8A6;
-          --primary-dark: #0D9488;
+          --primary: #004d40;
+          --primary-light: #006d5b;
+          --primary-dark: #003d33;
           --accent: #F59E0B;
-          --background: #F8FAFC;
-          --foreground: #0F172A;
-          --muted: #64748B;
+          --background: #F9FAFB;
+          --foreground: #111827;
+          --muted: #6B7280;
         }
       `}</style>
 
@@ -104,7 +104,7 @@ export default function Layout({ children, currentPageName }) {
                     <Button variant="ghost" className="flex items-center gap-2 px-2">
                       <Avatar className="w-8 h-8">
                         <AvatarImage src={user.profile_photo} />
-                        <AvatarFallback className="bg-teal-100 text-teal-700 text-sm">
+                        <AvatarFallback className="bg-[#004d40]/10 text-[#004d40] text-sm">
                           {user.full_name?.[0] || user.email?.[0] || 'U'}
                         </AvatarFallback>
                       </Avatar>
@@ -150,7 +150,7 @@ export default function Layout({ children, currentPageName }) {
             ) : (
               <Button 
                 onClick={() => base44.auth.redirectToLogin()}
-                className="bg-teal-600 hover:bg-teal-700"
+                className="bg-[#004d40] hover:bg-[#003d33]"
               >
                 Sign In
               </Button>
@@ -176,7 +176,7 @@ export default function Layout({ children, currentPageName }) {
                   to={createPageUrl(item.page)}
                   className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${
                     isActive 
-                      ? 'text-teal-600' 
+                      ? 'text-[#004d40]' 
                       : 'text-gray-400 hover:text-gray-600'
                   }`}
                 >

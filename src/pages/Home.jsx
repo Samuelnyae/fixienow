@@ -3,30 +3,50 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { 
-  Search, 
-  MapPin, 
+import {
+  Search,
   ArrowRight,
-  Sparkles,
   Shield,
-  Clock,
-  Star
+  Zap,
+  Star,
+  Wrench,
+  Droplets,
+  Zap as Bolt,
+  Paintbrush,
+  UserCheck,
+  Calendar,
+  ShieldCheck,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import ServiceCategoryCard from '../components/home/ServiceCategoryCard';
-import TechnicianCard from '../components/home/TechnicianCard';
-import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const defaultCategories = [
-  { id: '1', name: 'Mechanic', slug: 'mechanic', base_price: 500 },
-  { id: '2', name: 'Plumber', slug: 'plumber', base_price: 400 },
-  { id: '3', name: 'Electrician', slug: 'electrician', base_price: 450 },
-  { id: '4', name: 'Carpenter', slug: 'carpenter', base_price: 600 },
-  { id: '5', name: 'Painter', slug: 'painter', base_price: 350 },
-  { id: '6', name: 'HVAC', slug: 'hvac', base_price: 800 },
-  { id: '7', name: 'Appliance Repair', slug: 'appliance_repair', base_price: 500 },
-  { id: '8', name: 'Locksmith', slug: 'locksmith', base_price: 300 },
+  { id: '1', name: 'Mechanic', slug: 'mechanic', base_price: 500, description: 'Car repair & maintenance' },
+  { id: '2', name: 'Plumber', slug: 'plumber', base_price: 400, description: 'Pipes, leaks & installations' },
+  { id: '3', name: 'Electrician', slug: 'electrician', base_price: 450, description: 'Wiring, faults & installations' },
+  { id: '4', name: 'Painter', slug: 'painter', base_price: 350, description: 'Walls, doors & finishes' },
+  { id: '5', name: 'Carpenter', slug: 'carpenter', base_price: 600, description: 'Furniture & woodwork' },
+  { id: '6', name: 'HVAC', slug: 'hvac', base_price: 800, description: 'Heating & cooling' },
+  { id: '7', name: 'Appliance Repair', slug: 'appliance_repair', base_price: 500, description: 'Fridge, washer & more' },
+  { id: '8', name: 'Locksmith', slug: 'locksmith', base_price: 300, description: 'Locks & keys' },
+];
+
+const categoryIcons = {
+  mechanic: { icon: Wrench, color: 'text-blue-500', bg: 'bg-blue-50' },
+  plumber: { icon: Droplets, color: 'text-teal-500', bg: 'bg-teal-50' },
+  electrician: { icon: Bolt, color: 'text-amber-500', bg: 'bg-amber-50' },
+  painter: { icon: Paintbrush, color: 'text-purple-500', bg: 'bg-purple-50' },
+  carpenter: { icon: Wrench, color: 'text-orange-500', bg: 'bg-orange-50' },
+  hvac: { icon: Zap, color: 'text-cyan-500', bg: 'bg-cyan-50' },
+  appliance_repair: { icon: Wrench, color: 'text-red-500', bg: 'bg-red-50' },
+  locksmith: { icon: Shield, color: 'text-indigo-500', bg: 'bg-indigo-50' },
+};
+
+const howItWorks = [
+  { step: 1, title: 'Search', desc: 'Tell us what you need', icon: Search },
+  { step: 2, title: 'Connect', desc: 'We match you with experts', icon: UserCheck },
+  { step: 3, title: 'Book', desc: 'Choose time & confirm', icon: Calendar },
+  { step: 4, title: 'Relax', desc: 'Get the job done right', icon: ShieldCheck },
 ];
 
 export default function Home() {
@@ -50,63 +70,50 @@ export default function Home() {
     queryFn: () => base44.entities.ServiceCategory.list(),
   });
 
-  const { data: topTechnicians = [], isLoading: techLoading } = useQuery({
-    queryKey: ['topTechnicians'],
-    queryFn: async () => {
-      const techs = await base44.entities.Technician.filter(
-        { verification_status: 'approved', is_available: true },
-        '-rating',
-        6
-      );
-      return techs;
-    },
-  });
-
   const displayCategories = categories.length > 0 ? categories : defaultCategories;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-50/50 to-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-teal-600 to-teal-800" />
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-32 h-32 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-10 w-48 h-48 bg-amber-400 rounded-full blur-3xl" />
+      <section className="relative overflow-hidden bg-[#004d40]">
+        {/* Technician image */}
+        <div className="absolute inset-0 right-0 hidden sm:block">
+          <img
+            src="https://images.unsplash.com/photo-16219054191784-6cb4d76fa1e6?w=900&q=80"
+            alt="Technician"
+            className="absolute right-0 top-0 h-full w-1/2 object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#004d40] via-[#004d40]/80 to-transparent" />
         </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 pt-8 pb-16">
-          <div className="text-center text-white mb-8">
-            <div className="flex justify-center mb-6">
-              <img
-                src="https://media.base44.com/images/public/695420244ced3f7c551d2538/c32b9fbf9_Gemini_Generated_Image_5ukoir5ukoir5uko.png"
-                alt="Fixie"
-                className="w-24 h-24 rounded-full object-cover shadow-2xl border-4 border-white/30"
-              />
-            </div>
-            <h1 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
-              Expert Help,{' '}
-              <span className="text-amber-400">Right Now</span>
-            </h1>
-            <p className="text-teal-100 text-lg max-w-md mx-auto">
-              Connect with certified technicians worldwide for fast, reliable service at your doorstep
-            </p>
-          </div>
 
-          {/* Search Bar */}
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-xl p-2 flex items-center gap-2">
+        <div className="relative max-w-7xl mx-auto px-4 py-10 sm:py-16">
+          <div className="max-w-lg text-white">
+            {/* Badge */}
+            <div className="inline-flex items-center bg-teal-600/40 backdrop-blur-sm border border-teal-400/30 rounded-full px-3 py-1 mb-5">
+              <span className="text-xs font-medium text-teal-50">Trusted. Verified. Reliable.</span>
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3 leading-tight">
+              Expert Help, Right When You Need It
+            </h1>
+            <p className="text-teal-100/80 text-sm sm:text-base mb-6 max-w-md">
+              Connect with certified technicians worldwide for fast, reliable service at your doorstep.
+            </p>
+
+            {/* Search Bar */}
+            <div className="bg-white rounded-2xl shadow-xl p-1.5 flex items-center gap-1.5 mb-5">
               <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <Input
                   placeholder="What do you need help with?"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 h-14 border-0 text-lg focus-visible:ring-0"
+                  className="pl-11 h-12 border-0 text-base focus-visible:ring-0 bg-transparent"
                 />
               </div>
-              <Button 
+              <Button
                 asChild
-                className="h-12 px-6 bg-teal-600 hover:bg-teal-700 rounded-xl"
+                className="h-12 px-6 bg-[#004d40] hover:bg-[#003d33] rounded-xl font-medium"
               >
                 <Link to={createPageUrl(`Services${searchQuery ? `?q=${searchQuery}` : ''}`)}>
                   Search
@@ -114,131 +121,112 @@ export default function Home() {
               </Button>
             </div>
 
-            {/* Quick Stats */}
-            <div className="flex items-center justify-center gap-6 mt-6 text-white/90">
-              <div className="flex items-center gap-2">
-                <Star className="w-4 h-4 text-amber-400" />
-                <span className="text-sm">4.8 avg rating</span>
+            {/* Stats Row */}
+            <div className="flex items-center gap-3 sm:gap-4 text-white/90">
+              <div className="flex items-center gap-1.5">
+                <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                <span className="text-xs sm:text-sm">4.8 avg rating</span>
               </div>
-              <div className="w-1 h-1 bg-white/50 rounded-full" />
-              <div className="flex items-center gap-2">
+              <div className="w-px h-4 bg-white/30" />
+              <div className="flex items-center gap-1.5">
                 <Shield className="w-4 h-4" />
-                <span className="text-sm">Verified pros</span>
+                <span className="text-xs sm:text-sm">Verified pros</span>
               </div>
-              <div className="w-1 h-1 bg-white/50 rounded-full" />
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                <span className="text-sm">Fast response</span>
+              <div className="w-px h-4 bg-white/30" />
+              <div className="flex items-center gap-1.5">
+                <Zap className="w-4 h-4" />
+                <span className="text-xs sm:text-sm">Fast response</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Categories Section */}
-      <section className="max-w-7xl mx-auto px-4 py-10">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-900">Browse Services</h2>
-          <Link 
+      {/* Browse Services */}
+      <section className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-lg font-bold text-gray-900">Browse Services</h2>
+          <Link
             to={createPageUrl('Services')}
-            className="text-teal-600 font-medium text-sm flex items-center gap-1 hover:gap-2 transition-all"
+            className="text-[#004d40] font-medium text-sm flex items-center gap-1 hover:gap-2 transition-all"
           >
             View all <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {displayCategories.slice(0, 8).map((category) => (
-            <ServiceCategoryCard key={category.id || category.slug} category={category} />
-          ))}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+          {displayCategories.slice(0, 4).map((category) => {
+            const config = categoryIcons[category.slug] || categoryIcons.mechanic;
+            const Icon = config.icon;
+            return (
+              <Link
+                key={category.id || category.slug}
+                to={createPageUrl(`Services?category=${category.slug}`)}
+                className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-50 hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col items-center text-center"
+              >
+                <div className={`w-12 h-12 ${config.bg} rounded-xl flex items-center justify-center mb-3`}>
+                  <Icon className={`w-6 h-6 ${config.color}`} />
+                </div>
+                <h3 className="font-semibold text-gray-900 text-sm mb-0.5">{category.name}</h3>
+                <p className="text-xs text-gray-500">{category.description}</p>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
-      {/* Top Technicians Section */}
-      <section className="max-w-7xl mx-auto px-4 py-10">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">Top Rated Technicians</h2>
-            <p className="text-gray-500 text-sm mt-1">Verified professionals near you</p>
-          </div>
-          <Link 
-            to={createPageUrl('Services')}
-            className="text-teal-600 font-medium text-sm flex items-center gap-1 hover:gap-2 transition-all"
-          >
-            See more <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
+      {/* How Fixie Works */}
+      <section className="max-w-7xl mx-auto px-4 py-8">
+        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-100">
+          <h2 className="text-lg font-bold text-gray-900 text-center mb-6">How Fixie Works</h2>
 
-        {techLoading ? (
-          <LoadingSpinner />
-        ) : topTechnicians.length > 0 ? (
-          <div className="grid md:grid-cols-2 gap-4">
-            {topTechnicians.map((tech) => (
-              <TechnicianCard key={tech.id} technician={tech} />
-            ))}
+          <div className="flex items-start justify-between gap-1 sm:gap-4">
+            {howItWorks.map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <React.Fragment key={item.step}>
+                  <div className="flex flex-col items-center text-center flex-1">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                      <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-[#004d40]" />
+                    </div>
+                    <h3 className="font-semibold text-gray-900 text-sm mb-1">{item.step}. {item.title}</h3>
+                    <p className="text-xs text-gray-500 leading-tight">{item.desc}</p>
+                  </div>
+                  {idx < howItWorks.length - 1 && (
+                    <div className="flex items-center pt-7 sm:pt-8">
+                      <div className="flex gap-0.5">
+                        <div className="w-1 h-1 rounded-full bg-gray-300" />
+                        <div className="w-1 h-1 rounded-full bg-gray-300" />
+                        <div className="w-1 h-1 rounded-full bg-gray-300" />
+                      </div>
+                    </div>
+                  )}
+                </React.Fragment>
+              );
+            })}
           </div>
-        ) : (
-          <div className="bg-gray-50 rounded-2xl p-8 text-center">
-            <Sparkles className="w-10 h-10 text-teal-500 mx-auto mb-3" />
-            <h3 className="font-semibold text-gray-900 mb-2">Technicians Coming Soon</h3>
-            <p className="text-gray-500 text-sm max-w-sm mx-auto">
-              We're onboarding verified technicians in your area. Check back soon!
-            </p>
-          </div>
-        )}
+        </div>
       </section>
 
-      {/* How It Works Section */}
-      <section className="max-w-7xl mx-auto px-4 py-10 pb-20">
-        <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">How Fixie Works</h2>
-        
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            {
-              step: '1',
-              title: 'Choose a Service',
-              description: 'Browse categories and select the help you need',
-              gradient: 'from-teal-500 to-teal-600'
-            },
-            {
-              step: '2',
-              title: 'Book a Technician',
-              description: 'Pick a verified pro or get auto-matched instantly',
-              gradient: 'from-amber-500 to-amber-600'
-            },
-            {
-              step: '3',
-              title: 'Get It Fixed',
-              description: 'Technician arrives, completes the job, you pay securely',
-              gradient: 'from-green-500 to-green-600'
-            }
-          ].map((item) => (
-            <div key={item.step} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition-shadow">
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center text-white font-bold mb-4`}>
-                {item.step}
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">{item.title}</h3>
-              <p className="text-gray-500 text-sm">{item.description}</p>
+      {/* Bottom Promo Banner */}
+      <section className="max-w-7xl mx-auto px-4 pb-24 md:pb-8">
+        <div className="bg-[#004d40] rounded-2xl p-5 sm:p-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
+              <ShieldCheck className="w-6 h-6 text-white" />
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA for Technicians */}
-      <section className="bg-gradient-to-r from-gray-900 to-gray-800 py-12">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-            Are you a skilled technician?
-          </h2>
-          <p className="text-gray-300 mb-6 max-w-md mx-auto">
-            Join Fixie and grow your business. Get verified, find customers, and earn more.
-          </p>
-          <Button 
+            <div>
+              <h3 className="font-bold text-white text-sm sm:text-base">Verified & Trusted</h3>
+              <p className="text-teal-100/80 text-xs sm:text-sm">All pros are background-checked and highly rated.</p>
+            </div>
+          </div>
+          <Button
             asChild
-            className="bg-amber-500 hover:bg-amber-600 text-gray-900 font-semibold px-8 h-12 rounded-xl"
+            variant="secondary"
+            className="bg-white text-[#004d40] hover:bg-gray-100 font-medium rounded-xl flex-shrink-0"
           >
-            <Link to={createPageUrl('TechnicianRegister')}>
-              Join as Technician
+            <Link to={createPageUrl('Services')}>
+              Learn more
             </Link>
           </Button>
         </div>
