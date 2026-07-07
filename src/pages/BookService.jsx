@@ -95,6 +95,7 @@ export default function BookService() {
     scheduled_date: null,
     scheduled_time: '',
     address: '',
+    service_area: '',
     technician_id: preselectedTechId || '',
   });
 
@@ -123,7 +124,7 @@ export default function BookService() {
     enabled: !!preselectedTechId,
   });
 
-  const { data: availableTechnicians = [] } = useQuery({
+  const { data: allCategoryTechnicians = [] } = useQuery({
     queryKey: ['availableTechs', formData.category],
     queryFn: async () => {
       if (!formData.category) return [];
@@ -135,6 +136,16 @@ export default function BookService() {
     },
     enabled: !!formData.category && !preselectedTechId,
   });
+
+  const { data: serviceAreas = [] } = useQuery({
+    queryKey: ['activeServiceAreas'],
+    queryFn: () => base44.entities.ServiceArea.filter({ is_active: true }, 'name', 100),
+  });
+
+  // Filter technicians to those covering the selected service area
+  const availableTechnicians = formData.service_area
+    ? allCategoryTechnicians.filter(t => (t.service_areas || []).includes(formData.service_area))
+    : allCategoryTechnicians;
 
   // AI dispatch: pick best technician using AI reasoning
   const { data: aiDispatchResult } = useQuery({
@@ -221,7 +232,7 @@ Return ONLY the id of the best technician and a brief reason.`,
       booking_type: formData.booking_type,
       scheduled_date: formData.scheduled_date ? format(formData.scheduled_date, 'yyyy-MM-dd') : null,
       scheduled_time: formData.scheduled_time,
-      location: { address: formData.address },
+      location: { address: formData.address, area: formData.service_area },
       estimated_price: basePrices[formData.category] || 500,
       status: 'pending',
     };
@@ -415,15 +426,41 @@ Return ONLY the id of the best technician and a brief reason.`,
               </div>
             )}
 
+            {/* Service Area */}
+            <div>
+              <Label className="text-base mb-3 block">
+                <MapPin className="w-4 h-4 inline mr-1" />
+                Your Area
+              </Label>
+              <Select
+                value={formData.service_area}
+                onValueChange={(value) => setFormData({ ...formData, service_area: value })}
+              >
+                <SelectTrigger className="h-12">
+                  <SelectValue placeholder="Select your area" />
+                </SelectTrigger>
+                <SelectContent>
+                  {serviceAreas.map((area) => (
+                    <SelectItem key={area.id} value={area.name}>{area.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {formData.service_area && availableTechnicians.length === 0 && (
+                <p className="text-sm text-amber-600 mt-2">
+                  No technicians available in {formData.service_area} for this service. Try another area.
+                </p>
+              )}
+            </div>
+
             {/* Address */}
             <div>
               <Label htmlFor="address" className="text-base mb-3 block">
                 <MapPin className="w-4 h-4 inline mr-1" />
-                Service Location
+                Detailed Address
               </Label>
               <Input
                 id="address"
-                placeholder="Enter your address"
+                placeholder="Enter your street address"
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 className="h-12"
@@ -440,7 +477,7 @@ Return ONLY the id of the best technician and a brief reason.`,
               </Button>
               <Button
                 onClick={() => setStep(3)}
-                disabled={!formData.address || (formData.booking_type === 'scheduled' && (!formData.scheduled_date || !formData.scheduled_time))}
+                disabled={!formData.service_area || !formData.address || (formData.booking_type === 'scheduled' && (!formData.scheduled_date || !formData.scheduled_time))}
                 className="flex-1 h-12 bg-teal-600 hover:bg-teal-700"
               >
                 Continue
@@ -476,7 +513,12 @@ Return ONLY the id of the best technician and a brief reason.`,
                 </div>
 
                 <div className="flex items-center justify-between py-2">
-                  <span className="text-gray-500">Location</span>
+                  <span className="text-gray-500">Area</span>
+                  <span className="font-medium">{formData.service_area}</span>
+                </div>
+
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-gray-500">Address</span>
                   <span className="font-medium text-right max-w-[200px] truncate">{formData.address}</span>
                 </div>
 

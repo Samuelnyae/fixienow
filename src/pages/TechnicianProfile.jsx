@@ -77,6 +77,11 @@ export default function TechnicianProfile() {
     enabled: !!user,
   });
 
+  const { data: serviceAreas = [] } = useQuery({
+    queryKey: ['activeServiceAreas'],
+    queryFn: () => base44.entities.ServiceArea.filter({ is_active: true }, 'name', 100),
+  });
+
   const updateMutation = useMutation({
     mutationFn: (data) => base44.entities.Technician.update(technician.id, data),
     onSuccess: () => {
@@ -93,7 +98,7 @@ export default function TechnicianProfile() {
       bio: technician?.bio || '',
       hourly_rate: technician?.hourly_rate?.toString() || '',
       years_experience: technician?.years_experience?.toString() || '',
-      service_areas: technician?.service_areas?.join(', ') || '',
+      service_areas: technician?.service_areas || [],
     });
     setShowEditDialog(true);
   };
@@ -106,7 +111,7 @@ export default function TechnicianProfile() {
       bio: editForm.bio,
       hourly_rate: parseFloat(editForm.hourly_rate) || 500,
       years_experience: parseInt(editForm.years_experience) || 0,
-      service_areas: editForm.service_areas.split(',').map(s => s.trim()).filter(Boolean),
+      service_areas: editForm.service_areas || [],
     });
   };
 
@@ -358,13 +363,33 @@ export default function TechnicianProfile() {
             </div>
             <div>
               <Label>Service Areas</Label>
-              <Input
-                value={editForm.service_areas}
-                onChange={(e) => setEditForm({ ...editForm, service_areas: e.target.value })}
-                placeholder="Westlands, Kilimani, etc."
-                className="mt-1"
-              />
-              <p className="text-xs text-gray-500 mt-1">Separate with commas</p>
+              <p className="text-xs text-gray-500 mt-1 mb-2">Select the areas you cover</p>
+              <div className="grid grid-cols-2 gap-2 mt-1 max-h-40 overflow-y-auto">
+                {serviceAreas.length === 0 ? (
+                  <p className="text-sm text-gray-400 col-span-2">No service areas defined yet. An admin must define areas first.</p>
+                ) : serviceAreas.map((area) => {
+                  const checked = (editForm.service_areas || []).includes(area.name);
+                  return (
+                    <label key={area.id} className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer text-sm transition-all ${checked ? 'border-teal-600 bg-teal-50 text-teal-700' : 'border-gray-200 hover:bg-gray-50'}`}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(e) => {
+                          const current = editForm.service_areas || [];
+                          setEditForm({
+                            ...editForm,
+                            service_areas: e.target.checked
+                              ? [...current, area.name]
+                              : current.filter(a => a !== area.name)
+                          });
+                        }}
+                        className="w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                      />
+                      {area.name}
+                    </label>
+                  );
+                })}
+              </div>
             </div>
             <Button 
               onClick={handleSave}

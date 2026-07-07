@@ -38,6 +38,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import ServiceAreaManager from '../components/admin/ServiceAreaManager';
 
 export default function AdminDashboard() {
   const [user, setUser] = useState(null);
@@ -193,6 +194,7 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="technicians" className="flex-1 text-xs sm:text-sm">Technicians</TabsTrigger>
             <TabsTrigger value="bookings" className="flex-1 text-xs sm:text-sm">Bookings</TabsTrigger>
+            <TabsTrigger value="areas" className="flex-1 text-xs sm:text-sm">Service Areas</TabsTrigger>
           </TabsList>
 
           {/* Pending Approvals */}
@@ -495,6 +497,11 @@ export default function AdminDashboard() {
                 </TableBody>
               </Table>
             </div>
+          </TabsContent>
+
+          {/* Service Areas */}
+          <TabsContent value="areas" className="mt-6">
+            <ServiceAreaManager />
           </TabsContent>
         </Tabs>
       </div>
