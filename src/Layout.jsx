@@ -85,14 +85,39 @@ export default function Layout({ children, currentPageName }) {
       {/* Top Header */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to={createPageUrl('Home')} className="flex items-center gap-2">
-            <img 
-              src="https://media.base44.com/images/public/695420244ced3f7c551d2538/c32b9fbf9_Gemini_Generated_Image_5ukoir5ukoir5uko.png"
-              alt="Fixie"
-              className="w-10 h-10 rounded-full object-cover"
-            />
-            <span className="text-xl font-bold text-gray-900">Fixie</span>
-          </Link>
+          <div className="flex items-center gap-6">
+            <Link to={createPageUrl('Home')} className="flex items-center gap-2">
+              <img 
+                src="https://media.base44.com/images/public/695420244ced3f7c551d2538/c32b9fbf9_Gemini_Generated_Image_5ukoir5ukoir5uko.png"
+                alt="Fixie"
+                className="w-10 h-10 rounded-full object-cover"
+              />
+              <span className="text-xl font-bold text-gray-900">Fixie</span>
+            </Link>
+
+            {/* Desktop Navigation */}
+            {user && (
+              <nav className="hidden md:flex items-center gap-1">
+                {navItems.map((item) => {
+                  const isActive = currentPageName === item.page;
+                  return (
+                    <Link
+                      key={item.page}
+                      to={createPageUrl(item.page)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                        isActive
+                          ? 'text-[#004d40] font-semibold bg-[#004d40]/5'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      }`}
+                    >
+                      <item.icon className="w-4 h-4" />
+                      {item.name}
+                    </Link>
+                  );
+                })}
+              </nav>
+            )}
+          </div>
 
           <div className="flex items-center gap-3">
             {user ? (
