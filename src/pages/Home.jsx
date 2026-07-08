@@ -75,66 +75,76 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-[#004d40]">
-        {/* Technician image - visible on all screens */}
-        <img
-          src="https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=1200&q=80"
-          alt="Technician"
-          className="absolute right-0 top-0 h-full w-full sm:w-3/5 object-cover object-center"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#004d40] via-[#004d40]/85 to-[#004d40]/30 sm:to-transparent" />
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#004d40] to-[#002820]">
+        <div className="max-w-7xl mx-auto px-4 py-12 md:py-20">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+            {/* Left Column - Content */}
+            <div className="text-white md:py-8">
+              {/* Badge */}
+              <div className="inline-flex items-center bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1 mb-6">
+                <span className="text-xs font-medium text-teal-50">Trusted. Verified. Reliable.</span>
+              </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 py-10 sm:py-16">
-          <div className="max-w-lg text-white">
-            {/* Badge */}
-            <div className="inline-flex items-center bg-teal-600/40 backdrop-blur-sm border border-teal-400/30 rounded-full px-3 py-1 mb-5">
-              <span className="text-xs font-medium text-teal-50">Trusted. Verified. Reliable.</span>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.3] mb-5">
+                Expert Help, <span className="text-yellow-400">Right When You Need It</span>
+              </h1>
+
+              <p className="text-teal-50/80 text-sm sm:text-base mb-8 max-w-md leading-relaxed">
+                Connect with certified technicians for fast, reliable service right at your doorstep.
+              </p>
+
+              {/* Search Bar */}
+              <div className="bg-white rounded-2xl shadow-xl p-1.5 flex items-center gap-1.5 mb-8 max-w-lg">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Input
+                    placeholder="What do you need help with?"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-11 h-12 border-0 text-base focus-visible:ring-0 bg-transparent"
+                  />
+                </div>
+                <Button
+                  asChild
+                  className="h-12 px-6 bg-[#004d40] hover:bg-[#003d33] rounded-xl font-medium"
+                >
+                  <Link to={createPageUrl(`Services${searchQuery ? `?q=${searchQuery}` : ''}`)}>
+                    Search
+                  </Link>
+                </Button>
+              </div>
+
+              {/* Trust Badges */}
+              <div className="flex items-center gap-5 text-white/90">
+                <div className="flex items-center gap-2">
+                  <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                  <span className="text-xs sm:text-sm">4.8 avg rating</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-teal-300" />
+                  <span className="text-xs sm:text-sm">Verified pros</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-teal-300" />
+                  <span className="text-xs sm:text-sm">Fast response</span>
+                </div>
+              </div>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3 leading-tight">
-              Expert Help, <span className="text-yellow-400">Right When You Need It</span>
-            </h1>
-            <p className="text-teal-100/80 text-sm sm:text-base mb-6 max-w-md">
-              Connect with certified technicians worldwide for fast, reliable service at your doorstep.
-            </p>
-
-            {/* Search Bar */}
-            <div className="bg-white rounded-2xl shadow-xl p-1.5 flex items-center gap-1.5 mb-5">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <Input
-                  placeholder="What do you need help with?"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-11 h-12 border-0 text-base focus-visible:ring-0 bg-transparent"
+            {/* Right Column - Media */}
+            <div className="relative hidden md:block">
+              <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl">
+                <img
+                  src="https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=1200&q=80"
+                  alt="Professional technician toolset"
+                  className="w-full h-full object-cover"
                 />
+                {/* Blend overlay - masks image into background */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#004d40] via-transparent to-transparent opacity-40" />
+                <div className="absolute inset-0 bg-gradient-to-bl from-transparent via-transparent to-[#002820] opacity-50" />
               </div>
-              <Button
-                asChild
-                className="h-12 px-6 bg-[#004d40] hover:bg-[#003d33] rounded-xl font-medium"
-              >
-                <Link to={createPageUrl(`Services${searchQuery ? `?q=${searchQuery}` : ''}`)}>
-                  Search
-                </Link>
-              </Button>
-            </div>
-
-            {/* Stats Row */}
-            <div className="flex items-center gap-3 sm:gap-4 text-white/90">
-              <div className="flex items-center gap-1.5">
-                <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                <span className="text-xs sm:text-sm">4.8 avg rating</span>
-              </div>
-              <div className="w-px h-4 bg-white/30" />
-              <div className="flex items-center gap-1.5">
-                <Shield className="w-4 h-4" />
-                <span className="text-xs sm:text-sm">Verified pros</span>
-              </div>
-              <div className="w-px h-4 bg-white/30" />
-              <div className="flex items-center gap-1.5">
-                <Zap className="w-4 h-4" />
-                <span className="text-xs sm:text-sm">Fast response</span>
-              </div>
+              {/* Outer glow blending into section background */}
+              <div className="absolute -inset-6 bg-[#004d40]/20 blur-3xl -z-10" />
             </div>
           </div>
         </div>
