@@ -83,16 +83,16 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
 
       {/* Top Header */}
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
+      <header className="bg-white/95 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link to={createPageUrl('Home')} className="flex items-center gap-2">
+          <div className="flex items-center gap-8">
+            <Link to={createPageUrl('Home')} className="flex items-center gap-2 group">
               <img 
                 src="https://media.base44.com/images/public/695420244ced3f7c551d2538/c32b9fbf9_Gemini_Generated_Image_5ukoir5ukoir5uko.png"
                 alt="Fixie"
-                className="w-10 h-10 rounded-full object-cover"
+                className="w-9 h-9 rounded-full object-cover ring-2 ring-[#004d40]/10 group-hover:ring-[#004d40]/20 transition-all"
               />
-              <span className="text-xl font-bold text-gray-900">Fixie</span>
+              <span className="text-xl font-bold text-gray-900 tracking-tight">Fixie</span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -104,14 +104,17 @@ export default function Layout({ children, currentPageName }) {
                     <Link
                       key={item.page}
                       to={createPageUrl(item.page)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all relative ${
                         isActive
-                          ? 'text-[#004d40] font-semibold bg-[#004d40]/5'
+                          ? 'text-[#004d40] font-semibold'
                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                       }`}
                     >
-                      <item.icon className="w-4 h-4" />
+                      <item.icon className={`w-4 h-4 ${isActive ? 'text-[#004d40]' : 'text-gray-400'}`} />
                       {item.name}
+                      {isActive && (
+                        <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-[#004d40] rounded-full" />
+                      )}
                     </Link>
                   );
                 })}
@@ -122,23 +125,38 @@ export default function Layout({ children, currentPageName }) {
           <div className="flex items-center gap-3">
             {user ? (
               <>
+                {/* Desktop CTA */}
+                {!isTechnician && (
+                  <Button
+                    asChild
+                    className="hidden md:inline-flex bg-[#004d40] hover:bg-[#003d33] h-9 px-4"
+                  >
+                    <Link to={createPageUrl('BookService')}>
+                      Book a Service
+                    </Link>
+                  </Button>
+                )}
+
                 <NotificationBell userId={user.id} />
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center gap-2 px-2">
-                      <Avatar className="w-8 h-8">
+                    <Button variant="ghost" className="flex items-center gap-2 px-2 hover:bg-gray-50 rounded-full">
+                      <Avatar className="w-8 h-8 ring-1 ring-gray-200">
                         <AvatarImage src={user.profile_photo} />
-                        <AvatarFallback className="bg-[#004d40]/10 text-[#004d40] text-sm">
+                        <AvatarFallback className="bg-[#004d40]/10 text-[#004d40] text-sm font-medium">
                           {user.full_name?.[0] || user.email?.[0] || 'U'}
                         </AvatarFallback>
                       </Avatar>
+                      <span className="hidden lg:inline text-sm font-medium text-gray-700 max-w-[120px] truncate">
+                        {user.full_name?.split(' ')[0] || 'Account'}
+                      </span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuContent align="end" className="w-56">
                     <div className="px-3 py-2">
                       <p className="font-medium text-sm">{user.full_name || 'User'}</p>
-                      <p className="text-xs text-gray-500">{user.email}</p>
+                      <p className="text-xs text-gray-500 truncate">{user.email}</p>
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
@@ -173,12 +191,21 @@ export default function Layout({ children, currentPageName }) {
                 </DropdownMenu>
               </>
             ) : (
-              <Button 
-                onClick={() => base44.auth.redirectToLogin()}
-                className="bg-[#004d40] hover:bg-[#003d33]"
-              >
-                Sign In
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="ghost"
+                  onClick={() => base44.auth.redirectToLogin()}
+                  className="hidden md:inline-flex text-gray-700 hover:text-gray-900"
+                >
+                  Sign In
+                </Button>
+                <Button 
+                  asChild
+                  className="bg-[#004d40] hover:bg-[#003d33]"
+                >
+                  <Link to={createPageUrl('TechnicianRegister')}>Get Started</Link>
+                </Button>
+              </div>
             )}
           </div>
         </div>
