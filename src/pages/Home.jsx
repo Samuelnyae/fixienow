@@ -73,90 +73,73 @@ export default function Home() {
   const displayCategories = categories.length > 0 ? categories : defaultCategories;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#004d40] to-[#002820]">
-        <div className="max-w-7xl mx-auto px-4 py-12 md:py-20">
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-            {/* Left Column - Content */}
-            <div className="text-white md:py-8">
-              {/* Badge */}
-              <div className="inline-flex items-center bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1 mb-6">
-                <span className="text-xs font-medium text-teal-50">Trusted. Verified. Reliable.</span>
-              </div>
-
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.3] mb-5">
-                Expert Help, <span className="text-yellow-400">Right When You Need It</span>
-              </h1>
-
-              <p className="text-teal-50/80 text-sm sm:text-base mb-8 max-w-md leading-relaxed">
-                Connect with certified technicians for fast, reliable service right at your doorstep.
-              </p>
-
-              {/* Search Bar */}
-              <div className="bg-white rounded-2xl shadow-xl p-1.5 flex items-center gap-1.5 mb-8 max-w-lg">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <Input
-                    placeholder="What do you need help with?"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-11 h-12 border-0 text-base focus-visible:ring-0 bg-transparent"
-                  />
-                </div>
-                <Button
-                  asChild
-                  className="h-12 px-6 bg-[#004d40] hover:bg-[#003d33] rounded-xl font-medium"
-                >
-                  <Link to={createPageUrl(`Services${searchQuery ? `?q=${searchQuery}` : ''}`)}>
-                    Search
-                  </Link>
-                </Button>
-              </div>
-
-              {/* Trust Badges */}
-              <div className="flex items-center gap-5 text-white/90">
-                <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                  <span className="text-xs sm:text-sm">4.8 avg rating</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-teal-300" />
-                  <span className="text-xs sm:text-sm">Verified pros</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-teal-300" />
-                  <span className="text-xs sm:text-sm">Fast response</span>
-                </div>
-              </div>
+      <section className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0B463C 0%, #197B6B 100%)' }}>
+        <div className="max-w-7xl mx-auto px-4 py-14 md:py-20">
+          <div className="max-w-2xl mx-auto text-center">
+            {/* Badge */}
+            <div className="inline-flex items-center bg-[#197B6B]/40 border border-white/15 rounded-full px-4 py-1.5 mb-6">
+              <span className="text-xs font-medium text-white tracking-wide">Trusted. Verified. Reliable.</span>
             </div>
 
-            {/* Right Column - Media */}
-            <div className="relative hidden md:block">
-              <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl">
-                <img
-                  src="https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=1200&q=80"
-                  alt="Professional technician toolset"
-                  className="w-full h-full object-cover"
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.25] mb-4 text-white">
+              Expert Help, Right When You Need It
+            </h1>
+
+            <p className="text-white/80 text-sm sm:text-base mb-8 max-w-lg mx-auto leading-relaxed">
+              Connect with certified technicians worldwide for fast, reliable service at your doorstep.
+            </p>
+
+            {/* Search Bar */}
+            <div className="bg-white rounded-2xl shadow-2xl p-1.5 flex items-center gap-1.5 mb-8 max-w-lg mx-auto">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  placeholder="What do you need help with?"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-11 h-12 border-0 text-base focus-visible:ring-0 bg-transparent"
                 />
-                {/* Blend overlay - masks image into background */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-[#004d40] via-transparent to-transparent opacity-40" />
-                <div className="absolute inset-0 bg-gradient-to-bl from-transparent via-transparent to-[#002820] opacity-50" />
               </div>
-              {/* Outer glow blending into section background */}
-              <div className="absolute -inset-6 bg-[#004d40]/20 blur-3xl -z-10" />
+              <Button
+                asChild
+                className="h-12 px-6 bg-[#0B463C] hover:bg-[#0a3d34] rounded-xl font-medium"
+              >
+                <Link to={createPageUrl(`Services${searchQuery ? `?q=${searchQuery}` : ''}`)}>
+                  Search
+                </Link>
+              </Button>
+            </div>
+
+            {/* Stats Bar */}
+            <div className="flex items-center justify-center gap-6 sm:gap-8 text-white">
+              <div className="flex items-center gap-2">
+                <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                <span className="text-xs sm:text-sm font-medium">4.8 avg rating</span>
+              </div>
+              <div className="w-px h-4 bg-white/25" />
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-white/90" />
+                <span className="text-xs sm:text-sm font-medium">Verified pros</span>
+              </div>
+              <div className="w-px h-4 bg-white/25" />
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-white/90" />
+                <span className="text-xs sm:text-sm font-medium">Fast response</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Browse Services */}
-      <section className="max-w-7xl mx-auto px-4 py-8">
+      <section className="max-w-7xl mx-auto px-4 py-10">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-bold text-gray-900">Browse Services</h2>
           <Link
             to={createPageUrl('Services')}
-            className="text-[#004d40] font-medium text-sm flex items-center gap-1 hover:gap-2 transition-all"
+            className="text-[#0B463C] font-medium text-sm flex items-center gap-1 hover:gap-2 transition-all"
           >
             View all <ArrowRight className="w-4 h-4" />
           </Link>
@@ -170,7 +153,7 @@ export default function Home() {
               <Link
                 key={category.id || category.slug}
                 to={createPageUrl(`Services?category=${category.slug}`)}
-                className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-50 hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col items-center text-center"
+                className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col items-center text-center"
               >
                 <div className={`w-12 h-12 ${config.bg} rounded-xl flex items-center justify-center mb-3`}>
                   <Icon className={`w-6 h-6 ${config.color}`} />
@@ -184,21 +167,21 @@ export default function Home() {
       </section>
 
       {/* How Fixie Works */}
-      <section className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900 text-center mb-6">How Fixie Works</h2>
+      <section className="max-w-7xl mx-auto px-4 py-6">
+        <div className="bg-gray-50 rounded-2xl p-6 sm:p-8 border border-gray-100">
+          <h2 className="text-lg font-bold text-gray-900 text-center mb-8">How Fixie Works</h2>
 
           <div className="relative">
             {/* Dotted connector line behind circles */}
-            <div className="absolute top-7 sm:top-8 left-[12%] right-[12%] border-t-2 border-dashed border-gray-200" />
+            <div className="absolute top-7 sm:top-8 left-[12%] right-[12%] border-t-2 border-dashed border-gray-300" />
 
             <div className="relative flex items-start justify-between gap-1 sm:gap-4">
               {howItWorks.map((item) => {
                 const Icon = item.icon;
                 return (
                   <div key={item.step} className="flex flex-col items-center text-center flex-1">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white border-2 border-gray-100 rounded-full flex items-center justify-center mb-3 z-10">
-                      <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-[#004d40]" />
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white border-2 border-gray-100 rounded-full flex items-center justify-center mb-3 z-10 shadow-sm">
+                      <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-[#0B463C]" />
                     </div>
                     <h3 className="font-semibold text-gray-900 text-sm mb-1">{item.step}. {item.title}</h3>
                     <p className="text-xs text-gray-500 leading-tight">{item.desc}</p>
@@ -211,8 +194,8 @@ export default function Home() {
       </section>
 
       {/* Bottom Promo Banner */}
-      <section className="max-w-7xl mx-auto px-4 pb-24 md:pb-8">
-        <div className="bg-[#004d40] rounded-2xl p-5 sm:p-6 flex items-center justify-between gap-4">
+      <section className="max-w-7xl mx-auto px-4 pb-24 md:pb-8 pt-4">
+        <div className="bg-[#0B463C] rounded-2xl p-5 sm:p-6 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="w-11 h-11 sm:w-12 sm:h-12 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
               <ShieldCheck className="w-6 h-6 text-white" />
@@ -224,11 +207,11 @@ export default function Home() {
           </div>
           <Button
             asChild
-            variant="secondary"
-            className="bg-white text-[#004d40] hover:bg-gray-100 font-medium rounded-xl flex-shrink-0"
+            variant="outline"
+            className="border-white/30 text-white hover:bg-white/10 hover:text-white font-medium rounded-xl flex-shrink-0"
           >
             <Link to={createPageUrl('Services')}>
-              Learn more
+              Learn more <ArrowRight className="w-4 h-4" />
             </Link>
           </Button>
         </div>
