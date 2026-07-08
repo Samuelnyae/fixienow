@@ -83,74 +83,60 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
 
       {/* Top Header */}
-      <header className="bg-white/95 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link to={createPageUrl('Home')} className="flex items-center gap-2 group">
+      <header className="bg-white/80 backdrop-blur-md border-b border-gray-100/80 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between relative">
+          {/* Left - Logo */}
+          <div className="flex items-center gap-2.5 z-10">
+            <Link to={createPageUrl('Home')} className="flex items-center gap-2.5 group">
               <img 
                 src="https://media.base44.com/images/public/695420244ced3f7c551d2538/c32b9fbf9_Gemini_Generated_Image_5ukoir5ukoir5uko.png"
                 alt="Fixie"
-                className="w-9 h-9 rounded-full object-cover ring-2 ring-[#004d40]/10 group-hover:ring-[#004d40]/20 transition-all"
+                className="w-9 h-9 rounded-full object-cover ring-1 ring-gray-200 group-hover:ring-[#004d40]/30 transition-all"
               />
               <span className="text-xl font-bold text-gray-900 tracking-tight">Fixie</span>
             </Link>
-
-            {/* Desktop Navigation */}
-            {user && (
-              <nav className="hidden md:flex items-center gap-1">
-                {navItems.map((item) => {
-                  const isActive = currentPageName === item.page;
-                  return (
-                    <Link
-                      key={item.page}
-                      to={createPageUrl(item.page)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all relative ${
-                        isActive
-                          ? 'text-[#004d40] font-semibold'
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                      }`}
-                    >
-                      <item.icon className={`w-4 h-4 ${isActive ? 'text-[#004d40]' : 'text-gray-400'}`} />
-                      {item.name}
-                      {isActive && (
-                        <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-[#004d40] rounded-full" />
-                      )}
-                    </Link>
-                  );
-                })}
-              </nav>
-            )}
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Center - Navigation */}
+          {user && (
+            <nav className="hidden md:flex items-center absolute left-1/2 -translate-x-1/2">
+              {navItems.map((item) => {
+                const isActive = currentPageName === item.page;
+                return (
+                  <Link
+                    key={item.page}
+                    to={createPageUrl(item.page)}
+                    className={`flex items-center px-4 py-2 text-sm font-medium tracking-wide transition-colors relative ${
+                      isActive
+                        ? 'text-[#004d40]'
+                        : 'text-gray-500 hover:text-gray-900'
+                    }`}
+                  >
+                    {item.name}
+                    {isActive && (
+                      <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-[#004d40] rounded-full" />
+                    )}
+                  </Link>
+                );
+              })}
+            </nav>
+          )}
+
+          {/* Right - User Actions */}
+          <div className="flex items-center gap-2 z-10">
             {user ? (
               <>
-                {/* Desktop CTA */}
-                {!isTechnician && (
-                  <Button
-                    asChild
-                    className="hidden md:inline-flex bg-[#004d40] hover:bg-[#003d33] h-9 px-4"
-                  >
-                    <Link to={createPageUrl('BookService')}>
-                      Book a Service
-                    </Link>
-                  </Button>
-                )}
-
                 <NotificationBell userId={user.id} />
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center gap-2 px-2 hover:bg-gray-50 rounded-full">
-                      <Avatar className="w-8 h-8 ring-1 ring-gray-200">
+                    <Button variant="ghost" className="rounded-full p-0 h-9 w-9 hover:bg-gray-50 ml-1">
+                      <Avatar className="w-9 h-9 ring-1 ring-gray-200">
                         <AvatarImage src={user.profile_photo} />
-                        <AvatarFallback className="bg-[#004d40]/10 text-[#004d40] text-sm font-medium">
+                        <AvatarFallback className="bg-[#004d40]/5 text-[#004d40] text-sm font-semibold">
                           {user.full_name?.[0] || user.email?.[0] || 'U'}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="hidden lg:inline text-sm font-medium text-gray-700 max-w-[120px] truncate">
-                        {user.full_name?.split(' ')[0] || 'Account'}
-                      </span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
