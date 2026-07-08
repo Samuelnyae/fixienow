@@ -188,9 +188,27 @@ Return ONLY the id of the best technician and a brief reason.`,
 
   const bestTechnicianId = aiDispatchResult?.technician_id || availableTechnicians[0]?.id;
 
+  const [rateLimitError, setRateLimitError] = useState(null);
+
   const createBookingMutation = useMutation({
     mutationFn: async (bookingData) => {
+      // Check rate limit before creating
+      const rateCheck = await base44.functions.invoke('check_booking_rate_limit', {});
+      if (rateCheck.data && !rateCheck.data.can_book) {
+        throw new Error(rateCheck.data.reason || 'Rate limit exceeded. Please try again later.');
+      }
+
       const booking = await base44.entities.Booking.create(bookingData);
+
+      // Track analytics
+      base44.analytics.track({
+        eventName: 'booking_created',
+        properties: {
+          category: bookingData.category,
+          booking_type: bookingData.booking_type,
+          estimated_price: bookingData.estimated_price,
+        },
+      });
 
       // Create notification for technician if assigned
       if (bookingData.technician_id) {
@@ -214,6 +232,9 @@ Return ONLY the id of the best technician and a brief reason.`,
     },
     onSuccess: (booking) => {
       navigate(createPageUrl(`BookingDetail?id=${booking.id}`));
+    },
+    onError: (error) => {
+      setRateLimitError(error.message || 'Something went wrong. Please try again.');
     },
   });
 
@@ -548,6 +569,12 @@ Return ONLY the id of the best technician and a brief reason.`,
             <div className="bg-amber-50 rounded-xl p-4 text-sm text-amber-800">
               <p>💡 Final price may vary based on the actual work required. You'll only pay after the job is completed.</p>
             </div>
+
+            {rateLimitError && (
+              <div className="bg-red-50 rounded-xl p-4 text-sm text-red-700 border border-red-100">
+                <p>{rateLimitError}</p>
+              </div>
+            )}
 
             <div className="flex gap-3">
               <Button

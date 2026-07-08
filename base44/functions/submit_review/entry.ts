@@ -42,6 +42,12 @@ Deno.serve(async (req) => {
       comment: comment || '',
     });
 
+    // Analytics
+    base44.analytics && base44.analytics.track && base44.analytics.track({
+      eventName: 'review_submitted',
+      properties: { rating: numericRating, category: booking.category },
+    });
+
     // Recalculate technician rating
     if (booking.technician_id) {
       const techs = await base44.asServiceRole.entities.Technician.filter({ id: booking.technician_id });

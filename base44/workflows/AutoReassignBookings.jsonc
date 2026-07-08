@@ -1,0 +1,45 @@
+{
+  "name": "Auto-Reassign Stale Bookings",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "auto_reassign_stale_bookings",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "reassign_bookings": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "auto_reassign_bookings",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Reassign stale bookings",
+            "description": "Find and reassign/cancel old pending bookings"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "interval",
+      "cron_expression": null,
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": 10,
+      "interval_unit": "minutes",
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "description": "Every 10 minutes, checks for pending bookings older than 15 minutes and reassigns to alternative technicians or cancels them"
+}

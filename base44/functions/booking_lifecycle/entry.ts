@@ -66,6 +66,12 @@ Deno.serve(async (req) => {
     }
     await base44.asServiceRole.entities.Booking.update(booking.id, update);
 
+    // Analytics
+    base44.analytics && base44.analytics.track && base44.analytics.track({
+      eventName: action === 'complete' ? 'booking_completed' : `booking_${action}`,
+      properties: { category: booking.category, action },
+    });
+
     // On complete: update technician stats
     if (action === 'complete') {
       await base44.asServiceRole.entities.Technician.update(technician.id, {

@@ -98,7 +98,13 @@ Deno.serve(async (req) => {
     // 3. Mark booking paid
     await base44.asServiceRole.entities.Booking.update(booking.id, { payment_status: 'paid' });
 
-    // 4. In-app notification (receipt)
+    // 4. Analytics
+    base44.analytics && base44.analytics.track && base44.analytics.track({
+      eventName: 'payment_completed',
+      properties: { category: booking.category, amount, method: paymentMethod },
+    });
+
+    // 5. In-app notification (receipt)
     await base44.asServiceRole.entities.Notification.create({
       user_id: booking.user_id,
       type: 'payment_received',
