@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import BecomeTechnicianCTA from '../components/home/BecomeTechnicianCTA';
 
 const defaultCategories = [
   { id: '1', name: 'Mechanic', slug: 'mechanic', base_price: 500, description: 'Car repair & maintenance' },
@@ -194,7 +195,7 @@ export default function Home() {
       </section>
 
       {/* Bottom Promo Banner */}
-      <section className="max-w-7xl mx-auto px-4 pb-24 md:pb-8 pt-4">
+      <section className="max-w-7xl mx-auto px-4 pb-8 pt-4">
         <div className="bg-[#0B463C] rounded-2xl p-5 sm:p-6 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="w-11 h-11 sm:w-12 sm:h-12 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -216,6 +217,9 @@ export default function Home() {
           </Button>
         </div>
       </section>
+
+      {/* Become a Technician CTA */}
+      <BecomeTechnicianCTA />
     </div>
   );
 }
