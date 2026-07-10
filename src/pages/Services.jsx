@@ -58,20 +58,16 @@ export default function Services() {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const { data: technicians = [], isLoading } = useQuery({
-    queryKey: ['technicians', selectedCategory, showAvailableOnly],
+    queryKey: ['technicians'],
     queryFn: async () => {
-      const filters = { verification_status: 'approved' };
-      if (selectedCategory !== 'all') {
-        filters.profession = selectedCategory;
-      }
-      if (showAvailableOnly) {
-        filters.is_available = true;
-      }
-      return base44.entities.Technician.filter(filters, '-rating', 50);
+      return base44.entities.Technician.list('-rating', 100);
     },
   });
 
   const filteredTechnicians = technicians.filter((tech) => {
+    const professionSlug = (tech.profession || '').toLowerCase().replace(/ /g, '_');
+    const matchesCategory = selectedCategory === 'all' || professionSlug === selectedCategory;
+    
     const matchesSearch = !searchQuery || 
       tech.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tech.profession?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -80,7 +76,9 @@ export default function Services() {
     const matchesPrice = !tech.hourly_rate || 
       (tech.hourly_rate >= priceRange[0] && tech.hourly_rate <= priceRange[1]);
     
-    return matchesSearch && matchesPrice;
+    const matchesAvailability = !showAvailableOnly || tech.is_available === true;
+    
+    return matchesCategory && matchesSearch && matchesPrice && matchesAvailability;
   });
 
   return (
@@ -187,7 +185,7 @@ export default function Services() {
           <p className="text-gray-500 text-sm">
             {filteredTechnicians.length} technician{filteredTechnicians.length !== 1 ? 's' : ''} found
           </p>
-          {(selectedCategory !== 'all' || searchQuery || showAvailableOnly) && (
+          {(selectedCategory !== 'all' || searchQuery || showAvailableOnly || priceRange[0] !== 0 || priceRange[1] !== 5000) && (
             <button
               onClick={() => {
                 setSelectedCategory('all');

@@ -200,13 +200,22 @@ export default function TechnicianRegister() {
               </div>
               <div>
                 <Label htmlFor="profession">Profession / Skill</Label>
-                <Input
+                <select
                   id="profession"
-                  placeholder="e.g., Plumber, Electrician, Welder..."
                   value={formData.profession}
                   onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
-                  className="mt-1"
-                />
+                  className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="">Select your profession...</option>
+                  <option value="mechanic">Mechanic</option>
+                  <option value="plumber">Plumber</option>
+                  <option value="electrician">Electrician</option>
+                  <option value="carpenter">Carpenter</option>
+                  <option value="painter">Painter</option>
+                  <option value="hvac">HVAC</option>
+                  <option value="appliance_repair">Appliance Repair</option>
+                  <option value="locksmith">Locksmith</option>
+                </select>
               </div>
             </div>
 
