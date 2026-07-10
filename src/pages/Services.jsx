@@ -53,7 +53,7 @@ export default function Services() {
 
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-  const [priceRange, setPriceRange] = useState([0, 5000]);
+  const [priceRange, setPriceRange] = useState([0, 10000]);
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -65,8 +65,11 @@ export default function Services() {
   });
 
   const filteredTechnicians = technicians.filter((tech) => {
-    const professionSlug = (tech.profession || '').toLowerCase().replace(/ /g, '_');
-    const matchesCategory = selectedCategory === 'all' || professionSlug === selectedCategory;
+    const professionSlug = (tech.profession || '').toLowerCase().trim().replace(/ /g, '_');
+    const matchesCategory = selectedCategory === 'all' || 
+      professionSlug === selectedCategory ||
+      professionSlug.includes(selectedCategory) ||
+      selectedCategory.includes(professionSlug);
     
     const matchesSearch = !searchQuery || 
       tech.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -119,8 +122,8 @@ export default function Services() {
                   <div>
                     <label className="text-sm font-medium mb-3 block">Price Range (per hour)</label>
                     <Slider
-                      defaultValue={priceRange}
-                      max={5000}
+                      value={priceRange}
+                      max={10000}
                       step={100}
                       onValueChange={setPriceRange}
                       className="mb-2"
@@ -185,13 +188,13 @@ export default function Services() {
           <p className="text-gray-500 text-sm">
             {filteredTechnicians.length} technician{filteredTechnicians.length !== 1 ? 's' : ''} found
           </p>
-          {(selectedCategory !== 'all' || searchQuery || showAvailableOnly || priceRange[0] !== 0 || priceRange[1] !== 5000) && (
+          {(selectedCategory !== 'all' || searchQuery || showAvailableOnly || priceRange[0] !== 0 || priceRange[1] !== 10000) && (
             <button
               onClick={() => {
                 setSelectedCategory('all');
                 setSearchQuery('');
                 setShowAvailableOnly(false);
-                setPriceRange([0, 5000]);
+                setPriceRange([0, 10000]);
               }}
               className="text-teal-600 text-sm font-medium"
             >
@@ -218,6 +221,7 @@ export default function Services() {
               setSelectedCategory('all');
               setSearchQuery('');
               setShowAvailableOnly(false);
+              setPriceRange([0, 10000]);
             }}
           />
         )}
