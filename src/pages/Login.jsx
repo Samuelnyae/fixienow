@@ -101,7 +101,7 @@ export default function Login() {
               id="password"
               type="password"
               autoComplete="current-password"
-              placeholder="••••••••"
+              placeholder="•••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="pl-10 h-12"
