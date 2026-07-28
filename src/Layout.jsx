@@ -181,7 +181,7 @@ export default function Layout({ children, currentPageName }) {
                 <Button 
                   variant="ghost"
                   onClick={() => base44.auth.redirectToLogin()}
-                  className="hidden md:inline-flex text-gray-700 hover:text-gray-900"
+                  className="text-gray-700 hover:text-gray-900"
                 >
                   Sign In
                 </Button>
