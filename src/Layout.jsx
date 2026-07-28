@@ -178,12 +178,12 @@ export default function Layout({ children, currentPageName }) {
               </>
             ) : (
               <div className="flex items-center gap-2">
-                <Button 
+                <Button
+                  asChild
                   variant="ghost"
-                  onClick={() => base44.auth.redirectToLogin()}
                   className="text-gray-700 hover:text-gray-900"
                 >
-                  Sign In
+                  <Link to="/login">Sign In</Link>
                 </Button>
                 <Button 
                   asChild
