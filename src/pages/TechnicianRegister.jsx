@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import TagInput from '@/components/common/TagInput';
 
 
 export default function TechnicianRegister() {
@@ -32,10 +33,11 @@ export default function TechnicianRegister() {
     email: '',
     phone: '',
     profession: '',
+    skills: [],
     bio: '',
     years_experience: '',
     hourly_rate: '',
-    service_areas: '',
+    service_areas: [],
     location: { address: '' },
   });
   const [idDocument, setIdDocument] = useState(null);
@@ -80,11 +82,12 @@ export default function TechnicianRegister() {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        profession: formData.profession,
+        profession: formData.profession || (formData.skills[0] || ''),
+        skills: formData.skills,
         bio: formData.bio,
         years_experience: parseInt(formData.years_experience) || 0,
         hourly_rate: parseInt(formData.hourly_rate) || 500,
-        service_areas: formData.service_areas.split(',').map(s => s.trim()).filter(Boolean),
+        service_areas: formData.service_areas,
         location: formData.location,
         id_document_url: idDocUrl,
         certificate_url: certUrl,
@@ -198,24 +201,27 @@ export default function TechnicianRegister() {
                   className="mt-1"
                 />
               </div>
-              <div>
-                <Label htmlFor="profession">Profession / Skill</Label>
-                <select
+              <div className="md:col-span-2">
+                <Label htmlFor="profession">Primary Profession</Label>
+                <input
                   id="profession"
+                  type="text"
                   value={formData.profession}
                   onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
+                  placeholder="e.g. Plumber, Electrician, General Handyman..."
                   className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                >
-                  <option value="">Select your profession...</option>
-                  <option value="mechanic">Mechanic</option>
-                  <option value="plumber">Plumber</option>
-                  <option value="electrician">Electrician</option>
-                  <option value="carpenter">Carpenter</option>
-                  <option value="painter">Painter</option>
-                  <option value="hvac">HVAC</option>
-                  <option value="appliance_repair">Appliance Repair</option>
-                  <option value="locksmith">Locksmith</option>
-                </select>
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <TagInput
+                  label="Skills you're capable of"
+                  placeholder="Type a skill and press Enter (e.g. Pipe fitting, Wiring, Painting)..."
+                  value={formData.skills}
+                  onChange={(skills) => setFormData({ ...formData, skills })}
+                  suggestions={['Mechanic', 'Plumber', 'Electrician', 'Carpenter', 'Painter', 'HVAC', 'Appliance Repair', 'Locksmith', 'Welding', 'Tiling', 'Roofing', 'General Handyman', 'Solar Installation', 'CCTV Installation', 'Generator Repair']}
+                />
+                <p className="text-sm text-gray-500 mt-1.5">Add as many skills as you want — this helps you get found for more job types.</p>
               </div>
             </div>
 
@@ -232,7 +238,7 @@ export default function TechnicianRegister() {
 
             <Button
               onClick={() => setStep(2)}
-              disabled={!formData.name || !formData.phone || !formData.profession}
+              disabled={!formData.name || !formData.phone || (formData.skills.length === 0 && !formData.profession)}
               className="w-full h-12 bg-teal-600 hover:bg-teal-700"
             >
               Continue
@@ -271,15 +277,14 @@ export default function TechnicianRegister() {
             </div>
 
             <div>
-              <Label htmlFor="areas">Service Areas</Label>
-              <Input
-                id="areas"
-                placeholder="e.g., Westlands, Kilimani, Lavington"
+              <TagInput
+                label="Service Areas"
+                placeholder="Type an area and press Enter (e.g. Westlands, Kilimani, Lavington)..."
                 value={formData.service_areas}
-                onChange={(e) => setFormData({ ...formData, service_areas: e.target.value })}
-                className="mt-1"
+                onChange={(areas) => setFormData({ ...formData, service_areas: areas })}
+                suggestions={['Westlands', 'Kilimani', 'Lavington', 'Karen', 'Runda', 'Kasarani', 'Embakasi', 'Ruaka', 'Ngong Road', 'Industrial Area', 'CBD', 'South B', 'South C', 'Eastleigh']}
               />
-              <p className="text-sm text-gray-500 mt-1">Separate areas with commas</p>
+              <p className="text-sm text-gray-500 mt-1">Add all the areas you can serve to reach more customers.</p>
             </div>
 
             <div>

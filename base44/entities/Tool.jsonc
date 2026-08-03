@@ -1,0 +1,96 @@
+{
+  "name": "Tool",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Tool or item name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Item description"
+    },
+    "price": {
+      "type": "number",
+      "description": "Price in KES"
+    },
+    "category": {
+      "type": "string",
+      "description": "Category slug (e.g. plumber, electrician, mechanic)"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Item image URL"
+    },
+    "brand": {
+      "type": "string",
+      "description": "Brand or manufacturer"
+    },
+    "condition": {
+      "type": "string",
+      "enum": [
+        "new",
+        "used",
+        "refurbished"
+      ],
+      "default": "new",
+      "description": "Item condition"
+    },
+    "seller_id": {
+      "type": "string",
+      "description": "User ID of the seller"
+    },
+    "seller_name": {
+      "type": "string",
+      "description": "Display name of the seller"
+    },
+    "seller_type": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "technician"
+      ],
+      "default": "technician",
+      "description": "Whether the platform or a technician is selling"
+    },
+    "technician_id": {
+      "type": "string",
+      "description": "Technician entity ID if seller is a technician"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "sold"
+      ],
+      "default": "pending",
+      "description": "Approval / listing status"
+    },
+    "badge": {
+      "type": "string",
+      "description": "Optional promotional badge label"
+    },
+    "rating": {
+      "type": "number",
+      "default": 0
+    },
+    "reviews": {
+      "type": "number",
+      "default": 0
+    },
+    "stock": {
+      "type": "number",
+      "default": 1,
+      "description": "Available quantity"
+    }
+  },
+  "required": [
+    "name",
+    "price",
+    "category",
+    "seller_id",
+    "seller_type"
+  ]
+}

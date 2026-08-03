@@ -22,6 +22,13 @@
       "type": "string",
       "description": "Primary profession / skill"
     },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "All skills the technician is capable of (broad market reach)"
+    },
     "bio": {
       "type": "string",
       "description": "Short bio/description"
