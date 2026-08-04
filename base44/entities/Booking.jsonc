@@ -85,6 +85,15 @@
       "type": "number",
       "description": "Final price after completion"
     },
+    "promo_code": {
+      "type": "string",
+      "description": "Applied promo code (uppercase)"
+    },
+    "discount_amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Discount applied in KES"
+    },
     "payment_status": {
       "type": "string",
       "enum": [

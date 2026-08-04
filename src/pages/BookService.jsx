@@ -41,6 +41,7 @@ import {
 } from '@/components/ui/popover';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import PromoCodeInput from '../components/booking/PromoCodeInput';
 
 const iconMap = {
   mechanic: Wrench,
@@ -189,6 +190,8 @@ Return ONLY the id of the best technician and a brief reason.`,
   const bestTechnicianId = aiDispatchResult?.technician_id || availableTechnicians[0]?.id;
 
   const [rateLimitError, setRateLimitError] = useState(null);
+  const [discount, setDiscount] = useState(0);
+  const [promoCode, setPromoCode] = useState('');
 
   const createBookingMutation = useMutation({
     mutationFn: async (bookingData) => {
@@ -255,6 +258,8 @@ Return ONLY the id of the best technician and a brief reason.`,
       scheduled_time: formData.scheduled_time,
       location: { address: formData.address, area: formData.service_area },
       estimated_price: basePrices[formData.category] || 500,
+      promo_code: promoCode || undefined,
+      discount_amount: discount || 0,
       status: 'pending',
     };
 
@@ -562,6 +567,31 @@ Return ONLY the id of the best technician and a brief reason.`,
                   <span className="text-2xl font-bold text-teal-600">
                     KES {estimatedPrice.toLocaleString()}
                   </span>
+                </div>
+
+                {/* Promo Code */}
+                <div className="pt-2">
+                  <p className="text-sm font-medium mb-2">Have a promo code?</p>
+                  <PromoCodeInput
+                    category={formData.category}
+                    baseAmount={estimatedPrice}
+                    onApply={(amt, code) => { setDiscount(amt); setPromoCode(code); }}
+                    onClear={() => { setDiscount(0); setPromoCode(''); }}
+                  />
+                  {discount > 0 && (
+                    <div className="mt-2 space-y-1.5 text-sm">
+                      <div className="flex items-center justify-between text-green-700">
+                        <span>Discount</span>
+                        <span>−KES {discount.toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-center justify-between font-semibold pt-1.5 border-t">
+                        <span>You Pay</span>
+                        <span className="text-teal-600">
+                          KES {Math.max(0, estimatedPrice - discount).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
