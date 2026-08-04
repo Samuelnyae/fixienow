@@ -143,9 +143,13 @@ export default function BookService() {
     queryFn: () => base44.entities.ServiceArea.filter({ is_active: true }, 'name', 100),
   });
 
-  // Filter technicians to those covering the selected service area
-  const availableTechnicians = formData.service_area
-    ? allCategoryTechnicians.filter(t => (t.service_areas || []).includes(formData.service_area))
+  // Filter technicians to those covering the entered service area (case-insensitive)
+  const availableTechnicians = formData.service_area.trim()
+    ? allCategoryTechnicians.filter(t =>
+        (t.service_areas || []).some(a =>
+          a.toLowerCase() === formData.service_area.trim().toLowerCase()
+        )
+      )
     : allCategoryTechnicians;
 
   // AI dispatch: pick best technician using AI reasoning
@@ -454,23 +458,24 @@ Return ONLY the id of the best technician and a brief reason.`,
 
             {/* Service Area */}
             <div>
-              <Label className="text-base mb-3 block">
+              <Label htmlFor="service_area" className="text-base mb-3 block">
                 <MapPin className="w-4 h-4 inline mr-1" />
                 Your Area
               </Label>
-              <Select
+              <Input
+                id="service_area"
+                list="service-areas-list"
+                placeholder="Type your area (e.g. Westlands, Kilimani)"
                 value={formData.service_area}
-                onValueChange={(value) => setFormData({ ...formData, service_area: value })}
-              >
-                <SelectTrigger className="h-12">
-                  <SelectValue placeholder="Select your area" />
-                </SelectTrigger>
-                <SelectContent>
-                  {serviceAreas.map((area) => (
-                    <SelectItem key={area.id} value={area.name}>{area.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={(e) => setFormData({ ...formData, service_area: e.target.value })}
+                className="h-12"
+                autoComplete="off"
+              />
+              <datalist id="service-areas-list">
+                {serviceAreas.map((area) => (
+                  <option key={area.id} value={area.name} />
+                ))}
+              </datalist>
               {formData.service_area && availableTechnicians.length === 0 && (
                 <p className="text-sm text-amber-600 mt-2">
                   No technicians available in {formData.service_area} for this service. Try another area.
