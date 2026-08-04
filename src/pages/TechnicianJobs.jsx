@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '../utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { 
   Calendar,
   MapPin,
-  Phone,
   CheckCircle2,
   XCircle,
   Navigation,
   Play,
-  Loader2,
-  MessageCircle
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +22,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import ContactButtons from '../components/technician/ContactButtons';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import EmptyState from '../components/common/EmptyState';
 
@@ -78,10 +75,28 @@ export default function TechnicianJobs() {
   });
 
   const lifecycleMutation = useMutation({
-    mutationFn: ({ booking_id, action, final_price }) =>
-      base44.functions.invoke('booking_lifecycle', { booking_id, action, final_price }),
+    mutationFn: async ({ booking_id, action, final_price }) => {
+      // Try the backend lifecycle function first (handles notifications, etc.)
+      try {
+        return await base44.functions.invoke('booking_lifecycle', { booking_id, action, final_price });
+      } catch (e) {
+        // Backend function unavailable on current plan — fall back to direct status update
+        const statusMap = {
+          accept: 'accepted',
+          decline: 'cancelled',
+          en_route: 'en_route',
+          start_work: 'in_progress',
+          complete: 'completed',
+        };
+        const update = { status: statusMap[action] };
+        if (action === 'complete' && final_price) update.final_price = final_price;
+        return await base44.entities.Booking.update(booking_id, update);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['techJobs']);
+      queryClient.invalidateQueries(['techAllJobs']);
+      queryClient.invalidateQueries(['booking']);
       setShowCompleteDialog(false);
       setSelectedJob(null);
     },
@@ -204,78 +219,46 @@ export default function TechnicianJobs() {
                       )}
 
                       {job.status === 'accepted' && (
-                        <div className="grid grid-cols-3 gap-2 mt-4">
-                          <Button 
-                            variant="outline"
-                            asChild
-                          >
-                            <Link to={createPageUrl('BookingDetail') + `?id=${job.id}`}>
-                              <MessageCircle className="w-4 h-4 mr-1" />
-                              Chat
-                            </Link>
-                          </Button>
-                          <Button 
-                            variant="outline"
-                          >
-                            <Phone className="w-4 h-4 mr-1" />
-                            Call
-                          </Button>
+                        <div className="space-y-2 mt-4">
+                          <ContactButtons job={job} />
                           <Button 
                             onClick={() => handleStartRoute(job)}
-                            className="bg-purple-600 hover:bg-purple-700"
+                            className="w-full bg-purple-600 hover:bg-purple-700"
                             disabled={lifecycleMutation.isPending}
                           >
-                            <Navigation className="w-4 h-4 mr-1" />
-                            Route
+                            <Navigation className="w-4 h-4 mr-2" />
+                            Start Route
                           </Button>
                         </div>
                       )}
 
                       {job.status === 'en_route' && (
-                        <div className="flex gap-3 mt-4">
-                          <Button 
-                            variant="outline"
-                            asChild
-                            className="flex-1"
-                          >
-                            <Link to={createPageUrl('BookingDetail') + `?id=${job.id}`}>
-                              <MessageCircle className="w-4 h-4 mr-1" />
-                              Chat
-                            </Link>
-                          </Button>
+                        <div className="space-y-2 mt-4">
+                          <ContactButtons job={job} />
                           <Button 
                             onClick={() => handleStartWork(job)}
-                            className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                            className="w-full bg-indigo-600 hover:bg-indigo-700"
                             disabled={lifecycleMutation.isPending}
                           >
-                            <Play className="w-4 h-4 mr-1" />
-                            Arrived
+                            <Play className="w-4 h-4 mr-2" />
+                            Mark Arrived
                           </Button>
                         </div>
                       )}
 
                       {job.status === 'in_progress' && (
-                        <div className="flex gap-3 mt-4">
-                          <Button 
-                            variant="outline"
-                            asChild
-                            className="flex-1"
-                          >
-                            <Link to={createPageUrl('BookingDetail') + `?id=${job.id}`}>
-                              <MessageCircle className="w-4 h-4 mr-1" />
-                              Chat
-                            </Link>
-                          </Button>
+                        <div className="space-y-2 mt-4">
+                          <ContactButtons job={job} />
                           <Button 
                             onClick={() => {
                               setSelectedJob(job);
                               setFinalPrice(job.estimated_price?.toString() || '');
                               setShowCompleteDialog(true);
                             }}
-                            className="flex-1 bg-green-600 hover:bg-green-700"
+                            className="w-full bg-green-600 hover:bg-green-700"
                           >
-                            <CheckCircle2 className="w-4 h-4 mr-1" />
-                            Complete
+                            <CheckCircle2 className="w-4 h-4 mr-2" />
+                            Complete Job
                           </Button>
                         </div>
                       )}

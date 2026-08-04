@@ -209,7 +209,7 @@ export default function BookingDetail() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-        <Tabs defaultValue="details" className="w-full">
+        <Tabs defaultValue={urlParams.get('tab') === 'chat' ? 'chat' : 'details'} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="chat">Chat</TabsTrigger>
