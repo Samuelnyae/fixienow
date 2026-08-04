@@ -124,15 +124,35 @@ export default function BookingDetail() {
   });
 
   const submitReviewMutation = useMutation({
-    mutationFn: () =>
-      base44.functions.invoke('submit_review', {
+    mutationFn: async () => {
+      // Create the review record directly
+      await base44.entities.Review.create({
         booking_id: bookingId,
+        user_id: user.id,
+        user_name: user.full_name,
+        technician_id: booking.technician_id,
         rating,
         comment: reviewComment,
-      }),
+      });
+      // Recalculate technician's average rating (best-effort)
+      try {
+        const allReviews = await base44.entities.Review.filter({ technician_id: booking.technician_id });
+        const avg = allReviews.reduce((s, r) => s + (r.rating || 0), 0) / allReviews.length;
+        await base44.entities.Technician.update(booking.technician_id, {
+          rating: Math.round(avg * 10) / 10,
+          total_reviews: allReviews.length,
+        });
+      } catch (e) {
+        // Rating update may be restricted — the review itself is still saved
+      }
+    },
     onSuccess: () => {
       setShowReview(false);
+      setRating(5);
+      setReviewComment('');
       queryClient.invalidateQueries(['booking', bookingId]);
+      queryClient.invalidateQueries(['technicianReviews', booking.technician_id]);
+      queryClient.invalidateQueries(['technician', booking.technician_id]);
     },
   });
 
