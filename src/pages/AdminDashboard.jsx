@@ -20,15 +20,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import {
   Table,
   TableBody,
@@ -40,6 +33,12 @@ import {
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ServiceAreaManager from '../components/admin/ServiceAreaManager';
 import AdminToolsManager from '../components/admin/AdminToolsManager';
+
+// Skewed neomorphism design tokens
+const NEO_BASE = 'bg-[#e6ebf2]';
+const NEO_RAISED = 'bg-[#e6ebf2] shadow-[6px_6px_14px_#c3cad8,-6px_-6px_14px_#ffffff] border border-white/40';
+const NEO_INSET = 'bg-[#e6ebf2] shadow-[inset_5px_5px_10px_#c3cad8,inset_-5px_-5px_10px_#ffffff] border border-white/30';
+const SKEW = 'skew-y-[-2deg]';
 
 export default function AdminDashboard() {
   const [user, setUser] = useState(null);
@@ -101,102 +100,80 @@ export default function AdminDashboard() {
     return <LoadingSpinner text="Loading..." />;
   }
 
+  const stats = [
+    { icon: Users, color: 'text-teal-600', bg: 'bg-teal-100', value: technicians.length, label: 'Technicians' },
+    { icon: Clock, color: 'text-amber-600', bg: 'bg-amber-100', value: pendingTechnicians.length, label: 'Pending Approval' },
+    { icon: Briefcase, color: 'text-blue-600', bg: 'bg-blue-100', value: bookings.length, label: 'Total Bookings' },
+    { icon: DollarSign, color: 'text-green-600', bg: 'bg-green-100', value: `KES ${totalRevenue.toLocaleString()}`, label: 'Total Revenue' },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <div className={`min-h-screen ${NEO_BASE}`}>
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Link 
-            to={createPageUrl('Home')}
-            className="text-gray-600 hover:text-gray-900"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-gray-500">Manage your platform</p>
+        <div className={`flex items-center gap-4 ${NEO_RAISED} rounded-2xl px-5 py-4 ${SKEW}`}>
+          <div className={`flex items-center gap-4 -skew-y-[2deg] flex-1 min-w-0`}>
+            <Link
+              to={createPageUrl('Home')}
+              className="text-gray-600 hover:text-gray-900 flex-shrink-0"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">Admin Dashboard</h1>
+              <p className="text-gray-500 text-sm hidden sm:block">Manage your platform</p>
+            </div>
           </div>
         </div>
 
         {/* Quick Links */}
         <Link
           to={createPageUrl('FraudDetection')}
-          className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 hover:bg-red-100 transition-colors w-fit"
+          className={`flex items-center gap-3 ${NEO_RAISED} rounded-2xl px-4 py-3 hover:shadow-[inset_4px_4px_8px_#c3cad8,inset_-4px_-4px_8px_#ffffff] transition-all w-fit`}
         >
           <AlertTriangle className="w-5 h-5 text-red-600" />
-          <span className="font-medium text-red-700">AI Fraud Detection</span>
+          <span className="font-medium text-red-700 text-sm">AI Fraud Detection</span>
           <Shield className="w-4 h-4 text-red-400" />
         </Link>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-teal-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{technicians.length}</p>
-                  <p className="text-sm text-gray-500">Technicians</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-                  <Clock className="w-5 h-5 text-amber-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{pendingTechnicians.length}</p>
-                  <p className="text-sm text-gray-500">Pending Approval</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+          {stats.map((stat, i) => {
+            const Icon = stat.icon;
+            return (
+              <div key={i} className={`${NEO_RAISED} rounded-2xl p-4 ${SKEW}`}>
+                <div className="-skew-y-[2deg] flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl ${stat.bg} flex items-center justify-center flex-shrink-0`}>
+                    <Icon className={`w-5 h-5 ${stat.color}`} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-lg sm:text-2xl font-bold truncate">{stat.value}</p>
+                    <p className="text-xs sm:text-sm text-gray-500">{stat.label}</p>
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                  <Briefcase className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{bookings.length}</p>
-                  <p className="text-sm text-gray-500">Total Bookings</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">KES {totalRevenue.toLocaleString()}</p>
-                  <p className="text-sm text-gray-500">Total Revenue</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            );
+          })}
         </div>
 
         {/* Main Content */}
         <Tabs defaultValue="pending">
-          <TabsList className="bg-white border w-full flex">
-            <TabsTrigger value="pending" className="flex-1 text-xs sm:text-sm">
-              Pending ({pendingTechnicians.length})
-            </TabsTrigger>
-            <TabsTrigger value="technicians" className="flex-1 text-xs sm:text-sm">Technicians</TabsTrigger>
-            <TabsTrigger value="bookings" className="flex-1 text-xs sm:text-sm">Bookings</TabsTrigger>
-            <TabsTrigger value="areas" className="flex-1 text-xs sm:text-sm">Service Areas</TabsTrigger>
-            <TabsTrigger value="tools" className="flex-1 text-xs sm:text-sm">Tools</TabsTrigger>
+          <TabsList className={`${NEO_INSET} border-0 w-full flex overflow-x-auto scrollbar-hide rounded-2xl p-1.5 gap-1.5`}>
+            {[
+              { value: 'pending', label: `Pending (${pendingTechnicians.length})` },
+              { value: 'technicians', label: 'Technicians' },
+              { value: 'bookings', label: 'Bookings' },
+              { value: 'areas', label: 'Service Areas' },
+              { value: 'tools', label: 'Tools' },
+            ].map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="flex-1 shrink-0 min-w-fit text-xs sm:text-sm data-[state=active]:bg-[#e6ebf2] data-[state=active]:shadow-[inset_4px_4px_8px_#c3cad8,inset_-4px_-4px_8px_#ffffff] rounded-xl px-3 py-2.5 whitespace-nowrap"
+              >
+                {tab.label}
+              </TabsTrigger>
+            ))}
           </TabsList>
 
           {/* Pending Approvals */}
@@ -204,16 +181,16 @@ export default function AdminDashboard() {
             {pendingTechnicians.length > 0 ? (
               <>
                 {/* Mobile cards */}
-                <div className="md:hidden space-y-3">
+                <div className="md:hidden space-y-4">
                   {pendingTechnicians.map((tech) => (
-                    <div key={tech.id} className="bg-white rounded-xl border p-4 space-y-3">
+                    <div key={tech.id} className={`${NEO_RAISED} rounded-2xl p-4 space-y-3`}>
                       <div className="flex items-center gap-3">
                         <Avatar className="w-10 h-10">
                           <AvatarImage src={tech.profile_photo} />
                           <AvatarFallback>{tech.name?.[0]}</AvatarFallback>
                         </Avatar>
-                        <div>
-                          <p className="font-medium">{tech.name}</p>
+                        <div className="min-w-0">
+                          <p className="font-medium truncate">{tech.name}</p>
                           <p className="text-sm text-gray-500 capitalize">{tech.profession?.replace('_', ' ')} · {tech.phone}</p>
                         </div>
                       </div>
@@ -249,7 +226,7 @@ export default function AdminDashboard() {
                   ))}
                 </div>
                 {/* Desktop table */}
-                <div className="hidden md:block bg-white rounded-xl border overflow-hidden">
+                <div className={`hidden md:block ${NEO_RAISED} rounded-2xl overflow-hidden`}>
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -312,7 +289,7 @@ export default function AdminDashboard() {
                 </div>
               </>
             ) : (
-              <div className="bg-white rounded-xl p-12 text-center">
+              <div className={`${NEO_RAISED} rounded-2xl p-12 text-center`}>
                 <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
                 <h3 className="font-semibold text-gray-900">All caught up!</h3>
                 <p className="text-gray-500">No pending approvals</p>
@@ -323,9 +300,9 @@ export default function AdminDashboard() {
           {/* All Technicians */}
           <TabsContent value="technicians" className="mt-6">
             {/* Mobile cards */}
-            <div className="md:hidden space-y-3">
+            <div className="md:hidden space-y-4">
               {technicians.map((tech) => (
-                <div key={tech.id} className="bg-white rounded-xl border p-4 space-y-2">
+                <div key={tech.id} className={`${NEO_RAISED} rounded-2xl p-4 space-y-2`}>
                   <div className="flex items-center gap-3">
                     <Avatar className="w-10 h-10">
                       <AvatarImage src={tech.profile_photo} />
@@ -359,7 +336,7 @@ export default function AdminDashboard() {
               ))}
             </div>
             {/* Desktop table */}
-            <div className="hidden md:block bg-white rounded-xl border overflow-hidden">
+            <div className={`hidden md:block ${NEO_RAISED} rounded-2xl overflow-hidden`}>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -416,9 +393,9 @@ export default function AdminDashboard() {
           {/* Bookings */}
           <TabsContent value="bookings" className="mt-6">
             {/* Mobile cards */}
-            <div className="md:hidden space-y-3">
+            <div className="md:hidden space-y-4">
               {bookings.slice(0, 20).map((booking) => (
-                <div key={booking.id} className="bg-white rounded-xl border p-4 space-y-2">
+                <div key={booking.id} className={`${NEO_RAISED} rounded-2xl p-4 space-y-2`}>
                   <div className="flex items-center justify-between">
                     <span className="font-mono text-xs text-gray-500">#{booking.id?.slice(-8).toUpperCase()}</span>
                     <Badge className={
@@ -433,7 +410,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Customer</span>
-                    <span className="font-medium">{booking.user_name || 'N/A'}</span>
+                    <span className="font-medium truncate ml-2">{booking.user_name || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Service</span>
@@ -441,7 +418,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Technician</span>
-                    <span>{booking.technician_name || 'Unassigned'}</span>
+                    <span className="truncate ml-2">{booking.technician_name || 'Unassigned'}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Amount</span>
@@ -455,7 +432,7 @@ export default function AdminDashboard() {
               ))}
             </div>
             {/* Desktop table */}
-            <div className="hidden md:block bg-white rounded-xl border overflow-hidden">
+            <div className={`hidden md:block ${NEO_RAISED} rounded-2xl overflow-hidden`}>
               <Table>
                 <TableHeader>
                   <TableRow>

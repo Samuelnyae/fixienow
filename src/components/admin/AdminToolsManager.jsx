@@ -74,7 +74,7 @@ export default function AdminToolsManager({ user }) {
 
       {/* Pending listings */}
       {pending.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+        <div className="bg-amber-50/60 border border-amber-200 rounded-2xl p-4 shadow-[4px_4px_10px_#d6c3b0,-4px_-4px_10px_#fff5e6]">
           <h3 className="font-medium text-amber-800 mb-3">
             Pending Technician Listings ({pending.length})
           </h3>
@@ -112,8 +112,54 @@ export default function AdminToolsManager({ user }) {
         </div>
       )}
 
-      {/* All tools table */}
-      <div className="bg-white rounded-xl border overflow-hidden">
+      {/* Mobile cards */}
+      <div className="md:hidden space-y-4">
+        {tools.map(tool => (
+          <div key={tool.id} className="bg-[#e6ebf2] shadow-[6px_6px_14px_#c3cad8,-6px_-6px_14px_#ffffff] border border-white/40 rounded-2xl p-4 space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+                {tool.image_url && <img src={tool.image_url} alt="" className="w-full h-full object-cover" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{tool.name}</p>
+                <p className="text-xs text-gray-500">KES {(tool.price || 0).toLocaleString()} · <span className="capitalize">{tool.condition || 'new'}</span></p>
+                <p className="text-xs text-gray-400 truncate">{tool.seller_name || '—'} · {tool.brand || '—'}</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <Badge className={
+                tool.status === 'approved' ? 'bg-green-100 text-green-700'
+                : tool.status === 'pending' ? 'bg-amber-100 text-amber-700'
+                : tool.status === 'rejected' ? 'bg-red-100 text-red-700'
+                : 'bg-gray-100 text-gray-700'
+              }>
+                {tool.status}
+              </Badge>
+              <div className="flex gap-1">
+                {tool.status === 'pending' && (
+                  <>
+                    <Button size="sm" onClick={() => statusMutation.mutate({ id: tool.id, status: 'approved' })} disabled={statusMutation.isPending} className="bg-green-600 hover:bg-green-700 h-8">
+                      <CheckCircle2 className="w-4 h-4" />
+                    </Button>
+                    <Button size="sm" variant="destructive" onClick={() => statusMutation.mutate({ id: tool.id, status: 'rejected' })} disabled={statusMutation.isPending} className="h-8">
+                      <XCircle className="w-4 h-4" />
+                    </Button>
+                  </>
+                )}
+                <Button size="sm" variant="ghost" onClick={() => openEdit(tool)} className="h-8">
+                  <Pencil className="w-4 h-4" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => { if (confirm('Delete this listing?')) deleteMutation.mutate(tool.id); }} className="h-8 text-red-600 hover:text-red-700">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden md:block bg-[#e6ebf2] shadow-[6px_6px_14px_#c3cad8,-6px_-6px_14px_#ffffff] border border-white/40 rounded-2xl overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -177,7 +223,7 @@ export default function AdminToolsManager({ user }) {
         </Table>
 
         {tools.length === 0 && (
-          <div className="text-center py-12 text-gray-400">
+          <div className="text-center py-12 text-gray-400 col-span-full">
             <Package className="w-10 h-10 mx-auto mb-2 opacity-50" />
             <p className="text-sm">No tools yet. Click "Add Tool" to create one.</p>
           </div>
