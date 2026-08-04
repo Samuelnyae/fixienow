@@ -1,0 +1,89 @@
+{
+  "name": "KYCSubmission",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Owner user ID"
+    },
+    "wallet_id": {
+      "type": "string",
+      "description": "Related wallet ID"
+    },
+    "id_type": {
+      "type": "string",
+      "enum": [
+        "national_id",
+        "passport",
+        "drivers_license"
+      ],
+      "description": "Type of government ID submitted"
+    },
+    "id_number": {
+      "type": "string",
+      "description": "ID / document number"
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Full legal name as shown on ID"
+    },
+    "date_of_birth": {
+      "type": "string",
+      "format": "date"
+    },
+    "id_front_url": {
+      "type": "string",
+      "description": "Front of ID image URL"
+    },
+    "id_back_url": {
+      "type": "string",
+      "description": "Back of ID image URL (if applicable)"
+    },
+    "selfie_url": {
+      "type": "string",
+      "description": "Live selfie photo URL"
+    },
+    "address_proof_url": {
+      "type": "string",
+      "description": "Proof of address document URL (utility bill, bank statement)"
+    },
+    "address_line": {
+      "type": "string",
+      "description": "Street / building address"
+    },
+    "city": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string",
+      "default": "Kenya"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Verification status"
+    },
+    "rejection_reason": {
+      "type": "string",
+      "description": "Reason provided if rejected"
+    },
+    "reviewed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "user_id",
+    "id_type",
+    "id_number",
+    "full_name",
+    "id_front_url",
+    "selfie_url",
+    "address_proof_url"
+  ]
+}

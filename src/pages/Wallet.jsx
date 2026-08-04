@@ -21,6 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import WalletCard from '../components/wallet/WalletCard';
+import KycCard from '../components/wallet/KycCard';
 import TransactionItem from '../components/wallet/TransactionItem';
 import TransactionFilters from '../components/wallet/TransactionFilters';
 import SendMoneyDialog from '../components/wallet/SendMoneyDialog';
@@ -439,6 +440,9 @@ export default function Wallet() {
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {/* Enhanced Wallet Card */}
         <WalletCard wallet={wallet} />
+
+        {/* Identity Verification (KYC) */}
+        <KycCard wallet={wallet} user={user} />
 
         {/* Quick Actions - Modern Grid */}
         <div>
