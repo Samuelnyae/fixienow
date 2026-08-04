@@ -7,6 +7,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MapPin, Navigation, Star, Wrench } from 'lucide-react';
+import { resolveAreaCoords } from '@/lib/kenyaAreas';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
@@ -58,32 +59,54 @@ export default function NearbyTechniciansMap() {
     queryFn: () => base44.entities.Technician.filter({ verification_status: 'approved' }, '-rating', 100),
   });
 
+  // Lookup of service-area name -> coordinates (from the areas technicians added)
+  const areaCoords = useMemo(() => {
+    const map = {};
+    areas.forEach(a => {
+      if (a.center_lat && a.center_lng) map[a.name.toLowerCase()] = { lat: a.center_lat, lng: a.center_lng };
+    });
+    return map;
+  }, [areas]);
+
   const area = useMemo(
     () => areas.find(a => a.name.toLowerCase() === selectedArea.toLowerCase()),
     [areas, selectedArea]
   );
 
-  const mapCenter = area?.center_lat && area?.center_lng
-    ? { lat: area.center_lat, lng: area.center_lng }
-    : NAIROBI_CENTER;
+  // Resolve a technician's coordinates: their own location, else a known service-area
+  // (entity coords first, then the offline area dictionary), else their address.
+  const resolveTechCoords = (t) => {
+    if (t.location?.lat && t.location?.lng) return { lat: t.location.lat, lng: t.location.lng };
+    for (const aName of (t.service_areas || [])) {
+      const c = areaCoords[aName.toLowerCase()] || resolveAreaCoords(aName);
+      if (c) return c;
+    }
+    return resolveAreaCoords(t.location?.address);
+  };
 
-  // Technicians currently working (available) in the selected area
+  // Technicians currently working (available), filtered by selected area
   const nearbyTechs = useMemo(() => {
     let list = technicians.filter(t => t.is_available);
     if (selectedArea) {
       const q = selectedArea.toLowerCase();
-      list = list.filter(t =>
-        (t.service_areas || []).some(a => a.toLowerCase() === q)
-      );
+      list = list.filter(t => (t.service_areas || []).some(a => a.toLowerCase() === q));
     }
-    return list.map(t => {
-      const hasCoords = t.location?.lat && t.location?.lng;
-      const base = hasCoords
-        ? { lat: t.location.lat, lng: t.location.lng }
-        : { ...mapCenter, ...hashOffset(t.id || t.name || '') };
-      return { ...t, _coords: base };
-    });
-  }, [technicians, selectedArea, mapCenter]);
+    return list.map(t => ({ ...t, _coords: resolveTechCoords(t) }));
+  }, [technicians, selectedArea, areaCoords]);
+
+  // Center: selected area center, else average of resolved technician coords, else Nairobi
+  const resolvedCoords = nearbyTechs.map(t => t._coords).filter(Boolean);
+  const avgCenter = resolvedCoords.length
+    ? {
+        lat: resolvedCoords.reduce((s, c) => s + c.lat, 0) / resolvedCoords.length,
+        lng: resolvedCoords.reduce((s, c) => s + c.lng, 0) / resolvedCoords.length,
+      }
+    : NAIROBI_CENTER;
+
+  const selectedAreaCoords = area?.center_lat && area?.center_lng
+    ? { lat: area.center_lat, lng: area.center_lng }
+    : (area ? resolveAreaCoords(area.name) : null);
+  const mapCenter = selectedAreaCoords || avgCenter;
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-10">
@@ -132,8 +155,10 @@ export default function NearbyTechniciansMap() {
               <Marker position={[mapCenter.lat, mapCenter.lng]} icon={userIcon}>
                 <Popup>Your area center</Popup>
               </Marker>
-              {nearbyTechs.map(t => (
-                <Marker key={t.id} position={[t._coords.lat, t._coords.lng]} icon={techIcon}>
+              {nearbyTechs.map(t => {
+                const c = t._coords || { ...mapCenter, ...hashOffset(t.id || t.name || '') };
+                return (
+                <Marker key={t.id} position={[c.lat, c.lng]} icon={techIcon}>
                   <Popup>
                     <div style={{ minWidth: 160 }}>
                       <strong>{t.name}</strong>
@@ -149,7 +174,8 @@ export default function NearbyTechniciansMap() {
                     </div>
                   </Popup>
                 </Marker>
-              ))}
+                );
+              })}
             </MapContainer>
           )}
         </div>
