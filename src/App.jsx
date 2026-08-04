@@ -13,6 +13,7 @@ import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import BookingAssistant from '@/pages/BookingAssistant';
+import USSDBooking from '@/pages/USSDBooking';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -59,6 +60,11 @@ const AuthenticatedApp = () => {
       <Route path="/BookingAssistant" element={
         <LayoutWrapper currentPageName="BookingAssistant">
           <BookingAssistant />
+        </LayoutWrapper>
+      } />
+      <Route path="/USSDBooking" element={
+        <LayoutWrapper currentPageName="USSDBooking">
+          <USSDBooking />
         </LayoutWrapper>
       } />
       {Object.entries(Pages).map(([path, Page]) => (

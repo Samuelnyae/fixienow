@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Send, MessageCircle, Phone, Info, Plus } from 'lucide-react';
+import { Send, MessageCircle, Phone, Info, Grid3x3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import AgentMessageBubble from '@/components/booking/AgentMessageBubble';
@@ -88,14 +89,14 @@ export default function BookingAssistant() {
       </div>
 
       {/* Booking channel cards */}
-      <div className="grid grid-cols-2 gap-3 mb-5">
+      <div className="grid grid-cols-3 gap-3 mb-5">
         <a
           href={base44.agents.getWhatsAppConnectURL(AGENT_NAME)}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 bg-[#25D366] hover:bg-[#1da851] text-white rounded-2xl px-4 py-3 transition-all hover:scale-[1.02]"
+          className="flex items-center gap-2.5 bg-[#25D366] hover:bg-[#1da851] text-white rounded-2xl px-3 py-3 transition-all hover:scale-[1.02]"
         >
-          <MessageCircle className="w-6 h-6 shrink-0" />
+          <MessageCircle className="w-5 h-5 shrink-0" />
           <div>
             <p className="font-semibold text-sm">WhatsApp</p>
             <p className="text-xs opacity-90">Chat & book</p>
@@ -105,14 +106,24 @@ export default function BookingAssistant() {
           href={base44.agents.getTelegramConnectURL(AGENT_NAME)}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 bg-[#0088cc] hover:bg-[#006699] text-white rounded-2xl px-4 py-3 transition-all hover:scale-[1.02]"
+          className="flex items-center gap-2.5 bg-[#0088cc] hover:bg-[#006699] text-white rounded-2xl px-3 py-3 transition-all hover:scale-[1.02]"
         >
-          <Send className="w-6 h-6 shrink-0" />
+          <Send className="w-5 h-5 shrink-0" />
           <div>
             <p className="font-semibold text-sm">Telegram</p>
             <p className="text-xs opacity-90">Chat & book</p>
           </div>
         </a>
+        <Link
+          to="/USSDBooking"
+          className="flex items-center gap-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-2xl px-3 py-3 transition-all hover:scale-[1.02]"
+        >
+          <Grid3x3 className="w-5 h-5 shrink-0" />
+          <div>
+            <p className="font-semibold text-sm">USSD Menu</p>
+            <p className="text-xs opacity-90">No internet</p>
+          </div>
+        </Link>
       </div>
 
       {/* SMS note */}
