@@ -12,6 +12,7 @@ import {
   History,
   Globe,
   Shield,
+  Lock,
   Zap,
   TrendingUp,
   Filter,
@@ -103,6 +104,17 @@ export default function Wallet() {
     },
     enabled: !!user,
   });
+
+  // KYC verification status — wallet access is gated until KYC is submitted
+  const { data: kycSubmission } = useQuery({
+    queryKey: ['kycSubmission', user?.id],
+    queryFn: async () => {
+      const subs = await base44.entities.KYCSubmission.filter({ user_id: user.id }, '-created_date', 5);
+      return subs[0] || null;
+    },
+    enabled: !!user,
+  });
+  const canAccessWallet = kycSubmission && kycSubmission.status !== 'rejected';
 
   const { data: transactions = [], isLoading: txLoading } = useQuery({
     queryKey: ['myTransactions', wallet?.id],
@@ -444,7 +456,17 @@ export default function Wallet() {
         {/* Identity Verification (KYC) */}
         <KycCard wallet={wallet} user={user} />
 
-        {/* Quick Actions - Modern Grid */}
+        {/* Wallet access gated on KYC */}
+        {!canAccessWallet ? (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-3">
+            <Lock className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-semibold text-amber-900">Wallet locked</p>
+              <p className="text-sm text-amber-800 mt-0.5">Complete identity verification above to unlock sending, depositing, withdrawing, and transaction history.</p>
+            </div>
+          </div>
+        ) : (
+        <>
         <div>
           <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 px-1">Quick Actions</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -655,6 +677,8 @@ export default function Wallet() {
             )}
           </div>
         </div>
+        </>
+        )}
       </div>
 
       {/* Dialogs */}
