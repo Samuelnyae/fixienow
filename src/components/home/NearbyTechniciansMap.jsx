@@ -68,10 +68,12 @@ export default function NearbyTechniciansMap() {
     return map;
   }, [areas]);
 
-  const area = useMemo(
-    () => areas.find(a => a.name.toLowerCase() === selectedArea.toLowerCase()),
-    [areas, selectedArea]
-  );
+  // Areas actually added by technicians (not the seeded default ServiceArea list)
+  const techAreas = useMemo(() => {
+    const set = new Set();
+    technicians.forEach(t => (t.service_areas || []).forEach(a => { if (a && a.trim()) set.add(a.trim()); }));
+    return [...set].sort((a, b) => a.localeCompare(b));
+  }, [technicians]);
 
   // Resolve a technician's coordinates: their own location, else a known service-area
   // (entity coords first, then the offline area dictionary), else their address.
@@ -103,9 +105,12 @@ export default function NearbyTechniciansMap() {
       }
     : NAIROBI_CENTER;
 
-  const selectedAreaCoords = area?.center_lat && area?.center_lng
-    ? { lat: area.center_lat, lng: area.center_lng }
-    : (area ? resolveAreaCoords(area.name) : null);
+  const selectedAreaCoords = useMemo(() => {
+    if (!selectedArea) return null;
+    const ent = areas.find(a => a.name.toLowerCase() === selectedArea.toLowerCase());
+    if (ent?.center_lat && ent?.center_lng) return { lat: ent.center_lat, lng: ent.center_lng };
+    return resolveAreaCoords(selectedArea);
+  }, [selectedArea, areas]);
   const mapCenter = selectedAreaCoords || avgCenter;
 
   return (
@@ -128,8 +133,8 @@ export default function NearbyTechniciansMap() {
             className="h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring max-w-[200px]"
           >
             <option value="">All areas</option>
-            {areas.map(a => (
-              <option key={a.id} value={a.name}>{a.name}</option>
+            {techAreas.map(a => (
+              <option key={a} value={a}>{a}</option>
             ))}
           </select>
         </div>
