@@ -20,6 +20,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import BecomeTechnicianCTA from '../components/home/BecomeTechnicianCTA';
+import NearbyTechniciansMap from '../components/home/NearbyTechniciansMap';
 
 const defaultCategories = [
   { id: '1', name: 'Mechanic', slug: 'mechanic', base_price: 500, description: 'Car repair & maintenance' },
@@ -166,6 +167,9 @@ export default function Home() {
           })}
         </div>
       </section>
+
+      {/* Nearby technicians map */}
+      <NearbyTechniciansMap />
 
       {/* How Fixie Works */}
       <section className="max-w-7xl mx-auto px-4 py-6">
