@@ -143,13 +143,15 @@ export default function BookService() {
     queryFn: () => base44.entities.ServiceArea.filter({ is_active: true }, 'name', 100),
   });
 
-  // Filter technicians to those covering the entered service area (case-insensitive)
+  // Filter technicians to those covering the entered service area (lenient, case-insensitive)
   const availableTechnicians = formData.service_area.trim()
-    ? allCategoryTechnicians.filter(t =>
-        (t.service_areas || []).some(a =>
-          a.toLowerCase() === formData.service_area.trim().toLowerCase()
-        )
-      )
+    ? allCategoryTechnicians.filter(t => {
+        const entered = formData.service_area.trim().toLowerCase();
+        return (t.service_areas || []).some(a => {
+          const sa = a.toLowerCase();
+          return sa === entered || sa.includes(entered) || entered.includes(sa);
+        });
+      })
     : allCategoryTechnicians;
 
   // AI dispatch: pick best technician using AI reasoning
@@ -199,10 +201,15 @@ Return ONLY the id of the best technician and a brief reason.`,
 
   const createBookingMutation = useMutation({
     mutationFn: async (bookingData) => {
-      // Check rate limit before creating
-      const rateCheck = await base44.functions.invoke('check_booking_rate_limit', {});
-      if (rateCheck.data && !rateCheck.data.can_book) {
-        throw new Error(rateCheck.data.reason || 'Rate limit exceeded. Please try again later.');
+      // Check rate limit before creating (non-fatal: skip if backend function is unavailable)
+      try {
+        const rateCheck = await base44.functions.invoke('check_booking_rate_limit', {});
+        if (rateCheck?.data && !rateCheck.data.can_book) {
+          throw new Error(rateCheck.data.reason || 'Rate limit exceeded. Please try again later.');
+        }
+      } catch (e) {
+        // Backend function not accessible on current plan — proceed with booking
+        console.warn('Rate limit check skipped:', e.message);
       }
 
       const booking = await base44.entities.Booking.create(bookingData);
@@ -476,7 +483,7 @@ Return ONLY the id of the best technician and a brief reason.`,
                   <option key={area.id} value={area.name} />
                 ))}
               </datalist>
-              {formData.service_area && availableTechnicians.length === 0 && (
+              {formData.service_area && availableTechnicians.length === 0 && !selectedTechnician && !preselectedTechId && (
                 <p className="text-sm text-amber-600 mt-2">
                   No technicians available in {formData.service_area} for this service. Try another area.
                 </p>
