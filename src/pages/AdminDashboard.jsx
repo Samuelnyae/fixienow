@@ -135,20 +135,18 @@ export default function AdminDashboard() {
           <Shield className="w-4 h-4 text-red-400" />
         </Link>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        {/* Stats — strict 2×2 grid, consistent padding, centered icons */}
+        <div className="grid grid-cols-2 gap-4 sm:gap-6">
           {stats.map((stat, i) => {
             const Icon = stat.icon;
             return (
-              <div key={i} className={`${NEO_RAISED} rounded-2xl p-4 ${SKEW}`}>
-                <div className="-skew-y-[2deg] flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl ${stat.bg} flex items-center justify-center flex-shrink-0`}>
+              <div key={i} className={`${NEO_RAISED} rounded-2xl p-5 ${SKEW}`}>
+                <div className="-skew-y-[2deg] flex flex-col items-center text-center gap-2">
+                  <div className={`w-11 h-11 rounded-xl ${stat.bg} flex items-center justify-center`}>
                     <Icon className={`w-5 h-5 ${stat.color}`} />
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-lg sm:text-2xl font-bold truncate">{stat.value}</p>
-                    <p className="text-xs sm:text-sm text-gray-500">{stat.label}</p>
-                  </div>
+                  <p className="text-xl sm:text-2xl font-bold leading-none truncate max-w-full">{stat.value}</p>
+                  <p className="text-xs sm:text-sm text-gray-500">{stat.label}</p>
                 </div>
               </div>
             );
@@ -167,7 +165,7 @@ export default function AdminDashboard() {
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="flex-1 shrink-0 min-w-fit text-xs sm:text-sm data-[state=active]:bg-[#e6ebf2] data-[state=active]:shadow-[inset_4px_4px_8px_#c3cad8,inset_-4px_-4px_8px_#ffffff] rounded-xl px-3 py-2.5 whitespace-nowrap"
+                className="flex-1 shrink-0 min-w-fit text-xs sm:text-sm rounded-xl px-3 py-2.5 whitespace-nowrap transition-colors data-[state=active]:bg-[#0B463C] data-[state=active]:text-white data-[state=active]:shadow-[0_4px_10px_rgba(11,70,60,.35)] data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:text-gray-900 data-[state=inactive]:hover:bg-white/40"
               >
                 {tab.label}
               </TabsTrigger>
