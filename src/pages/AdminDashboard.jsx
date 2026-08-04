@@ -31,7 +31,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import ServiceAreaManager from '../components/admin/ServiceAreaManager';
 import AdminToolsManager from '../components/admin/AdminToolsManager';
 
 // Skewed neomorphism design tokens
@@ -163,7 +162,6 @@ export default function AdminDashboard() {
               { value: 'pending', label: `Pending (${pendingTechnicians.length})` },
               { value: 'technicians', label: 'Technicians' },
               { value: 'bookings', label: 'Bookings' },
-              { value: 'areas', label: 'Service Areas' },
               { value: 'tools', label: 'Tools' },
             ].map((tab) => (
               <TabsTrigger
@@ -476,11 +474,6 @@ export default function AdminDashboard() {
                 </TableBody>
               </Table>
             </div>
-          </TabsContent>
-
-          {/* Service Areas */}
-          <TabsContent value="areas" className="mt-6">
-            <ServiceAreaManager />
           </TabsContent>
 
           {/* Tools Marketplace */}

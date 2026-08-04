@@ -97,6 +97,27 @@ export default function TechnicianRegister() {
 
       const tech = await base44.entities.Technician.create(techData);
 
+      // Persist service areas to the ServiceArea database
+      // (create new ones for areas that don't already exist)
+      if (formData.service_areas.length > 0) {
+        try {
+          const existing = await base44.entities.ServiceArea.list('-created_date', 200);
+          const existingNames = new Set(
+            existing.map(a => (a.name || '').toLowerCase().trim())
+          );
+          const toCreate = formData.service_areas
+            .map(a => a.trim())
+            .filter(a => a && !existingNames.has(a.toLowerCase()))
+            .map(name => ({ name, city: 'Nairobi', is_active: true }));
+          if (toCreate.length > 0) {
+            await base44.entities.ServiceArea.bulkCreate(toCreate);
+          }
+        } catch (e) {
+          // Non-fatal — technician record already created
+          console.warn('ServiceArea creation failed:', e);
+        }
+      }
+
       // Update user type
       if (user) {
         await base44.auth.updateMe({ user_type: 'technician' });
