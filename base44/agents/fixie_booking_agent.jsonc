@@ -42,7 +42,7 @@
   "model": "automatic",
   "whatsapp_greeting": "Jambo! \ud83d\udc4b Welcome to Fixie. I'm your AI assistant and I can help you book a certified technician in minutes.\n\nTell me \u2014 what do you need help with today? (e.g. plumber, electrician, mechanic, carpenter, painter, AC repair, appliance repair, locksmith)",
   "telegram_greeting": "Jambo! \ud83d\udc4b Welcome to Fixie. I'm your AI assistant and I can help you book a certified technician in minutes.\n\nTell me \u2014 what do you need help with today? (e.g. plumber, electrician, mechanic, carpenter, painter, AC repair, appliance repair, locksmith)",
-  "line_greeting": null,
+  "line_greeting": "",
   "memory_config": {
     "enabled": true,
     "scope": "both",
@@ -52,6 +52,6 @@
   "voice_config": {
     "voice_id": null
   },
-  "allow_anonymous_access": false,
+  "allow_anonymous_access": true,
   "name": "fixie_booking_agent"
 }
