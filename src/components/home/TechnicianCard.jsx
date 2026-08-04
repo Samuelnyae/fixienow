@@ -4,6 +4,7 @@ import { createPageUrl } from '../../utils';
 import { Star, MapPin, CheckCircle2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import FavoriteButton from '@/components/technician/FavoriteButton';
 
 export default function TechnicianCard({ technician }) {
   const professionLabels = {
@@ -61,16 +62,19 @@ export default function TechnicianCard({ technician }) {
             )}
           </div>
 
-          <div className="text-right">
-            <p className="text-lg font-bold text-teal-600">
-              KES {technician.hourly_rate?.toLocaleString() || '500'}
-            </p>
-            <p className="text-xs text-gray-400">/hour</p>
-            {technician.is_available && (
-              <Badge className="mt-2 bg-green-100 text-green-700 hover:bg-green-100">
-                Available
-              </Badge>
-            )}
+          <div className="flex flex-col items-end gap-2">
+            <FavoriteButton technician={technician} className="w-9 h-9 shadow-sm border border-gray-100" />
+            <div className="text-right">
+              <p className="text-lg font-bold text-teal-600">
+                KES {technician.hourly_rate?.toLocaleString() || '500'}
+              </p>
+              <p className="text-xs text-gray-400">/hour</p>
+              {technician.is_available && (
+                <Badge className="mt-2 bg-green-100 text-green-700 hover:bg-green-100">
+                  Available
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
       </div>

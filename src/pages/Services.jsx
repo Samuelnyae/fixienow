@@ -10,6 +10,7 @@ import {
   Star,
   MapPin,
   X,
+  Heart,
   Wrench, 
   Droplets, 
   Zap, 
@@ -55,6 +56,7 @@ export default function Services() {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [priceRange, setPriceRange] = useState([0, 10000]);
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const { data: technicians = [], isLoading } = useQuery({
@@ -63,6 +65,20 @@ export default function Services() {
       return base44.entities.Technician.list('-rating', 100);
     },
   });
+
+  const { data: favorites = [] } = useQuery({
+    queryKey: ['favorites'],
+    queryFn: async () => {
+      try {
+        const u = await base44.auth.me();
+        return base44.entities.FavoriteTechnician.filter({ user_id: u.id });
+      } catch (e) {
+        return [];
+      }
+    },
+  });
+
+  const favoriteIds = new Set(favorites.map((f) => f.technician_id));
 
   const filteredTechnicians = technicians.filter((tech) => {
     const professionSlug = (tech.profession || '').toLowerCase().trim().replace(/ /g, '_');
@@ -80,8 +96,9 @@ export default function Services() {
       (tech.hourly_rate >= priceRange[0] && tech.hourly_rate <= priceRange[1]);
     
     const matchesAvailability = !showAvailableOnly || tech.is_available === true;
+    const matchesFavorites = !showFavoritesOnly || favoriteIds.has(tech.id);
     
-    return matchesCategory && matchesSearch && matchesPrice && matchesAvailability;
+    return matchesCategory && matchesSearch && matchesPrice && matchesAvailability && matchesFavorites;
   });
 
   return (
@@ -159,6 +176,19 @@ export default function Services() {
 
           {/* Category Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {favorites.length > 0 && (
+              <button
+                onClick={() => setShowFavoritesOnly((v) => !v)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all ${
+                  showFavoritesOnly
+                    ? 'bg-red-500 text-white'
+                    : 'bg-red-50 text-red-600 hover:bg-red-100'
+                }`}
+              >
+                <Heart className={`w-4 h-4 ${showFavoritesOnly ? 'fill-white' : ''}`} />
+                <span className="text-sm font-medium">Favorites ({favorites.length})</span>
+              </button>
+            )}
             {categories.map((cat) => {
               const Icon = cat.icon;
               const isActive = selectedCategory === cat.slug;
@@ -188,12 +218,13 @@ export default function Services() {
           <p className="text-gray-500 text-sm">
             {filteredTechnicians.length} technician{filteredTechnicians.length !== 1 ? 's' : ''} found
           </p>
-          {(selectedCategory !== 'all' || searchQuery || showAvailableOnly || priceRange[0] !== 0 || priceRange[1] !== 10000) && (
+          {(selectedCategory !== 'all' || searchQuery || showAvailableOnly || showFavoritesOnly || priceRange[0] !== 0 || priceRange[1] !== 10000) && (
             <button
               onClick={() => {
                 setSelectedCategory('all');
                 setSearchQuery('');
                 setShowAvailableOnly(false);
+                setShowFavoritesOnly(false);
                 setPriceRange([0, 10000]);
               }}
               className="text-teal-600 text-sm font-medium"
@@ -221,6 +252,7 @@ export default function Services() {
               setSelectedCategory('all');
               setSearchQuery('');
               setShowAvailableOnly(false);
+              setShowFavoritesOnly(false);
               setPriceRange([0, 10000]);
             }}
           />

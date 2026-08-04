@@ -16,6 +16,7 @@ import {
   Calendar,
   Award
 } from 'lucide-react';
+import FavoriteButton from '@/components/technician/FavoriteButton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -99,6 +100,10 @@ export default function TechnicianDetail() {
                     Verified
                   </Badge>
                 )}
+                <FavoriteButton
+                  technician={technician}
+                  className="w-9 h-9 ml-auto md:ml-0 shadow-md"
+                />
               </div>
               
               <p className="text-teal-100 text-lg mb-4">
