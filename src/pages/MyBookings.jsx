@@ -72,7 +72,7 @@ export default function MyBookings() {
             ) : activeBookings.length > 0 ? (
               <div className="space-y-4">
                 {activeBookings.map((booking) => (
-                  <BookingCard key={booking.id} booking={booking} />
+                  <BookingCard key={booking.id} booking={booking} user={user} />
                 ))}
               </div>
             ) : (
@@ -92,7 +92,7 @@ export default function MyBookings() {
             ) : completedBookings.length > 0 ? (
               <div className="space-y-4">
                 {completedBookings.map((booking) => (
-                  <BookingCard key={booking.id} booking={booking} />
+                  <BookingCard key={booking.id} booking={booking} user={user} />
                 ))}
               </div>
             ) : (
