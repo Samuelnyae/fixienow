@@ -1,0 +1,135 @@
+{
+  "name": "Ride",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Customer who ordered the ride"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "user_phone": {
+      "type": "string"
+    },
+    "ride_type": {
+      "type": "string",
+      "enum": [
+        "cab",
+        "truck",
+        "bodaboda"
+      ],
+      "description": "Type of ride: cab, truck or boda boda"
+    },
+    "pickup": {
+      "type": "object",
+      "description": "Pickup location",
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        }
+      }
+    },
+    "destination": {
+      "type": "object",
+      "description": "Drop-off location",
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "searching",
+        "assigned",
+        "in_progress",
+        "completed",
+        "cancelled"
+      ],
+      "default": "searching",
+      "description": "Lifecycle state of the ride"
+    },
+    "driver_name": {
+      "type": "string",
+      "description": "Assigned driver name"
+    },
+    "driver_phone": {
+      "type": "string",
+      "description": "Driver phone"
+    },
+    "vehicle_model": {
+      "type": "string",
+      "description": "Vehicle make/model"
+    },
+    "vehicle_plate": {
+      "type": "string",
+      "description": "Number plate"
+    },
+    "distance_km": {
+      "type": "number",
+      "description": "Estimated trip distance in km"
+    },
+    "duration_min": {
+      "type": "number",
+      "description": "Estimated trip duration in minutes"
+    },
+    "estimated_fare": {
+      "type": "number",
+      "description": "Estimated fare in KES"
+    },
+    "final_fare": {
+      "type": "number",
+      "description": "Final charged fare in KES"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "mpesa",
+        "cash",
+        "wallet"
+      ],
+      "default": "cash"
+    },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "paid",
+        "refunded"
+      ],
+      "default": "pending"
+    },
+    "rating": {
+      "type": "number",
+      "description": "Customer rating 1-5"
+    },
+    "booked_via": {
+      "type": "string",
+      "enum": [
+        "app",
+        "whatsapp",
+        "telegram",
+        "ussd"
+      ],
+      "default": "app"
+    }
+  },
+  "required": [
+    "user_id",
+    "ride_type"
+  ]
+}

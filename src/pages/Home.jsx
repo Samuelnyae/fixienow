@@ -16,6 +16,10 @@ import {
   UserCheck,
   Calendar,
   ShieldCheck,
+  Car,
+  Truck,
+  Bike,
+  Navigation,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -165,6 +169,57 @@ export default function Home() {
               </Link>
             );
           })}
+        </div>
+      </section>
+
+      {/* Get a ride — Bolt-style transport section */}
+      <section className="max-w-7xl mx-auto px-4 py-10">
+        <div className="rounded-3xl overflow-hidden" style={{ background: 'linear-gradient(135deg, #0B463C 0%, #14443B 100%)' }}>
+          <div className="px-6 sm:px-10 py-8 sm:py-10">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+              <div>
+                <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 mb-3">
+                  <Navigation className="w-3.5 h-3.5 text-[#9CE11F]" />
+                  <span className="text-xs font-medium text-white">Fixie Rides</span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-white">Get a ride in minutes</h2>
+                <p className="text-teal-100/80 text-sm mt-1 max-w-md">
+                  Cab, boda boda, or truck — dispatched on demand, priced upfront, paid after the trip.
+                </p>
+              </div>
+              <Link
+                to="/OrderRide"
+                className="inline-flex items-center gap-2 bg-[#9CE11F] hover:bg-[#8ad019] text-[#0B463C] font-semibold rounded-xl px-5 py-3 transition-all hover:scale-[1.02] flex-shrink-0"
+              >
+                Order a ride <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {[
+                { key: 'cab', label: 'Cab', desc: 'Up to 4 passengers · KES 120 base', icon: Car },
+                { key: 'bodaboda', label: 'Boda boda', desc: 'Quick trips · KES 50 base', icon: Bike },
+                { key: 'truck', label: 'Truck', desc: 'Cargo & moving · KES 600 base', icon: Truck },
+              ].map((r) => {
+                const Icon = r.icon;
+                return (
+                  <Link
+                    key={r.key}
+                    to={`/OrderRide?type=${r.key}`}
+                    className="group bg-white/10 hover:bg-white/15 border border-white/10 rounded-2xl p-4 flex items-center gap-3 transition-all hover:-translate-y-0.5"
+                  >
+                    <div className="w-11 h-11 rounded-xl bg-[#9CE11F] text-[#0B463C] flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-white">{r.label}</p>
+                      <p className="text-xs text-teal-100/80 truncate">{r.desc}</p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </section>
 
