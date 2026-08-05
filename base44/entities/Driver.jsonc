@@ -1,0 +1,118 @@
+{
+  "name": "Driver",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Reference to User entity"
+    },
+    "name": {
+      "type": "string",
+      "description": "Full name"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email address"
+    },
+    "vehicle_type": {
+      "type": "string",
+      "enum": [
+        "cab",
+        "bodaboda",
+        "truck"
+      ],
+      "description": "Type of vehicle the driver operates"
+    },
+    "vehicle_model": {
+      "type": "string",
+      "description": "Vehicle make & model"
+    },
+    "vehicle_plate": {
+      "type": "string",
+      "description": "Number plate"
+    },
+    "license_number": {
+      "type": "string",
+      "description": "Driving license number"
+    },
+    "license_url": {
+      "type": "string",
+      "description": "Driving license document URL"
+    },
+    "insurance_url": {
+      "type": "string",
+      "description": "Vehicle insurance document URL"
+    },
+    "profile_photo": {
+      "type": "string",
+      "description": "Profile photo URL"
+    },
+    "bio": {
+      "type": "string",
+      "description": "Short bio"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Admin verification status"
+    },
+    "is_available": {
+      "type": "boolean",
+      "default": false,
+      "description": "Currently online and accepting rides"
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        }
+      }
+    },
+    "service_areas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Areas where the driver usually operates"
+    },
+    "rating": {
+      "type": "number",
+      "default": 0
+    },
+    "total_trips": {
+      "type": "number",
+      "default": 0
+    },
+    "wallet_balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Earnings balance in KES"
+    },
+    "years_experience": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "name",
+    "phone",
+    "vehicle_type",
+    "vehicle_model",
+    "vehicle_plate"
+  ]
+}

@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/table';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import AdminToolsManager from '../components/admin/AdminToolsManager';
+import AdminDriversManager from '../components/admin/AdminDriversManager';
 
 // Skewed neomorphism design tokens
 const NEO_BASE = 'bg-[#e6ebf2]';
@@ -161,6 +162,7 @@ export default function AdminDashboard() {
               { value: 'technicians', label: 'Technicians' },
               { value: 'bookings', label: 'Bookings' },
               { value: 'tools', label: 'Tools' },
+              { value: 'drivers', label: 'Drivers' },
             ].map((tab) => (
               <TabsTrigger
                 key={tab.value}
@@ -477,6 +479,11 @@ export default function AdminDashboard() {
           {/* Tools Marketplace */}
           <TabsContent value="tools" className="mt-6">
             <AdminToolsManager user={user} />
+          </TabsContent>
+
+          {/* Drivers / Fleet */}
+          <TabsContent value="drivers" className="mt-6">
+            <AdminDriversManager user={user} />
           </TabsContent>
         </Tabs>
       </div>

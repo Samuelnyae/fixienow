@@ -69,6 +69,30 @@ export const DRIVER_POOL = {
   ],
 };
 
+// Pick the nearest real driver from a list, using each driver's stored
+// location or first resolvable service-area coordinate. Returns null if none
+// can be geolocated (caller should then fall back to a default).
+export function nearestDriverFromList(drivers, pickup) {
+  if (!drivers || drivers.length === 0 || !pickup) return null;
+  let best = null;
+  let bestDist = Infinity;
+  for (const d of drivers) {
+    let coords = null;
+    if (d.location?.lat && d.location?.lng) {
+      coords = { lat: d.location.lat, lng: d.location.lng };
+    } else if (d.service_areas?.length) {
+      for (const a of d.service_areas) {
+        const c = resolveAreaCoords(a);
+        if (c) { coords = c; break; }
+      }
+    }
+    if (!coords) continue;
+    const dist = haversineKm(pickup, coords);
+    if (dist < bestDist) { bestDist = dist; best = d; }
+  }
+  return best;
+}
+
 export function pickDriver(type) {
   const pool = DRIVER_POOL[type] || DRIVER_POOL.cab;
   return pool[Math.floor(Math.random() * pool.length)];

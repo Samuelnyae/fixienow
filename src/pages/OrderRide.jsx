@@ -27,6 +27,7 @@ import {
   resolveCoords,
   fallbackCoords,
   pickDriver,
+  nearestDriverFromList,
   NAIROBI_CBD,
 } from '@/lib/rideConfig';
 
@@ -130,7 +131,17 @@ export default function OrderRide() {
     setError('');
     setSubmitting(true);
     try {
-      const drv = pickDriver(rideType);
+      // Prefer a real, available, verified driver; fall back to the simulated fleet
+      let drv = null;
+      try {
+        const liveDrivers = await base44.entities.Driver.filter(
+          { vehicle_type: rideType, verification_status: 'approved', is_available: true },
+          '-rating', 50
+        );
+        drv = nearestDriverFromList(liveDrivers, pickupCoords) || liveDrivers[0] || null;
+      } catch (e) { /* Driver entity unavailable — use simulated fleet */ }
+      if (!drv) drv = pickDriver(rideType);
+
       const newRide = await base44.entities.Ride.create({
         user_id: user.id,
         user_name: user.full_name,
@@ -160,6 +171,7 @@ export default function OrderRide() {
         setTimeout(async () => {
           const assigned = await base44.entities.Ride.update(newRide.id, {
             status: 'assigned',
+            driver_id: drv.id,
             driver_name: drv.name,
             driver_phone: drv.phone,
             vehicle_model: drv.vehicle_model,

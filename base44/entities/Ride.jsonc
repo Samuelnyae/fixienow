@@ -63,6 +63,10 @@
       "default": "searching",
       "description": "Lifecycle state of the ride"
     },
+    "driver_id": {
+      "type": "string",
+      "description": "Assigned Driver entity ID"
+    },
     "driver_name": {
       "type": "string",
       "description": "Assigned driver name"

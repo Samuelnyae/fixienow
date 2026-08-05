@@ -8,6 +8,7 @@ import {
   Calendar, 
   User, 
   Wrench,
+  Wallet,
   Menu,
   X,
   LogOut,
@@ -45,6 +46,7 @@ export default function Layout({ children, currentPageName }) {
 
   const isAdmin = user?.role === 'admin' || user?.user_type === 'admin';
   const isTechnician = user?.user_type === 'technician';
+  const isDriver = user?.user_type === 'driver';
 
   const customerNav = [
     { name: 'Home', icon: Home, page: 'Home' },
@@ -60,7 +62,13 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Profile', icon: User, page: 'TechnicianProfile' },
   ];
 
-  const navItems = isTechnician ? technicianNav : customerNav;
+  const driverNav = [
+    { name: 'Dashboard', icon: Home, page: 'DriverDashboard' },
+    { name: 'Earnings', icon: Wallet, page: 'Wallet' },
+    { name: 'Profile', icon: User, page: 'Profile' },
+  ];
+
+  const navItems = isTechnician ? technicianNav : isDriver ? driverNav : customerNav;
 
   // Hide layout on auth pages
   const hideLayout = ['Login', 'TechnicianRegister'].includes(currentPageName);
