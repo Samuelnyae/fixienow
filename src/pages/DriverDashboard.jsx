@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
+import CreditScoreCard from '@/components/credit/CreditScoreCard';
+import { driverProfile } from '@/lib/creditScore';
 
 const VEHICLE_ICON = { cab: Car, bodaboda: Bike, truck: Truck };
 const STATUS_FLOW = ['searching', 'assigned', 'in_progress', 'completed'];
@@ -193,6 +195,9 @@ export default function DriverDashboard() {
                 <p className="text-sm text-gray-500">No active ride right now. {driver.is_available ? 'Stay online to receive requests.' : 'Go online to start receiving rides.'}</p>
               </div>
             )}
+
+            {/* Fixie Credit Score */}
+            <CreditScoreCard profile={driverProfile(driver)} />
 
             {/* Recent rides */}
             <div className="bg-white rounded-2xl border border-gray-100 p-4">

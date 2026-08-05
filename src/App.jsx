@@ -17,6 +17,7 @@ import USSDBooking from '@/pages/USSDBooking';
 import OrderRide from '@/pages/OrderRide';
 import DriverRegister from '@/pages/DriverRegister';
 import DriverDashboard from '@/pages/DriverDashboard';
+import CreditReadiness from '@/pages/CreditReadiness';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -83,6 +84,11 @@ const AuthenticatedApp = () => {
       <Route path="/DriverDashboard" element={
         <LayoutWrapper currentPageName="DriverDashboard">
           <DriverDashboard />
+        </LayoutWrapper>
+      } />
+      <Route path="/CreditReadiness" element={
+        <LayoutWrapper currentPageName="CreditReadiness">
+          <CreditReadiness />
         </LayoutWrapper>
       } />
       {Object.entries(Pages).map(([path, Page]) => (

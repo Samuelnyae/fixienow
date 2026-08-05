@@ -17,6 +17,7 @@ import {
   Award
 } from 'lucide-react';
 import FavoriteButton from '@/components/technician/FavoriteButton';
+import { computeCreditScore, bandFor } from '@/lib/creditScore';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -100,6 +101,15 @@ export default function TechnicianDetail() {
                     Verified
                   </Badge>
                 )}
+                {(() => {
+                  const cs = computeCreditScore({ verification_status: technician.verification_status, rating: technician.rating, total_reviews: technician.total_reviews, total_jobs: technician.total_jobs, wallet_balance: technician.wallet_balance, years_experience: technician.years_experience, has_certificate: !!technician.certificate_url });
+                  const band = bandFor(cs.score);
+                  return cs.score >= 670 ? (
+                    <Badge className="border-0" style={{ background: band.ring, color: '#fff' }}>
+                      Credit-ready · {cs.score}
+                    </Badge>
+                  ) : null;
+                })()}
                 <FavoriteButton
                   technician={technician}
                   className="w-9 h-9 ml-auto md:ml-0 shadow-md"

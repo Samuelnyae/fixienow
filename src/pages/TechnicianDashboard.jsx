@@ -18,6 +18,8 @@ import EmptyState from '../components/common/EmptyState';
 import DashboardJobCard from '../components/technician/DashboardJobCard';
 import EarningsSummary from '../components/technician/EarningsSummary';
 import AISuggestionsPanel from '../components/technician/AISuggestionsPanel';
+import CreditScoreCard from '../components/credit/CreditScoreCard';
+import { technicianProfile } from '../lib/creditScore';
 
 export default function TechnicianDashboard() {
   const [user, setUser] = useState(null);
@@ -228,6 +230,9 @@ export default function TechnicianDashboard() {
             </div>
           ))}
         </div>
+
+        {/* Fixie Credit Score */}
+        <CreditScoreCard profile={technicianProfile(technician)} />
 
         {/* New Job Requests */}
         {pendingJobs.length > 0 && (

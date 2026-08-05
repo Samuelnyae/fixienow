@@ -127,14 +127,24 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Links */}
-        <Link
-          to={createPageUrl('FraudDetection')}
-          className={`flex items-center gap-3 ${NEO_RAISED} rounded-2xl px-4 py-3 hover:shadow-[inset_4px_4px_8px_#c3cad8,inset_-4px_-4px_8px_#ffffff] transition-all w-fit`}
-        >
-          <AlertTriangle className="w-5 h-5 text-red-600" />
-          <span className="font-medium text-red-700 text-sm">AI Fraud Detection</span>
-          <Shield className="w-4 h-4 text-red-400" />
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            to={createPageUrl('FraudDetection')}
+            className={`flex items-center gap-3 ${NEO_RAISED} rounded-2xl px-4 py-3 hover:shadow-[inset_4px_4px_8px_#c3cad8,inset_-4px_-4px_8px_#ffffff] transition-all w-fit`}
+          >
+            <AlertTriangle className="w-5 h-5 text-red-600" />
+            <span className="font-medium text-red-700 text-sm">AI Fraud Detection</span>
+            <Shield className="w-4 h-4 text-red-400" />
+          </Link>
+          <Link
+            to={createPageUrl('CreditReadiness')}
+            className={`flex items-center gap-3 ${NEO_RAISED} rounded-2xl px-4 py-3 hover:shadow-[inset_4px_4px_8px_#c3cad8,inset_-4px_-4px_8px_#ffffff] transition-all w-fit`}
+          >
+            <Shield className="w-5 h-5 text-[#0B463C]" />
+            <span className="font-medium text-[#0B463C] text-sm">Credit Readiness</span>
+            <CheckCircle2 className="w-4 h-4 text-[#0B463C]/40" />
+          </Link>
+        </div>
 
         {/* Stats — strict 2×2 grid, consistent padding, centered icons */}
         <div className="grid grid-cols-2 gap-4 sm:gap-6">
