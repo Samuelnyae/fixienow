@@ -16,7 +16,9 @@ import {
 } from 'lucide-react';
 import RideMap from '@/components/ride/RideMap';
 import RideTypeCard from '@/components/ride/RideTypeCard';
+import RideSafetyPanel from '@/components/ride/RideSafetyPanel';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   RIDE_TYPES,
@@ -50,6 +52,9 @@ export default function OrderRide() {
   const [error, setError] = useState('');
   const [rating, setRating] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [safeRide, setSafeRide] = useState(false);
+  const [emergencyName, setEmergencyName] = useState('');
+  const [emergencyPhone, setEmergencyPhone] = useState('');
 
   const timers = useRef([]);
 
@@ -142,6 +147,7 @@ export default function OrderRide() {
       } catch (e) { /* Driver entity unavailable — use simulated fleet */ }
       if (!drv) drv = pickDriver(rideType);
 
+      const shareToken = (crypto?.randomUUID?.() || Math.random().toString(36).slice(2)) + Date.now().toString(36);
       const newRide = await base44.entities.Ride.create({
         user_id: user.id,
         user_name: user.full_name,
@@ -155,6 +161,10 @@ export default function OrderRide() {
         payment_method: 'cash',
         status: 'searching',
         booked_via: 'app',
+        safe_ride: safeRide,
+        emergency_contact_name: safeRide ? emergencyName.trim() : '',
+        emergency_contact_phone: safeRide ? emergencyPhone.trim() : '',
+        share_token: safeRide ? shareToken : '',
       });
       setRide(newRide);
       setDriver(drv);
@@ -339,6 +349,44 @@ export default function OrderRide() {
               </div>
             )}
 
+            {/* Women Safe Ride */}
+            <div className="bg-white rounded-2xl border border-pink-100 shadow-sm p-4">
+              <button
+                onClick={() => setSafeRide((v) => !v)}
+                className="flex items-center gap-3 w-full text-left"
+              >
+                <div className="w-9 h-9 rounded-xl bg-pink-600 text-white flex items-center justify-center">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900 text-sm">Women Safe Ride</p>
+                  <p className="text-xs text-gray-500">Verified driver · share live trip · one-tap SOS</p>
+                </div>
+                <div className={`w-11 h-6 rounded-full transition-colors ${safeRide ? 'bg-pink-600' : 'bg-gray-200'}`}>
+                  <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform mt-0.5 ${safeRide ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                </div>
+              </button>
+              {safeRide && (
+                <div className="mt-4 pt-4 border-t border-pink-100 space-y-3">
+                  <p className="text-xs text-pink-700">
+                    Add a trusted contact who can follow your trip live and be alerted if you trigger SOS.
+                  </p>
+                  <input
+                    value={emergencyName}
+                    onChange={(e) => setEmergencyName(e.target.value)}
+                    placeholder="Emergency contact name"
+                    className="w-full h-11 px-3 rounded-xl bg-pink-50 border border-pink-100 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                  />
+                  <input
+                    value={emergencyPhone}
+                    onChange={(e) => setEmergencyPhone(e.target.value)}
+                    placeholder="Emergency contact phone (e.g. 0712 345 678)"
+                    className="w-full h-11 px-3 rounded-xl bg-pink-50 border border-pink-100 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
+                  />
+                </div>
+              )}
+            </div>
+
             {error && (
               <div className="bg-red-50 rounded-xl p-3 text-sm text-red-700 border border-red-100">{error}</div>
             )}
@@ -421,6 +469,7 @@ export default function OrderRide() {
                 </div>
               </div>
             </div>
+            {ride?.safe_ride && <RideSafetyPanel ride={ride} onUpdate={(r) => setRide(r)} />}
             <Button onClick={cancelRide} variant="outline" className="w-full h-11 rounded-xl">
               Cancel ride
             </Button>
@@ -452,6 +501,7 @@ export default function OrderRide() {
                 <Phone className="w-4 h-4" />
               </a>
             </div>
+            {ride?.safe_ride && <RideSafetyPanel ride={ride} onUpdate={(r) => setRide(r)} />}
           </div>
         )}
 

@@ -130,6 +130,37 @@
         "ussd"
       ],
       "default": "app"
+    },
+    "safe_ride": {
+      "type": "boolean",
+      "default": false,
+      "description": "Women Safe Ride mode enabled"
+    },
+    "emergency_contact_name": {
+      "type": "string",
+      "description": "Trusted contact for Safe Ride"
+    },
+    "emergency_contact_phone": {
+      "type": "string",
+      "description": "Trusted contact phone"
+    },
+    "share_token": {
+      "type": "string",
+      "description": "Public token for the live trip-share link"
+    },
+    "sos_active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether an SOS alert is active"
+    },
+    "sos_triggered_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When SOS was triggered"
+    },
+    "sos_message": {
+      "type": "string",
+      "description": "Optional SOS detail message"
     }
   },
   "required": [
