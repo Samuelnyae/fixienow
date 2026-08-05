@@ -9,6 +9,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
 import CreditScoreCard from '@/components/credit/CreditScoreCard';
 import { driverProfile } from '@/lib/creditScore';
+import { useWalletStats } from '@/hooks/useWalletStats';
 
 const VEHICLE_ICON = { cab: Car, bodaboda: Bike, truck: Truck };
 const STATUS_FLOW = ['searching', 'assigned', 'in_progress', 'completed'];
@@ -35,6 +36,8 @@ export default function DriverDashboard() {
     enabled: !!driver?.id,
     refetchInterval: 5000,
   });
+
+  const { data: walletStats = null } = useWalletStats(driver?.user_id, !!driver);
 
   const activeRide = myRides.find((r) => ['searching', 'assigned', 'in_progress'].includes(r.status));
   const completedRides = myRides.filter((r) => r.status === 'completed');
@@ -197,7 +200,7 @@ export default function DriverDashboard() {
             )}
 
             {/* Fixie Credit Score */}
-            <CreditScoreCard profile={driverProfile(driver)} />
+            <CreditScoreCard profile={driverProfile(driver, walletStats)} />
 
             {/* Recent rides */}
             <div className="bg-white rounded-2xl border border-gray-100 p-4">

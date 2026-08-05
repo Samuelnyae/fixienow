@@ -1,15 +1,26 @@
 // Fixie Credit Score
-// Turns a provider's verified activity (technician or driver) into a 300–850
-// credit-readiness score that partner banks / SACCOs can use for micro-loans,
-// asset finance and insurance. Pure function — no SDK calls.
+// A 300–850 credit-readiness score built on three pillars of verified hustle:
+//   1. Successful job count      — proven, completed work volume
+//   2. Positive review ratings   — consistent customer satisfaction
+//   3. Wallet transaction history — documented financial behaviour
+// KYC verification acts as a gate: an unverified provider cannot be credit-ready.
 
-const BASE = 300;
-const MAX = 850;
+import { base44 } from '@/api/base44Client';
+
+export const BASE = 300;
+export const MAX = 850;
+// Without verified KYC a provider cannot exceed "Fair" — no credit eligibility.
+export const KYC_GATE_CAP = 580;
 
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 
-// Each factor contributes points up to its `weight`. Returned `factors` are
-// used by the UI to show what's driving the score.
+// Pillar weights (sum to 550; base 300 + 550 = 850 max)
+const WEIGHTS = {
+  jobs: 200,     // successful job count
+  reviews: 180,  // positive review ratings
+  wallet: 170,  // wallet transaction history
+};
+
 export function computeCreditScore(profile = {}) {
   const {
     verification_status,
@@ -17,53 +28,82 @@ export function computeCreditScore(profile = {}) {
     total_reviews = 0,
     total_jobs = 0,
     total_trips = 0,
-    wallet_balance = 0,
-    years_experience = 0,
-    has_certificate = false,
+    walletStats = null,   // { tx_count, tx_throughput } from loadWalletStats
+    wallet_balance = 0,   // fallback when walletStats unavailable
   } = profile;
 
+  const completedJobs = (total_jobs || 0) + (total_trips || 0);
   const factors = [];
   let score = BASE;
 
-  // 1. Verification (0 or 120)
-  const verifPts = verification_status === 'approved' ? 120 : 0;
-  score += verifPts;
-  factors.push({ label: 'KYC / Verification', points: verifPts, max: 120, value: verification_status === 'approved' ? 'Verified' : 'Pending' });
+  // --- Pillar 1: Successful job count (0–200) ---
+  // Volume of proven, completed work. Caps at 80 jobs: beyond that the
+  // hustle is well established and extra jobs add diminishing signal.
+  const jobPts = clamp((Math.min(completedJobs, 80) / 80) * WEIGHTS.jobs, 0, WEIGHTS.jobs);
+  score += jobPts;
+  factors.push({
+    label: 'Successful jobs',
+    key: 'jobs',
+    points: Math.round(jobPts),
+    max: WEIGHTS.jobs,
+    value: `${completedJobs} completed`,
+  });
 
-  // 2. Rating (0–150) — maps 0..5 stars to 0..150
-  const ratingPts = clamp((rating / 5) * 150, 0, 150);
-  score += ratingPts;
-  factors.push({ label: 'Customer rating', points: Math.round(ratingPts), max: 150, value: `${(rating || 0).toFixed(1)} / 5` });
-
-  // 3. Completed work volume (0–200) — jobs + trips, capped at 100
-  const volume = (total_jobs || 0) + (total_trips || 0);
-  const volumePts = clamp((Math.min(volume, 100) / 100) * 200, 0, 200);
-  score += volumePts;
-  factors.push({ label: 'Completed jobs / trips', points: Math.round(volumePts), max: 200, value: `${volume} done` });
-
-  // 4. Wallet activity (0–150) — balance proxy for transaction history, cap 50k
-  const walletPts = clamp((Math.min(wallet_balance || 0, 50000) / 50000) * 150, 0, 150);
-  score += walletPts;
-  factors.push({ label: 'Wallet activity', points: Math.round(walletPts), max: 150, value: `KES ${(wallet_balance || 0).toLocaleString()}` });
-
-  // 5. Experience (0–80) — capped at 10 years
-  const expPts = clamp((Math.min(years_experience || 0, 10) / 10) * 80, 0, 80);
-  score += expPts;
-  factors.push({ label: 'Years of experience', points: Math.round(expPts), max: 80, value: `${years_experience || 0} yrs` });
-
-  // 6. Review count (0–80) — signals consistent reputation, cap 50
-  const reviewPts = clamp((Math.min(total_reviews || 0, 50) / 50) * 80, 0, 80);
+  // --- Pillar 2: Positive review ratings (0–180) ---
+  // Blends rating quality with review consistency:
+  //   rating contributes up to 120  (rating/5 * 120)
+  //   review count contributes 60   (min(reviews,40)/40 * 60)
+  const ratingPts = clamp((rating / 5) * 120, 0, 120);
+  const reviewCountPts = clamp((Math.min(total_reviews || 0, 40) / 40) * 60, 0, 60);
+  const reviewPts = ratingPts + reviewCountPts;
   score += reviewPts;
-  factors.push({ label: 'Number of reviews', points: Math.round(reviewPts), max: 80, value: `${total_reviews || 0} reviews` });
+  factors.push({
+    label: 'Positive reviews',
+    key: 'reviews',
+    points: Math.round(reviewPts),
+    max: WEIGHTS.reviews,
+    value: `${(rating || 0).toFixed(1)} ★ · ${total_reviews || 0} reviews`,
+  });
 
-  // 7. Certificate / insurance (0–50)
-  const certPts = has_certificate ? 50 : 0;
-  score += certPts;
-  factors.push({ label: 'Trade certificate / insurance', points: certPts, max: 50, value: has_certificate ? 'Provided' : 'Missing' });
+  // --- Pillar 3: Wallet transaction history (0–170) ---
+  // Uses real transaction history when available, else falls back to balance:
+  //   tx count contributes up to 100     (min(count,50)/50 * 100)
+  //   throughput contributes up to 70    (min(throughput, 200k)/200k * 70)
+  let txCount = 0;
+  let throughput = 0;
+  let usingFallback = false;
+  if (walletStats) {
+    txCount = walletStats.tx_count || 0;
+    throughput = walletStats.tx_throughput || 0;
+  } else {
+    throughput = wallet_balance || 0;
+    usingFallback = true;
+  }
+  const txCountPts = clamp((Math.min(txCount, 50) / 50) * 100, 0, 100);
+  const throughputPts = clamp((Math.min(throughput, 200000) / 200000) * 70, 0, 70);
+  const walletPts = txCountPts + throughputPts;
+  score += walletPts;
+  factors.push({
+    label: 'Wallet history',
+    key: 'wallet',
+    points: Math.round(walletPts),
+    max: WEIGHTS.wallet,
+    value: usingFallback
+      ? `KES ${(wallet_balance || 0).toLocaleString()} balance`
+      : `${txCount} transactions · KES ${Math.round(throughput).toLocaleString()}`,
+  });
 
   score = clamp(Math.round(score), BASE, MAX);
 
-  return { score, band: bandFor(score), tier: tierFor(score), factors };
+  // KYC gate — unverified providers cannot reach credit-ready tiers
+  const kycVerified = verification_status === 'approved';
+  let gated = false;
+  if (!kycVerified && score > KYC_GATE_CAP) {
+    score = KYC_GATE_CAP;
+    gated = true;
+  }
+
+  return { score, band: bandFor(score), tier: tierFor(score), factors, kycVerified, gated };
 }
 
 export function bandFor(score) {
@@ -75,29 +115,50 @@ export function bandFor(score) {
 }
 
 export function tierFor(score) {
-  if (score >= 740) return 'Credit-ready';      // pre-qualified for loans / asset finance
-  if (score >= 670) return 'Emerging';         // eligible for small starter credit
-  if (score >= 580) return 'Building';         // needs more history
-  return 'Early stage';                        // focus on onboarding + first jobs
+  if (score >= 740) return 'Credit-ready';
+  if (score >= 670) return 'Emerging';
+  if (score >= 580) return 'Building';
+  return 'Early stage';
+}
+
+// Fetch a wallet's completed transaction history and reduce it to the two
+// numbers the credit score needs: count of transactions and total throughput
+// (sum of all completed transaction amounts, in & out).
+export async function loadWalletStats(walletId) {
+  if (!walletId) return { tx_count: 0, tx_throughput: 0 };
+  try {
+    const [outgoing, incoming] = await Promise.all([
+      base44.entities.Transaction.filter(
+        { from_wallet_id: walletId, status: 'completed' },
+        '-created_date', 200
+      ),
+      base44.entities.Transaction.filter(
+        { to_wallet_id: walletId, status: 'completed' },
+        '-created_date', 200
+      ),
+    ]);
+    const txs = [...(outgoing || []), ...(incoming || [])];
+    const tx_throughput = txs.reduce((sum, t) => sum + (t.amount || 0), 0);
+    return { tx_count: txs.length, tx_throughput };
+  } catch {
+    return { tx_count: 0, tx_throughput: 0 };
+  }
 }
 
 // Normalise a Technician record into the profile shape computeCreditScore reads.
-export const technicianProfile = (t = {}) => ({
+export const technicianProfile = (t = {}, walletStats = null) => ({
   verification_status: t.verification_status,
   rating: t.rating,
   total_reviews: t.total_reviews,
   total_jobs: t.total_jobs,
   wallet_balance: t.wallet_balance,
-  years_experience: t.years_experience,
-  has_certificate: !!t.certificate_url,
+  walletStats,
 });
 
-export const driverProfile = (d = {}) => ({
+export const driverProfile = (d = {}, walletStats = null) => ({
   verification_status: d.verification_status,
   rating: d.rating,
-  total_reviews: 0,
   total_trips: d.total_trips,
   wallet_balance: d.wallet_balance,
-  years_experience: d.years_experience,
-  has_certificate: !!d.insurance_url,
+  walletStats,
 });

@@ -20,6 +20,7 @@ import EarningsSummary from '../components/technician/EarningsSummary';
 import AISuggestionsPanel from '../components/technician/AISuggestionsPanel';
 import CreditScoreCard from '../components/credit/CreditScoreCard';
 import { technicianProfile } from '../lib/creditScore';
+import { useWalletStats } from '../hooks/useWalletStats';
 
 export default function TechnicianDashboard() {
   const [user, setUser] = useState(null);
@@ -56,6 +57,8 @@ export default function TechnicianDashboard() {
     enabled: !!technician,
     refetchInterval: 30000, // live refresh every 30s
   });
+
+  const { data: walletStats = null } = useWalletStats(technician?.user_id, !!technician);
 
   const toggleAvailabilityMutation = useMutation({
     mutationFn: (isAvailable) =>
@@ -232,7 +235,7 @@ export default function TechnicianDashboard() {
         </div>
 
         {/* Fixie Credit Score */}
-        <CreditScoreCard profile={technicianProfile(technician)} />
+        <CreditScoreCard profile={technicianProfile(technician, walletStats)} />
 
         {/* New Job Requests */}
         {pendingJobs.length > 0 && (
