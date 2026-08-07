@@ -244,7 +244,7 @@ export default function Layout({ children, currentPageName }) {
           href={base44.agents.getWhatsAppConnectURL('fixie_booking_agent')}
           target="_blank"
           rel="noopener noreferrer"
-          className="fixed bottom-20 right-4 md:bottom-6 z-40 flex items-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white pl-3 pr-4 py-3 rounded-full shadow-lg shadow-black/10 transition-all hover:scale-105"
+          className="fixed bottom-28 right-4 md:bottom-6 z-40 flex items-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white pl-3 pr-4 py-3 rounded-full shadow-lg shadow-black/10 transition-all hover:scale-105"
         >
           <MessageCircle className="w-5 h-5" />
           <span className="text-sm font-semibold hidden sm:inline">Book via WhatsApp</span>

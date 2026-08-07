@@ -3,20 +3,18 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { format, subDays, startOfDay, endOfDay, isToday, isFuture } from 'date-fns';
+import { format, subDays, isToday, isFuture } from 'date-fns';
 import {
-  Briefcase, Star, Bell, AlertCircle, Clock, CheckCircle2,
-  Wrench, ChevronRight, CalendarDays, Zap, User, Settings, Wallet, Package
+  Star, AlertCircle, Bell, CheckCircle2, CalendarDays, Zap, Briefcase,
+  ChevronRight, LineChart, MessageCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import EmptyState from '../components/common/EmptyState';
 import DashboardJobCard from '../components/technician/DashboardJobCard';
-import EarningsSummary from '../components/technician/EarningsSummary';
 import AISuggestionsPanel from '../components/technician/AISuggestionsPanel';
 import CreditScoreCard from '../components/credit/CreditScoreCard';
 import { technicianProfile } from '../lib/creditScore';
@@ -24,6 +22,7 @@ import { useWalletStats } from '../hooks/useWalletStats';
 
 export default function TechnicianDashboard() {
   const [user, setUser] = useState(null);
+  const [statusTab, setStatusTab] = useState('active');
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -55,7 +54,7 @@ export default function TechnicianDashboard() {
       100
     ),
     enabled: !!technician,
-    refetchInterval: 30000, // live refresh every 30s
+    refetchInterval: 30000,
   });
 
   const { data: walletStats = null } = useWalletStats(technician?.user_id, !!technician);
@@ -76,7 +75,6 @@ export default function TechnicianDashboard() {
     onSuccess: () => queryClient.invalidateQueries(['techAllJobs']),
   });
 
-  // Categorize jobs
   const { pendingJobs, activeJobs, upcomingJobs, completedJobs, todayCompleted, weekCompleted } = useMemo(() => {
     const now = new Date();
     const weekAgo = subDays(now, 7);
@@ -109,15 +107,14 @@ export default function TechnicianDashboard() {
 
   if (techLoading) return <LoadingSpinner text="Loading dashboard..." />;
 
-  // Guard: not a technician
   if (!technician) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-[#F5F7F9] flex items-center justify-center px-4">
         <div className="text-center">
           <AlertCircle className="w-16 h-16 text-amber-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold mb-2">Not Registered as Technician</h2>
           <p className="text-gray-500 mb-6">Register to access the technician dashboard</p>
-          <Button asChild className="bg-teal-600 hover:bg-teal-700">
+          <Button asChild className="bg-[#2E7D32] hover:bg-[#256628]">
             <Link to={createPageUrl('TechnicianRegister')}>Register Now</Link>
           </Button>
         </div>
@@ -127,9 +124,9 @@ export default function TechnicianDashboard() {
 
   if (technician.verification_status === 'pending') {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-[#F5F7F9] flex items-center justify-center px-4">
         <div className="text-center max-w-md">
-          <Clock className="w-16 h-16 text-amber-500 mx-auto mb-4" />
+          <AlertCircle className="w-16 h-16 text-amber-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold mb-2">Verification Pending</h2>
           <p className="text-gray-500 mb-6">Your application is under review. We'll notify you once approved (usually 24-48 hours).</p>
           <Button asChild variant="outline"><Link to={createPageUrl('Home')}>Back to Home</Link></Button>
@@ -140,7 +137,7 @@ export default function TechnicianDashboard() {
 
   if (technician.verification_status === 'rejected') {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-[#F5F7F9] flex items-center justify-center px-4">
         <div className="text-center max-w-md">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold mb-2">Application Rejected</h2>
@@ -151,45 +148,15 @@ export default function TechnicianDashboard() {
     );
   }
 
+  const statusTabs = [
+    { key: 'upcoming', label: 'Upcoming', count: upcomingJobs.length, icon: CalendarDays },
+    { key: 'active',   label: 'Active',   count: activeJobs.length,   icon: Zap },
+    { key: 'history',  label: 'History',  count: completedJobs.length, icon: CheckCircle2 },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-teal-50/20 to-gray-50">
-      {/* Top Header */}
-      <div className="bg-white border-b sticky top-16 z-40">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Avatar className="w-10 h-10 ring-2 ring-teal-100">
-              <AvatarImage src={technician.profile_photo} />
-              <AvatarFallback className="bg-teal-100 text-teal-700 font-semibold">
-                {technician.name?.[0]}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h1 className="font-bold text-gray-900 leading-tight">{technician.name}</h1>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500 capitalize">{technician.profession?.replace('_', ' ')}</span>
-                <span className="text-gray-300">·</span>
-                <span className="flex items-center gap-1 text-xs text-amber-600">
-                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                  {technician.rating?.toFixed(1) || '0.0'}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Availability Toggle */}
-          <div className="flex items-center gap-2">
-            <span className={`text-xs font-semibold ${technician.is_available ? 'text-green-600' : 'text-gray-400'}`}>
-              {technician.is_available ? 'Online' : 'Offline'}
-            </span>
-            <Switch
-              checked={technician.is_available}
-              onCheckedChange={(checked) => toggleAvailabilityMutation.mutate(checked)}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <div className="min-h-screen bg-[#F5F7F9]">
+      <div className="max-w-4xl mx-auto px-4 pt-6 pb-28 space-y-5">
 
         {/* Offline Banner */}
         {!technician.is_available && (
@@ -208,34 +175,61 @@ export default function TechnicianDashboard() {
           </div>
         )}
 
-        {/* Earnings Summary Card */}
-        <EarningsSummary
-          dailyEarnings={dailyEarnings}
-          weeklyEarnings={weeklyEarnings}
-          todayJobs={todayCompleted.length}
-          weekJobs={weekCompleted.length}
-        />
-
-        {/* Stats Row */}
-        <div className="grid grid-cols-4 gap-3">
-          {[
-            { label: 'Total Jobs',  value: technician.total_jobs || 0,                             icon: Briefcase,   color: 'text-teal-600 bg-teal-50' },
-            { label: 'Active',      value: activeJobs.length,                                       icon: Zap,         color: 'text-blue-600 bg-blue-50' },
-            { label: 'Upcoming',    value: upcomingJobs.length,                                     icon: CalendarDays,color: 'text-purple-600 bg-purple-50' },
-            { label: 'Reviews',     value: technician.total_reviews || 0,                           icon: Star,        color: 'text-amber-600 bg-amber-50' },
-          ].map(stat => (
-            <div key={stat.label} className="bg-white rounded-2xl p-4 border border-gray-200 text-center">
-              <div className={`w-9 h-9 rounded-xl ${stat.color} flex items-center justify-center mx-auto mb-2`}>
-                <stat.icon className="w-4.5 h-4.5 w-[18px] h-[18px]" />
-              </div>
-              <p className="text-xl font-bold text-gray-900">{stat.value}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{stat.label}</p>
+        {/* Unified Profile Card */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3 shadow-sm">
+          <Avatar className="w-14 h-14 ring-2 ring-green-100 flex-shrink-0">
+            <AvatarImage src={technician.profile_photo} />
+            <AvatarFallback className="bg-[#2E7D32]/10 text-[#2E7D32] font-semibold text-lg">
+              {technician.name?.[0]}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <h1 className="font-bold text-gray-900 truncate leading-tight">{technician.name}</h1>
+            <p className="text-sm text-gray-500 capitalize truncate">{technician.profession?.replace('_', ' ')}</p>
+            <div className="flex items-center gap-1 text-xs text-amber-600 mt-0.5">
+              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              <span className="font-medium">{technician.rating?.toFixed(1) || '0.0'} Star Rating</span>
             </div>
-          ))}
+          </div>
+          <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+            <span className={`text-xs font-bold tracking-wide ${technician.is_available ? 'text-[#2E7D32]' : 'text-gray-400'}`}>
+              {technician.is_available ? 'ONLINE' : 'OFFLINE'}
+            </span>
+            <Switch
+              checked={technician.is_available}
+              onCheckedChange={(checked) => toggleAvailabilityMutation.mutate(checked)}
+            />
+          </div>
         </div>
 
-        {/* Fixie Credit Score */}
-        <CreditScoreCard profile={technicianProfile(technician, walletStats)} />
+        {/* Dashboard Overview — consolidated hero card */}
+        <div className="rounded-2xl p-5 text-white shadow-sm" style={{ background: '#2E7D32' }}>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-base">Dashboard Overview</h2>
+            <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center">
+              <LineChart className="w-5 h-5 text-white" />
+            </div>
+          </div>
+
+          <div>
+            <p className="text-white/80 text-sm">Today's Earnings</p>
+            <p className="text-3xl font-bold tracking-tight">KES {dailyEarnings.toLocaleString()}</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-white/20">
+            <div>
+              <p className="text-white/70 text-xs">Jobs Done Today</p>
+              <p className="text-lg font-bold">{todayCompleted.length}</p>
+            </div>
+            <div>
+              <p className="text-white/70 text-xs">This Week</p>
+              <p className="text-lg font-bold">
+                KES {weeklyEarnings.toLocaleString()}
+                <span className="text-white/70 text-sm font-medium"> ({weekCompleted.length} Job{weekCompleted.length !== 1 ? 's' : ''})</span>
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* New Job Requests */}
         {pendingJobs.length > 0 && (
@@ -261,49 +255,41 @@ export default function TechnicianDashboard() {
           </div>
         )}
 
-        {/* Jobs Tabs: Active / Upcoming / Completed */}
-        <Tabs defaultValue="active">
-          <div className="flex items-center justify-between mb-3">
-            <TabsList className="bg-gray-100">
-              <TabsTrigger value="active" className="text-xs">
-                Active
-                {activeJobs.length > 0 && (
-                  <span className="ml-1.5 bg-teal-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-semibold">
-                    {activeJobs.length}
+        {/* Consolidated horizontal status bar */}
+        <div className="grid grid-cols-3 gap-2">
+          {statusTabs.map(tab => {
+            const isActive = statusTab === tab.key;
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setStatusTab(tab.key)}
+                className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
+                  isActive
+                    ? 'border-[#2E7D32] bg-[#2E7D32]/5 text-[#2E7D32]'
+                    : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+                {tab.count > 0 && (
+                  <span className={`ml-0.5 text-xs font-bold ${isActive ? 'text-[#2E7D32]' : 'text-gray-400'}`}>
+                    ({tab.count})
                   </span>
                 )}
-              </TabsTrigger>
-              <TabsTrigger value="upcoming" className="text-xs">
-                Upcoming
-                {upcomingJobs.length > 0 && (
-                  <span className="ml-1.5 bg-purple-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-semibold">
-                    {upcomingJobs.length}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="history" className="text-xs">History</TabsTrigger>
-            </TabsList>
-            <Link
-              to={createPageUrl('TechnicianJobs')}
-              className="text-xs font-medium text-teal-600 hover:text-teal-700 flex items-center gap-1"
-            >
-              Manage All
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
+              </button>
+            );
+          })}
+        </div>
 
-          {/* Active Jobs */}
-          <TabsContent value="active" className="mt-0 space-y-3">
+        {/* Status content */}
+        {statusTab === 'active' && (
+          <div className="space-y-3">
             {jobsLoading ? (
               <LoadingSpinner />
             ) : activeJobs.length > 0 ? (
               activeJobs.map(job => (
-                <DashboardJobCard
-                  key={job.id}
-                  job={job}
-                  onAccept={() => {}}
-                  onDecline={() => {}}
-                />
+                <DashboardJobCard key={job.id} job={job} onAccept={() => {}} onDecline={() => {}} />
               ))
             ) : (
               <EmptyState
@@ -312,32 +298,25 @@ export default function TechnicianDashboard() {
                 description={technician.is_available ? "Waiting for new job requests" : "Go online to receive jobs"}
               />
             )}
-          </TabsContent>
+          </div>
+        )}
 
-          {/* Upcoming Scheduled */}
-          <TabsContent value="upcoming" className="mt-0 space-y-3">
+        {statusTab === 'upcoming' && (
+          <div className="space-y-3">
             {upcomingJobs.length > 0 ? (
               upcomingJobs.map(job => (
-                <DashboardJobCard
-                  key={job.id}
-                  job={job}
-                  onAccept={() => {}}
-                  onDecline={() => {}}
-                />
+                <DashboardJobCard key={job.id} job={job} onAccept={() => {}} onDecline={() => {}} />
               ))
             ) : (
-              <EmptyState
-                icon={CalendarDays}
-                title="No upcoming jobs"
-                description="Scheduled jobs will appear here"
-              />
+              <EmptyState icon={CalendarDays} title="No upcoming jobs" description="Scheduled jobs will appear here" />
             )}
-          </TabsContent>
+          </div>
+        )}
 
-          {/* Completed History */}
-          <TabsContent value="history" className="mt-0">
+        {statusTab === 'history' && (
+          <div>
             {completedJobs.length > 0 ? (
-              <div className="bg-white rounded-2xl border border-gray-200 divide-y overflow-hidden">
+              <div className="bg-white rounded-2xl border border-gray-100 divide-y overflow-hidden">
                 {completedJobs.slice(0, 15).map(job => (
                   <Link
                     key={job.id}
@@ -346,7 +325,7 @@ export default function TechnicianDashboard() {
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-xl bg-green-100 flex items-center justify-center">
-                        <CheckCircle2 className="w-4.5 h-4.5 w-[18px] h-[18px] text-green-600" />
+                        <CheckCircle2 className="w-[18px] h-[18px] text-green-600" />
                       </div>
                       <div>
                         <p className="font-medium text-sm text-gray-900 capitalize">
@@ -367,36 +346,16 @@ export default function TechnicianDashboard() {
                 ))}
               </div>
             ) : (
-              <EmptyState
-                icon={Briefcase}
-                title="No completed jobs yet"
-                description="Complete jobs to see them here"
-              />
+              <EmptyState icon={Briefcase} title="No completed jobs yet" description="Complete jobs to see them here" />
             )}
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
 
-        {/* AI Suggestions Panel */}
+        {/* Fixie Credit Score — detailed full-width widget */}
+        <CreditScoreCard profile={technicianProfile(technician, walletStats)} />
+
+        {/* AI Suggestions */}
         <AISuggestionsPanel technician={technician} completedJobs={completedJobs} />
-
-        {/* Quick Navigation */}
-        <div className="grid grid-cols-4 gap-3 pb-4">
-          {[
-            { label: 'All Jobs',   icon: Briefcase, page: 'TechnicianJobs',    color: 'bg-teal-50 text-teal-600 border-teal-200' },
-            { label: 'Earnings',   icon: Wallet,    page: 'TechnicianEarnings', color: 'bg-green-50 text-green-600 border-green-200' },
-            { label: 'My Profile', icon: User,      page: 'TechnicianProfile',  color: 'bg-purple-50 text-purple-600 border-purple-200' },
-            { label: 'Tool Shop',  icon: Package,   page: 'ToolsMarketplace',   color: 'bg-orange-50 text-orange-600 border-orange-200' },
-          ].map(nav => (
-            <Link
-              key={nav.page}
-              to={createPageUrl(nav.page)}
-              className={`flex flex-col items-center gap-2 p-4 rounded-2xl border ${nav.color} hover:opacity-80 transition-opacity`}
-            >
-              <nav.icon className="w-5 h-5" />
-              <span className="text-xs font-semibold">{nav.label}</span>
-            </Link>
-          ))}
-        </div>
       </div>
     </div>
   );
