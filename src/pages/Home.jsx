@@ -20,6 +20,7 @@ import {
   Truck,
   Bike,
   Navigation,
+  ShoppingBag,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -235,6 +236,25 @@ export default function Home() {
             <div className="flex-1 min-w-0">
               <h3 className="font-bold text-gray-900">Drive with Fixie</h3>
               <p className="text-sm text-gray-500 truncate">Register your cab, boda boda or truck and earn on every trip.</p>
+            </div>
+            <ArrowRight className="w-5 h-5 text-[#0B463C] flex-shrink-0" />
+          </div>
+        </Link>
+      </section>
+
+      {/* Tools Marketplace */}
+      <section className="max-w-7xl mx-auto px-4 pb-2 pt-4">
+        <Link
+          to={createPageUrl('ToolsMarketplace')}
+          className="block rounded-2xl border border-gray-100 bg-white p-5 sm:p-6 hover:shadow-md transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-[#0B463C] text-[#9CE11F] flex items-center justify-center flex-shrink-0">
+              <ShoppingBag className="w-6 h-6" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-gray-900">Tool Shop</h3>
+              <p className="text-sm text-gray-500 truncate">Buy tools & spare parts from verified technicians.</p>
             </div>
             <ArrowRight className="w-5 h-5 text-[#0B463C] flex-shrink-0" />
           </div>
