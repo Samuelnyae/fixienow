@@ -19,7 +19,8 @@ import RideTypeCard from '@/components/ride/RideTypeCard';
 import RideSafetyPanel from '@/components/ride/RideSafetyPanel';
 import SavedLocations from '@/components/ride/SavedLocations';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { ShieldCheck, Calendar, Clock, Zap, History } from 'lucide-react';
+import { ShieldCheck, Calendar, Clock, Zap, History, BellRing } from 'lucide-react';
+import { sendRideNotification, requestNotificationPermission } from '@/lib/rideNotifications';
 import { Button } from '@/components/ui/button';
 import {
   RIDE_TYPES,
@@ -59,6 +60,7 @@ export default function OrderRide() {
   const [bookingType, setBookingType] = useState('instant'); // instant | scheduled
   const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
+  const [rideAlert, setRideAlert] = useState(null); // { kind, title, message }
 
   const timers = useRef([]);
 
@@ -152,6 +154,8 @@ export default function OrderRide() {
     }
     setError('');
     setSubmitting(true);
+    setRideAlert(null);
+    requestNotificationPermission();
 
     // Scheduled ride: book it for later — no live dispatch yet.
     if (isScheduled) {
@@ -246,12 +250,30 @@ export default function OrderRide() {
         }, 3000)
       );
 
+      // nearby alert — driver approaching pickup (after assignment, before arrival)
+      timers.current.push(
+        setTimeout(() => {
+          setRideAlert({
+            kind: 'nearby',
+            title: `${drv.name} is nearby`,
+            message: 'Your driver is almost at your pickup location. Get ready to head out.',
+          });
+          sendRideNotification({ user, ride: newRide, driver: drv, kind: 'nearby' });
+        }, 6500)
+      );
+
       // assigned -> in_progress (driver arrived, trip started)
       timers.current.push(
         setTimeout(async () => {
           const ip = await base44.entities.Ride.update(newRide.id, { status: 'in_progress' });
           setRide(ip);
           setPhase('in_progress');
+          setRideAlert({
+            kind: 'arrived',
+            title: `${drv.name} has arrived`,
+            message: 'Your driver is at your pickup location. Please head out to meet them.',
+          });
+          sendRideNotification({ user, ride: ip, driver: drv, kind: 'arrived' });
         }, 10000)
       );
 
@@ -285,6 +307,7 @@ export default function OrderRide() {
     setRide(null);
     setDriver(null);
     setDriverPos(null);
+    setRideAlert(null);
   };
 
   const submitRating = async () => {
@@ -348,6 +371,40 @@ export default function OrderRide() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-4">
+        {/* Driver proximity alert */}
+        {rideAlert && (
+          <div
+            className={`rounded-2xl border p-3.5 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 ${
+              rideAlert.kind === 'arrived'
+                ? 'bg-emerald-50 border-emerald-200'
+                : 'bg-amber-50 border-amber-200'
+            }`}
+          >
+            <div
+              className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
+                rideAlert.kind === 'arrived' ? 'bg-emerald-600' : 'bg-amber-500'
+              } text-white`}
+            >
+              {rideAlert.kind === 'arrived' ? <MapPin className="w-5 h-5" /> : <BellRing className="w-5 h-5" />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className={`font-semibold text-sm ${rideAlert.kind === 'arrived' ? 'text-emerald-900' : 'text-amber-900'}`}>
+                {rideAlert.title}
+              </p>
+              <p className={`text-xs mt-0.5 ${rideAlert.kind === 'arrived' ? 'text-emerald-700' : 'text-amber-700'}`}>
+                {rideAlert.message}
+              </p>
+            </div>
+            <button
+              onClick={() => setRideAlert(null)}
+              className="text-gray-400 hover:text-gray-700 flex-shrink-0"
+              aria-label="Dismiss alert"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {/* SETUP */}
         {phase === 'setup' && (
           <>
