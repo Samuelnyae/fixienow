@@ -34,6 +34,7 @@ import { Slider } from '@/components/ui/slider';
 import TechnicianCard from '../components/home/TechnicianCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import EmptyState from '../components/common/EmptyState';
+import ServicesMap from '../components/services/ServicesMap';
 
 const categories = [
   { slug: 'all', name: 'All', icon: Filter },
@@ -58,6 +59,7 @@ export default function Services() {
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [location, setLocation] = useState('');
 
   const { data: technicians = [], isLoading } = useQuery({
     queryKey: ['technicians'],
@@ -174,6 +176,27 @@ export default function Services() {
             </Sheet>
           </div>
 
+          {/* Location */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 relative">
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Input
+                placeholder="Enter your location to see pros near you (e.g. Westlands)"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="pl-10 h-12 rounded-xl bg-gray-50 border-gray-200"
+              />
+              {location && (
+                <button
+                  onClick={() => setLocation('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                >
+                  <X className="w-4 h-4 text-gray-400" />
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Category Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
             {favorites.length > 0 && (
@@ -213,6 +236,10 @@ export default function Services() {
 
       {/* Results */}
       <div className="max-w-7xl mx-auto px-4 py-6">
+        {location.trim() && !isLoading && filteredTechnicians.length > 0 && (
+          <ServicesMap location={location.trim()} technicians={filteredTechnicians} />
+        )}
+
         {/* Results Count */}
         <div className="flex items-center justify-between mb-4">
           <p className="text-gray-500 text-sm">
