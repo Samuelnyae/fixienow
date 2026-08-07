@@ -17,8 +17,9 @@ import {
 import RideMap from '@/components/ride/RideMap';
 import RideTypeCard from '@/components/ride/RideTypeCard';
 import RideSafetyPanel from '@/components/ride/RideSafetyPanel';
+import SavedLocations from '@/components/ride/SavedLocations';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, Calendar, Clock, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   RIDE_TYPES,
@@ -55,6 +56,9 @@ export default function OrderRide() {
   const [safeRide, setSafeRide] = useState(false);
   const [emergencyName, setEmergencyName] = useState('');
   const [emergencyPhone, setEmergencyPhone] = useState('');
+  const [bookingType, setBookingType] = useState('instant'); // instant | scheduled
+  const [scheduledDate, setScheduledDate] = useState('');
+  const [scheduledTime, setScheduledTime] = useState('');
 
   const timers = useRef([]);
 
@@ -119,10 +123,19 @@ export default function OrderRide() {
     setDestCoords(resolveCoords(value) || fallbackCoords(value));
   };
 
+  // Quick-fill destination from a saved location
+  const pickSavedDestination = (loc) => {
+    if (!loc) return;
+    setDestAddr(loc.address);
+    setDestCoords(loc.lat && loc.lng ? { lat: loc.lat, lng: loc.lng } : (resolveCoords(loc.address) || fallbackCoords(loc.address)));
+  };
+
   const clearTimers = () => {
     timers.current.forEach(clearTimeout);
     timers.current = [];
   };
+
+  const isScheduled = bookingType === 'scheduled';
 
   const requestRide = async () => {
     if (!user) {
@@ -133,8 +146,49 @@ export default function OrderRide() {
       setError('Please set both pickup and destination.');
       return;
     }
+    if (isScheduled && (!scheduledDate || !scheduledTime)) {
+      setError('Please choose a date and time for your scheduled ride.');
+      return;
+    }
     setError('');
     setSubmitting(true);
+
+    // Scheduled ride: book it for later — no live dispatch yet.
+    if (isScheduled) {
+      try {
+        const newRide = await base44.entities.Ride.create({
+          user_id: user.id,
+          user_name: user.full_name,
+          user_phone: user.phone,
+          ride_type: rideType,
+          booking_type: 'scheduled',
+          scheduled_date: scheduledDate,
+          scheduled_time: scheduledTime,
+          pickup: { address: pickupAddr, lat: pickupCoords.lat, lng: pickupCoords.lng },
+          destination: { address: destAddr, lat: destCoords.lat, lng: destCoords.lng },
+          distance_km: +distanceKm.toFixed(2),
+          duration_min: durationMin,
+          estimated_fare: fare,
+          payment_method: 'cash',
+          status: 'scheduled',
+          booked_via: 'app',
+          safe_ride: safeRide,
+          emergency_contact_name: safeRide ? emergencyName.trim() : '',
+          emergency_contact_phone: safeRide ? emergencyPhone.trim() : '',
+        });
+        setRide(newRide);
+        setDriver(null);
+        setDriverPos(null);
+        setPhase('scheduled');
+        base44.analytics.track({ eventName: 'ride_scheduled', properties: { ride_type: rideType, fare, when: `${scheduledDate} ${scheduledTime}` } });
+      } catch (e) {
+        setError(e.message || 'Could not schedule your ride. Please try again.');
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
     try {
       // Prefer a real, available, verified driver; fall back to the simulated fleet
       let drv = null;
@@ -251,6 +305,8 @@ export default function OrderRide() {
     setPhase('setup');
     setRide(null);
     setRating(0);
+    setScheduledDate('');
+    setScheduledTime('');
   };
 
   if (!authChecked) return <LoadingSpinner text="Loading..." />;
@@ -292,6 +348,26 @@ export default function OrderRide() {
         {/* SETUP */}
         {phase === 'setup' && (
           <>
+            {/* Ride now / Schedule toggle */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-1.5 flex">
+              <button
+                onClick={() => setBookingType('instant')}
+                className={`flex-1 flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-semibold transition-colors ${
+                  bookingType === 'instant' ? 'bg-[#0B463C] text-white' : 'text-gray-500'
+                }`}
+              >
+                <Zap className="w-4 h-4" /> Ride now
+              </button>
+              <button
+                onClick={() => setBookingType('scheduled')}
+                className={`flex-1 flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-semibold transition-colors ${
+                  bookingType === 'scheduled' ? 'bg-[#0B463C] text-white' : 'text-gray-500'
+                }`}
+              >
+                <Calendar className="w-4 h-4" /> Schedule
+              </button>
+            </div>
+
             {/* Location inputs */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
               <div className="flex items-center gap-3">
@@ -327,6 +403,40 @@ export default function OrderRide() {
                 </div>
               </div>
             </div>
+
+            {/* Saved locations + schedule picker */}
+            {user && (
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+                <SavedLocations
+                  userId={user.id}
+                  onPick={pickSavedDestination}
+                  draft={destCoords ? { address: destAddr, lat: destCoords.lat, lng: destCoords.lng } : null}
+                />
+                {bookingType === 'scheduled' && (
+                  <div className="pt-3 border-t border-gray-100 grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 flex items-center gap-1"><Calendar className="w-3 h-3" /> Date</label>
+                      <input
+                        type="date"
+                        value={scheduledDate}
+                        min={new Date().toISOString().split('T')[0]}
+                        onChange={(e) => setScheduledDate(e.target.value)}
+                        className="w-full h-11 px-3 rounded-xl bg-gray-50 border border-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B463C]/20"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 flex items-center gap-1"><Clock className="w-3 h-3" /> Time</label>
+                      <input
+                        type="time"
+                        value={scheduledTime}
+                        onChange={(e) => setScheduledTime(e.target.value)}
+                        className="w-full h-11 px-3 rounded-xl bg-gray-50 border border-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-[#0B463C]/20"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Trip estimate */}
             {pickupCoords && destCoords && (
@@ -393,13 +503,15 @@ export default function OrderRide() {
 
             <Button
               onClick={requestRide}
-              disabled={submitting || !pickupCoords || !destCoords}
+              disabled={submitting || !pickupCoords || !destCoords || (isScheduled && (!scheduledDate || !scheduledTime))}
               className="w-full h-13 py-3.5 bg-[#111827] hover:bg-black text-white rounded-2xl text-base font-semibold disabled:opacity-50"
             >
               {submitting ? (
                 <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" /> Requesting...
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" /> {isScheduled ? 'Scheduling...' : 'Requesting...'}
                 </>
+              ) : isScheduled ? (
+                <>Schedule {selectedType.label} · {scheduledDate && scheduledTime ? `${scheduledDate} ${scheduledTime}` : 'pick time'}</>
               ) : (
                 <>Request {selectedType.label} · KES {fare ? fare.toLocaleString() : '—'}</>
               )}
@@ -408,6 +520,31 @@ export default function OrderRide() {
               By requesting, you agree to Fixie's ride terms. Pay by cash, M-Pesa or wallet after the trip.
             </p>
           </>
+        )}
+
+        {/* SCHEDULED */}
+        {phase === 'scheduled' && ride && (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 text-center">
+            <div className="w-14 h-14 rounded-full bg-[#0B463C]/10 flex items-center justify-center mx-auto mb-3">
+              <Calendar className="w-7 h-7 text-[#0B463C]" />
+            </div>
+            <h2 className="text-lg font-bold text-gray-900">Ride scheduled</h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Your {selectedType.label} is booked for <span className="font-medium text-gray-700">{scheduledDate} at {scheduledTime}</span>
+            </p>
+            <div className="bg-gray-50 rounded-2xl p-4 mt-4 text-left space-y-2 text-sm">
+              <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-[#0B463C]" /><span className="text-gray-600">{ride.pickup?.address || pickupAddr}</span></div>
+              <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 bg-[#111827]" /><span className="text-gray-600">{ride.destination?.address || destAddr}</span></div>
+              <div className="flex items-center justify-between border-t pt-2 mt-2">
+                <span className="text-gray-500">Est. fare</span>
+                <span className="font-semibold text-[#0B463C]">KES {(ride.estimated_fare || fare).toLocaleString()}</span>
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 mt-3">We'll match you with a nearby driver closer to your pickup time.</p>
+            <Button onClick={resetToSetup} className="w-full mt-5 h-12 bg-[#111827] hover:bg-black text-white rounded-2xl font-semibold">
+              Done
+            </Button>
+          </div>
         )}
 
         {/* SEARCHING */}
