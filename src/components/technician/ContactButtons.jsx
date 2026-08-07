@@ -38,7 +38,7 @@ export default function ContactButtons({ job }) {
   const chatLink = `${createPageUrl('BookingDetail')}?id=${job.id}&tab=chat`;
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+    <div className="grid grid-cols-2 gap-2">
       {/* Call */}
       {localPhone ? (
         <Button variant="outline" asChild className="h-10">
@@ -53,29 +53,6 @@ export default function ContactButtons({ job }) {
           Call
         </Button>
       )}
-
-      {/* WhatsApp */}
-      {whatsappUrl ? (
-        <Button asChild className="h-10 bg-[#25D366] hover:bg-[#1da851] text-white border-0">
-          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-            <WhatsAppIcon className="w-4 h-4 mr-1.5" />
-            WhatsApp
-          </a>
-        </Button>
-      ) : (
-        <Button disabled className="h-10 bg-[#25D366]/60 text-white border-0">
-          <WhatsAppIcon className="w-4 h-4 mr-1.5" />
-          WhatsApp
-        </Button>
-      )}
-
-      {/* Telegram */}
-      <Button asChild className="h-10 bg-[#229ED9] hover:bg-[#1a8bc4] text-white border-0">
-        <a href={telegramUrl} target="_blank" rel="noopener noreferrer">
-          <TelegramIcon className="w-4 h-4 mr-1.5" />
-          Telegram
-        </a>
-      </Button>
 
       {/* Chat (in-app) */}
       <Button variant="outline" asChild className="h-10">
