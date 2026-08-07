@@ -19,7 +19,7 @@ import RideTypeCard from '@/components/ride/RideTypeCard';
 import RideSafetyPanel from '@/components/ride/RideSafetyPanel';
 import SavedLocations from '@/components/ride/SavedLocations';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { ShieldCheck, Calendar, Clock, Zap } from 'lucide-react';
+import { ShieldCheck, Calendar, Clock, Zap, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   RIDE_TYPES,
@@ -331,6 +331,9 @@ export default function OrderRide() {
               <p className="text-xs text-gray-500">Cab · Boda boda · Truck</p>
             </div>
           </div>
+          <Link to="/RideHistory" className="ml-auto flex items-center gap-1.5 text-sm font-medium text-[#0B463C] hover:underline">
+            <History className="w-4 h-4" /> History
+          </Link>
         </div>
       </div>
 

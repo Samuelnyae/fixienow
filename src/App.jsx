@@ -19,6 +19,7 @@ import DriverRegister from '@/pages/DriverRegister';
 import DriverDashboard from '@/pages/DriverDashboard';
 import CreditReadiness from '@/pages/CreditReadiness';
 import RideShare from '@/pages/RideShare';
+import RideHistory from '@/pages/RideHistory';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -93,6 +94,11 @@ const AuthenticatedApp = () => {
         </LayoutWrapper>
       } />
       <Route path="/RideShare/:token" element={<RideShare />} />
+      <Route path="/RideHistory" element={
+        <LayoutWrapper currentPageName="RideHistory">
+          <RideHistory />
+        </LayoutWrapper>
+      } />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route
           key={path}
