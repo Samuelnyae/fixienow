@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Loader2, RotateCcw, ChevronLeft } from 'lucide-react';
+import { findCustomerWallet, getKesBalance, debitWallet } from '@/lib/ussdWallet';
 
 const SERVICES = [
   { key: '1', slug: 'mechanic', label: 'Mechanic' },
@@ -40,6 +41,7 @@ const initialState = {
   // shared
   amount: '',
   phone: '',
+  paymentMethod: '', // 'mpesa' | 'wallet'
 };
 
 export default function USSDBooking() {
@@ -128,7 +130,7 @@ export default function USSDBooking() {
       status: 'pending',
       location: { address: data.area },
       estimated_price: Number(data.amount) || 0,
-      payment_method: 'mpesa',
+      payment_method: data.paymentMethod === 'wallet' ? 'wallet' : 'mpesa',
     });
 
     if (matched.user_id) {
@@ -142,31 +144,64 @@ export default function USSDBooking() {
     }
 
     const amount = Number(data.amount) || 0;
+    const method = data.paymentMethod === 'wallet' ? 'wallet' : 'mpesa';
     let paidLine = '';
     if (amount > 0) {
       try {
-        await base44.entities.Payment.create({
-          booking_id: booking.id,
-          user_id: 'guest',
-          technician_id: matched.id,
-          amount,
-          method: 'mpesa',
-          status: 'completed',
-          mpesa_phone: data.phone,
-        });
-        const walletOk = await creditTechnicianWallet(matched, amount);
-        await base44.entities.Booking.update(booking.id, { payment_status: 'paid' });
-        if (matched.user_id) {
-          await base44.entities.Notification.create({
-            user_id: matched.user_id,
-            type: 'payment_received',
-            title: 'Payment Received',
-            message: `You received KES ${amount.toLocaleString()} for ${data.category} booking.`,
+        if (method === 'wallet') {
+          const customerWallet = await findCustomerWallet(data.phone);
+          if (!customerWallet) {
+            paidLine = `No Fixie wallet linked to ${data.phone}.\nTop up your wallet or pay via M-Pesa.`;
+          } else if (getKesBalance(customerWallet) < amount) {
+            paidLine = `Wallet balance KES ${getKesBalance(customerWallet).toLocaleString()} is too low.\nTop up your wallet or pay via M-Pesa.`;
+          } else {
+            await debitWallet(customerWallet, amount);
+            const walletOk = await creditTechnicianWallet(matched, amount);
+            await base44.entities.Payment.create({
+              booking_id: booking.id,
+              user_id: 'guest',
+              technician_id: matched.id,
+              amount,
+              method: 'wallet',
+              status: 'completed',
+            });
+            await base44.entities.Booking.update(booking.id, { payment_status: 'paid', payment_method: 'wallet' });
+            if (matched.user_id) {
+              await base44.entities.Notification.create({
+                user_id: matched.user_id,
+                type: 'payment_received',
+                title: 'Payment Received',
+                message: `You received KES ${amount.toLocaleString()} (wallet) for ${data.category} booking.`,
+                booking_id: booking.id,
+                metadata: { amount, category: data.category },
+              });
+            }
+            paidLine = `Paid: KES ${amount.toLocaleString()} (Wallet)\n→ Credited to ${matched.name}'s wallet${walletOk ? '' : ' balance'}`;
+          }
+        } else {
+          await base44.entities.Payment.create({
             booking_id: booking.id,
-            metadata: { amount, category: data.category },
+            user_id: 'guest',
+            technician_id: matched.id,
+            amount,
+            method: 'mpesa',
+            status: 'completed',
+            mpesa_phone: data.phone,
           });
+          const walletOk = await creditTechnicianWallet(matched, amount);
+          await base44.entities.Booking.update(booking.id, { payment_status: 'paid' });
+          if (matched.user_id) {
+            await base44.entities.Notification.create({
+              user_id: matched.user_id,
+              type: 'payment_received',
+              title: 'Payment Received',
+              message: `You received KES ${amount.toLocaleString()} for ${data.category} booking.`,
+              booking_id: booking.id,
+              metadata: { amount, category: data.category },
+            });
+          }
+          paidLine = `Paid: KES ${amount.toLocaleString()} (M-Pesa)\n→ Credited to ${matched.name}'s wallet${walletOk ? '' : ' balance'}`;
         }
-        paidLine = `Paid: KES ${amount.toLocaleString()} (M-Pesa)\n→ Credited to ${matched.name}'s wallet${walletOk ? '' : ' balance'}`;
       } catch (e) {
         paidLine = `Payment of KES ${amount.toLocaleString()} pending.`;
       }
@@ -269,6 +304,20 @@ export default function USSDBooking() {
     }
 
     const amount = Number(data.amount) || Number(tool.price) || 0;
+    const method = data.paymentMethod === 'wallet' ? 'wallet' : 'mpesa';
+
+    // For wallet payment, debit the customer's Fixie wallet first (no cash / no M-Pesa)
+    if (amount > 0 && method === 'wallet') {
+      const customerWallet = await findCustomerWallet(data.phone);
+      if (!customerWallet) {
+        return { success: false, message: `No Fixie wallet linked to ${data.phone}. Top up your wallet or pay via M-Pesa.` };
+      }
+      if (getKesBalance(customerWallet) < amount) {
+        return { success: false, message: `Wallet balance KES ${getKesBalance(customerWallet).toLocaleString()} is too low. Top up your wallet or pay via M-Pesa.` };
+      }
+      try { await debitWallet(customerWallet, amount); }
+      catch (e) { return { success: false, message: 'Could not complete wallet payment. Try M-Pesa.' }; }
+    }
 
     // Credit the seller's in-app wallet immediately
     let creditedTo = tool.seller_name || 'Fixie Store';
@@ -337,7 +386,7 @@ export default function USSDBooking() {
         `Price: KES ${tool.price}`,
         tool.brand ? `Brand: ${tool.brand}` : '',
         '',
-        `Paid: KES ${amount.toLocaleString()} (M-Pesa)`,
+        `Paid: KES ${amount.toLocaleString()} (${method === 'wallet' ? 'Wallet' : 'M-Pesa'})`,
         walletOk ? `→ Credited to ${creditedTo}'s wallet` : '',
         '',
         `We will call you on ${data.phone} to arrange delivery.`,
@@ -399,7 +448,12 @@ export default function USSDBooking() {
     if (step === 't:phone') { if (v) { patch({ phone: v }); setStep('t:amount'); } return; }
     if (step === 't:amount') {
       const n = Number(v.replace(/[^0-9.]/g, ''));
-      if (n > 0) { patch({ amount: n }); setStep('t:confirm'); }
+      if (n > 0) { patch({ amount: n }); setStep('t:pay'); }
+      return;
+    }
+    if (step === 't:pay') {
+      if (v === '1') { patch({ paymentMethod: 'mpesa' }); setStep('t:confirm'); }
+      else if (v === '2') { patch({ paymentMethod: 'wallet' }); setStep('t:confirm'); }
       return;
     }
     if (step === 't:confirm') {
@@ -437,7 +491,12 @@ export default function USSDBooking() {
     if (step === 'c:phone') { if (v) { patch({ phone: v }); setStep('c:amount'); } return; }
     if (step === 'c:amount') {
       const n = Number(v.replace(/[^0-9.]/g, ''));
-      if (n > 0) { patch({ amount: n }); setStep('c:confirm'); }
+      if (n > 0) { patch({ amount: n }); setStep('c:pay'); }
+      return;
+    }
+    if (step === 'c:pay') {
+      if (v === '1') { patch({ paymentMethod: 'mpesa' }); setStep('c:confirm'); }
+      else if (v === '2') { patch({ paymentMethod: 'wallet' }); setStep('c:confirm'); }
       return;
     }
     if (step === 'c:confirm') {
@@ -476,10 +535,12 @@ export default function USSDBooking() {
     if (step === 't:when') return 'When do you need help?\n\n1. Now (ASAP)\n2. Schedule for later';
     if (step === 't:sched') return 'Enter date and time\n(DD/MM HH:mm):\n\ne.g. 05/08 14:00';
     if (step === 't:phone') return 'Enter your phone number:\n(e.g. 0712345678)';
-    if (step === 't:amount') return 'Enter amount to pay (KES):\n(e.g. 1500)\n\nPaid via M-Pesa to the technician wallet.';
+    if (step === 't:amount') return 'Enter amount to pay (KES):\n(e.g. 1500)';
+    if (step === 't:pay') return 'Choose payment method:\n\n1. M-Pesa\n2. Fixie Wallet (pay from your balance)';
     if (step === 't:confirm') {
       const sched = data.bookingType === 'scheduled' ? `Date: ${data.scheduledDate} ${data.scheduledTime}\n` : '';
-      return `Confirm & pay:\n\nService: ${data.category}\nArea: ${data.area}\nProblem: ${data.description}\n${sched}Phone: ${data.phone}\nPay: KES ${data.amount} (M-Pesa)\n\n1. Confirm & Pay\n2. Cancel`;
+      const m = data.paymentMethod === 'wallet' ? 'Wallet' : 'M-Pesa';
+      return `Confirm & pay:\n\nService: ${data.category}\nArea: ${data.area}\nProblem: ${data.description}\n${sched}Phone: ${data.phone}\nPay: KES ${data.amount} (${m})\n\n1. Confirm & Pay\n2. Cancel`;
     }
 
     // Ride
@@ -501,11 +562,13 @@ export default function USSDBooking() {
     if (step === 'c:phone') return 'Enter your phone number:\n(e.g. 0712345678)';
     if (step === 'c:amount') {
       const tool = data.tools[data.toolIndex];
-      return `Enter amount to pay (KES):\nTool price: KES ${tool?.price || 0}\n\nPaid via M-Pesa to the seller wallet.`;
+      return `Enter amount to pay (KES):\nTool price: KES ${tool?.price || 0}`;
     }
+    if (step === 'c:pay') return 'Choose payment method:\n\n1. M-Pesa\n2. Fixie Wallet (pay from your balance)';
     if (step === 'c:confirm') {
       const tool = data.tools[data.toolIndex];
-      return `Confirm & pay:\n\nTool: ${tool?.name}\nPrice: KES ${tool?.price}\nPhone: ${data.phone}\nPay: KES ${data.amount} (M-Pesa)\n\n1. Confirm & Pay\n2. Cancel`;
+      const m = data.paymentMethod === 'wallet' ? 'Wallet' : 'M-Pesa';
+      return `Confirm & pay:\n\nTool: ${tool?.name}\nPrice: KES ${tool?.price}\nPhone: ${data.phone}\nPay: KES ${data.amount} (${m})\n\n1. Confirm & Pay\n2. Cancel`;
     }
 
     return '';
@@ -514,9 +577,9 @@ export default function USSDBooking() {
   const backStep = () => {
     const order = [
       'home',
-      't:svc', 't:area', 't:desc', 't:when', 't:sched', 't:phone', 't:amount', 't:confirm',
+      't:svc', 't:area', 't:desc', 't:when', 't:sched', 't:phone', 't:amount', 't:pay', 't:confirm',
       'r:type', 'r:pickup', 'r:dest', 'r:phone', 'r:confirm',
-      'c:cat', 'c:list', 'c:phone', 'c:amount', 'c:confirm',
+      'c:cat', 'c:list', 'c:phone', 'c:amount', 'c:pay', 'c:confirm',
     ];
     const i = order.indexOf(step);
     if (i > 0) setStep(order[i - 1]);
