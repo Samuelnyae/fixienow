@@ -150,8 +150,8 @@ export default function Home() {
               *#
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-white">Book without an account</h3>
-              <p className="text-sm text-gray-400 truncate">No download, no login — book a technician through the USSD menu.</p>
+              <h3 className="font-bold text-white">No account? Use USSD</h3>
+              <p className="text-sm text-gray-400 truncate">No download, no login — book a technician, get a ride, or buy tools.</p>
             </div>
             <ArrowRight className="w-5 h-5 text-green-400 group-hover:translate-x-1 transition-transform flex-shrink-0" />
           </div>
