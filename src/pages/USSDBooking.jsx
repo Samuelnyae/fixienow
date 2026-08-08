@@ -24,9 +24,6 @@ export default function USSDBooking() {
   const [input, setInput] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
-  const [authed, setAuthed] = useState(true);
-
-  useEffect(() => { base44.auth.isAuthenticated().then(setAuthed); }, []);
 
   const reset = () => {
     setStep(0); setData(initialState); setInput(''); setResult(null); setSubmitting(false);
@@ -142,17 +139,6 @@ export default function USSDBooking() {
     }
     return '';
   };
-
-  if (!authed) {
-    return (
-      <div className="max-w-md mx-auto px-4 py-8">
-        <div className="bg-gray-900 rounded-3xl p-6 text-center">
-          <p className="text-green-400 font-mono text-sm mb-4">Sign in required to book via USSD menu.</p>
-          <a href="/login" className="inline-block bg-green-600 text-white px-6 py-2.5 rounded-full text-sm font-semibold">Sign In</a>
-        </div>
-      </div>
-    );
-  }
 
   if (step === 9) {
     return (

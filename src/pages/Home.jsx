@@ -139,6 +139,25 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Book without login — USSD menu */}
+      <section className="max-w-7xl mx-auto px-4 pt-8">
+        <Link
+          to="/USSDBooking"
+          className="block rounded-2xl bg-gray-900 p-5 sm:p-6 hover:bg-gray-800 transition-all group"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-green-500 text-gray-900 flex items-center justify-center flex-shrink-0 font-mono font-bold text-lg">
+              *#
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-white">Book without an account</h3>
+              <p className="text-sm text-gray-400 truncate">No download, no login — book a technician through the USSD menu.</p>
+            </div>
+            <ArrowRight className="w-5 h-5 text-green-400 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+          </div>
+        </Link>
+      </section>
+
       {/* Browse Services */}
       <section className="max-w-7xl mx-auto px-4 py-10">
         <div className="flex items-center justify-between mb-5">
