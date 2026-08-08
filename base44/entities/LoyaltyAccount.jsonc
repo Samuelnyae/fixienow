@@ -1,0 +1,44 @@
+{
+  "name": "LoyaltyAccount",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Owner user ID"
+    },
+    "points_balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Spendable points currently held"
+    },
+    "lifetime_points": {
+      "type": "number",
+      "default": 0,
+      "description": "Total points ever earned (drives tier)"
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "bronze",
+        "silver",
+        "gold",
+        "platinum"
+      ],
+      "default": "bronze",
+      "description": "Loyalty tier derived from lifetime_points"
+    },
+    "total_bookings": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of paid bookings that earned points"
+    },
+    "total_spent": {
+      "type": "number",
+      "default": 0,
+      "description": "Total KES spent on-platform"
+    }
+  },
+  "required": [
+    "user_id"
+  ]
+}

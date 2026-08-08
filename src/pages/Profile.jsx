@@ -29,6 +29,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import TierBadge from '../components/loyalty/TierBadge';
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -95,6 +96,7 @@ export default function Profile() {
           </Avatar>
           <h1 className="text-xl font-bold text-gray-900">{user?.full_name || 'User'}</h1>
           <p className="text-gray-500">{user?.email}</p>
+          {user && <TierBadge userId={user.id} className="mt-3" />}
         </div>
 
         {/* Contact Info */}

@@ -42,6 +42,10 @@ import ChatWindow from '../components/chat/ChatWindow';
 import TechnicianTrackingMap from '../components/booking/TechnicianTrackingMap';
 import ReceiptDialog from '../components/booking/ReceiptDialog';
 import PaymentDialog from '../components/booking/PaymentDialog';
+import FavoriteButton from '../components/technician/FavoriteButton';
+import { awardForBooking } from '@/lib/loyalty';
+import { debitWallet } from '@/lib/ussdWallet';
+import { useToast } from '@/components/ui/use-toast';
 
 const iconMap = {
   mechanic: Wrench,
@@ -67,6 +71,7 @@ export default function BookingDetail() {
   const urlParams = new URLSearchParams(window.location.search);
   const bookingId = urlParams.get('id');
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const [user, setUser] = useState(null);
   const [showPayment, setShowPayment] = useState(false);
@@ -189,6 +194,10 @@ export default function BookingDetail() {
         const userWallets = await base44.entities.Wallet.filter({ user_id: booking.user_id });
         const techWallets = techUserId ? await base44.entities.Wallet.filter({ user_id: techUserId }) : [];
 
+        if (paymentMethod === 'wallet' && userWallets[0]) {
+          const debit = await debitWallet(userWallets[0], amount);
+          if (!debit.ok) throw new Error('Insufficient Fixie wallet balance. Top up your wallet first.');
+        }
         if (userWallets[0] && techWallets[0]) {
           await base44.entities.Transaction.create({
             transaction_id: `tx_${Date.now()}_${booking.id.slice(-6)}`,
@@ -236,6 +245,30 @@ export default function BookingDetail() {
       setShowPayment(false);
       setShowReceipt(true);
       queryClient.invalidateQueries(['booking', bookingId]);
+      // Loyalty points + wallet cashback — rewards repeat in-app spend
+      const amount = booking?.final_price || booking?.estimated_price || 0;
+      if (user && amount > 0) {
+        awardForBooking(user, booking, variables?.method, amount)
+          .then((res) => {
+            if (res?.points > 0) {
+              toast({
+                title: `🎉 You earned ${res.points} Fixie points!`,
+                description: res.cashback
+                  ? `Plus KES ${res.cashback.toLocaleString()} cashback added to your wallet.`
+                  : 'Keep booking to unlock higher tiers and cashback.',
+              });
+            }
+            queryClient.invalidateQueries(['loyaltyAccount', user.id]);
+          })
+          .catch(() => {});
+      }
+    },
+    onError: (err) => {
+      toast({
+        title: 'Payment failed',
+        description: err?.message || 'Something went wrong. Please try again.',
+        variant: 'destructive',
+      });
     },
   });
 
@@ -371,6 +404,13 @@ export default function BookingDetail() {
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Chat
                 </Button>
+              </div>
+            )}
+
+            {isCustomer && (
+              <div className="flex items-center gap-3 mt-4 pt-4 border-t border-gray-100">
+                <FavoriteButton technician={technician} className="w-9 h-9 border border-gray-200 shrink-0" />
+                <span className="text-sm text-gray-600">Save this technician for next time</span>
               </div>
             )}
           </div>

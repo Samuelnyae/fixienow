@@ -1,0 +1,45 @@
+{
+  "name": "LoyaltyTransaction",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Owner user ID"
+    },
+    "account_id": {
+      "type": "string",
+      "description": "Related LoyaltyAccount ID"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "earn",
+        "redeem",
+        "cashback"
+      ],
+      "description": "earn = points from a booking, redeem = points spent to wallet, cashback = KES credited to wallet"
+    },
+    "points": {
+      "type": "number",
+      "default": 0,
+      "description": "Point delta (positive for earn, negative for redeem, 0 for cashback)"
+    },
+    "amount": {
+      "type": "number",
+      "default": 0,
+      "description": "KES amount involved (spend, cashback, or redeem value)"
+    },
+    "booking_id": {
+      "type": "string",
+      "description": "Booking that triggered earn/cashback"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable detail"
+    }
+  },
+  "required": [
+    "user_id",
+    "type"
+  ]
+}

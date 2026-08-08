@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Loader2, CreditCard, Smartphone, Building2, Globe, Bitcoin } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Loader2, CreditCard, Smartphone, Building2, Globe, Bitcoin, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { base44 } from '@/api/base44Client';
 import {
   Dialog,
   DialogContent,
@@ -23,6 +25,7 @@ const CURRENCIES = [
 ];
 
 const METHODS = [
+  { id: 'wallet',   label: 'Fixie Wallet',  icon: Wallet,      desc: 'Pay from balance · earn cashback' },
   { id: 'mpesa',    label: 'M-Pesa',        icon: Smartphone,  desc: 'Mobile money (East Africa)' },
   { id: 'card',     label: 'Credit / Debit Card', icon: CreditCard, desc: 'Visa, Mastercard, Amex' },
   { id: 'bank',     label: 'Bank Transfer',  icon: Building2,   desc: 'SWIFT / local bank' },
@@ -33,6 +36,21 @@ const METHODS = [
 export default function PaymentDialog({ open, onOpenChange, booking, onConfirm, isPending }) {
   const [method, setMethod] = useState('mpesa');
   const [currency, setCurrency] = useState('KES');
+
+  const { data: myWallet } = useQuery({
+    queryKey: ['myWalletForPay'],
+    queryFn: async () => {
+      try {
+        const u = await base44.auth.me();
+        const ws = await base44.entities.Wallet.filter({ user_id: u.id });
+        return ws[0] || null;
+      } catch (e) { return null; }
+    },
+  });
+  const walletKes = (() => {
+    const i = (myWallet?.balances || []).findIndex((b) => b.currency === 'KES');
+    return i !== -1 ? (myWallet.balances[i].amount || 0) : 0;
+  })();
   const [phone, setPhone]   = useState('');
   const [cardNo, setCardNo] = useState('');
   const [cardName, setCardName] = useState('');
@@ -48,6 +66,7 @@ export default function PaymentDialog({ open, onOpenChange, booking, onConfirm, 
   const getPaymentMethodLabel = () => {
     const m = METHODS.find(m => m.id === method);
     switch (method) {
+      case 'wallet': return `Fixie Wallet`;
       case 'mpesa':   return `M-Pesa (${phone})`;
       case 'card':    return `Card (****${cardNo.slice(-4) || '0000'})`;
       case 'bank':    return `Bank Transfer`;
@@ -59,6 +78,7 @@ export default function PaymentDialog({ open, onOpenChange, booking, onConfirm, 
 
   const canSubmit = () => {
     if (isPending) return false;
+    if (method === 'wallet') return !!myWallet && walletKes >= baseAmount;
     if (method === 'mpesa')   return phone.length >= 9;
     if (method === 'card')    return cardNo.length >= 13 && cardName.length > 1;
     if (method === 'bank')    return bankRef.length > 2;
@@ -215,6 +235,17 @@ export default function PaymentDialog({ open, onOpenChange, booking, onConfirm, 
                   value={cryptoAddr} onChange={e => setCryptoAddr(e.target.value)}
                   className="w-full h-11 px-4 border rounded-xl text-sm font-mono" />
               </div>
+            </div>
+          )}
+
+          {method === 'wallet' && (
+            <div className="bg-teal-50 rounded-xl p-4 space-y-1">
+              <p className="text-sm font-semibold text-teal-800">Fixie Wallet</p>
+              <p className="text-sm text-teal-700">Balance: KES {walletKes.toLocaleString()}</p>
+              <p className="text-xs text-teal-600">✨ Earn cashback on this payment — points added automatically.</p>
+              {myWallet && walletKes < baseAmount && (
+                <p className="text-xs text-red-600">Insufficient balance. Top up your wallet first.</p>
+              )}
             </div>
           )}
 

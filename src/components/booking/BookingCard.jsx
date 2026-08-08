@@ -15,7 +15,8 @@ import {
   Wind, 
   Refrigerator, 
   Key,
-  Flag
+  Flag,
+  RotateCcw
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -117,7 +118,7 @@ export default function BookingCard({ booking, showTechnician = true, user }) {
         </Link>
 
         {canDispute && (
-          <div className="pt-3 mt-3 border-t border-gray-100">
+          <div className="pt-3 mt-3 border-t border-gray-100 flex items-center justify-between">
             <button
               type="button"
               onClick={(e) => {
@@ -130,6 +131,16 @@ export default function BookingCard({ booking, showTechnician = true, user }) {
               <Flag className="w-4 h-4" />
               Report an Issue
             </button>
+            {booking.status === 'completed' && booking.technician_id && (
+              <Link
+                to={createPageUrl(`BookService?technician=${booking.technician_id}&category=${booking.category}`)}
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Rebook
+              </Link>
+            )}
           </div>
         )}
       </div>
