@@ -38,6 +38,7 @@ const initialState = {
   // tools
   toolCategory: '', tools: [], toolIndex: null,
   // shared
+  amount: '',
   phone: '',
 };
 
@@ -52,6 +53,40 @@ export default function USSDBooking() {
 
   const reset = () => {
     setStep('home'); setData(initialState); setInput(''); setResult(null); setSubmitting(false);
+  };
+
+  const creditTechnicianWallet = async (technician, amount) => {
+    let wallet = null;
+    if (technician.user_id) {
+      try {
+        const byUser = await base44.entities.Wallet.filter({ user_id: technician.user_id });
+        wallet = byUser[0];
+      } catch (e) {}
+    }
+    if (!wallet) {
+      try {
+        const byTech = await base44.entities.Wallet.filter({ technician_id: technician.id });
+        wallet = byTech[0];
+      } catch (e) {}
+    }
+    if (wallet) {
+      const balances = [...(wallet.balances || [])];
+      const idx = balances.findIndex((b) => b.currency === 'KES');
+      if (idx !== -1) balances[idx] = { ...balances[idx], amount: (balances[idx].amount || 0) + amount };
+      else balances.push({ currency: 'KES', amount, currency_symbol: 'KSh' });
+      await base44.entities.Wallet.update(wallet.id, {
+        balances,
+        total_received: (wallet.total_received || 0) + amount,
+      });
+      return true;
+    }
+    // fallback: technician.wallet_balance
+    try {
+      await base44.entities.Technician.update(technician.id, {
+        wallet_balance: (technician.wallet_balance || 0) + amount,
+      });
+    } catch (e) {}
+    return false;
   };
 
   const submitTechnician = async () => {
@@ -92,6 +127,8 @@ export default function USSDBooking() {
       scheduled_time: data.bookingType === 'scheduled' ? data.scheduledTime : undefined,
       status: 'pending',
       location: { address: data.area },
+      estimated_price: Number(data.amount) || 0,
+      payment_method: 'mpesa',
     });
 
     if (matched.user_id) {
@@ -104,13 +141,46 @@ export default function USSDBooking() {
       });
     }
 
+    const amount = Number(data.amount) || 0;
+    let paidLine = '';
+    if (amount > 0) {
+      try {
+        await base44.entities.Payment.create({
+          booking_id: booking.id,
+          user_id: 'guest',
+          technician_id: matched.id,
+          amount,
+          method: 'mpesa',
+          status: 'completed',
+          mpesa_phone: data.phone,
+        });
+        const walletOk = await creditTechnicianWallet(matched, amount);
+        await base44.entities.Booking.update(booking.id, { payment_status: 'paid' });
+        if (matched.user_id) {
+          await base44.entities.Notification.create({
+            user_id: matched.user_id,
+            type: 'payment_received',
+            title: 'Payment Received',
+            message: `You received KES ${amount.toLocaleString()} for ${data.category} booking.`,
+            booking_id: booking.id,
+            metadata: { amount, category: data.category },
+          });
+        }
+        paidLine = `Paid: KES ${amount.toLocaleString()} (M-Pesa)\n→ Credited to ${matched.name}'s wallet${walletOk ? '' : ' balance'}`;
+      } catch (e) {
+        paidLine = `Payment of KES ${amount.toLocaleString()} pending.`;
+      }
+    }
+
     return {
       success: true,
       lines: [
-        '✓ Booking confirmed!',
+        '✓ Booking confirmed & paid!',
         '',
         `Technician: ${matched.name}`,
         `Service: ${matched.profession || data.category}`,
+        '',
+        paidLine,
         '',
         `They will call you on ${data.phone} shortly.`,
         '',
@@ -275,7 +345,12 @@ export default function USSDBooking() {
       }
       return;
     }
-    if (step === 't:phone') { if (v) { patch({ phone: v }); setStep('t:confirm'); } return; }
+    if (step === 't:phone') { if (v) { patch({ phone: v }); setStep('t:amount'); } return; }
+    if (step === 't:amount') {
+      const n = Number(v.replace(/[^0-9.]/g, ''));
+      if (n > 0) { patch({ amount: n }); setStep('t:confirm'); }
+      return;
+    }
     if (step === 't:confirm') {
       if (v === '1') submit();
       else if (v === '2') reset();
@@ -345,9 +420,10 @@ export default function USSDBooking() {
     if (step === 't:when') return 'When do you need help?\n\n1. Now (ASAP)\n2. Schedule for later';
     if (step === 't:sched') return 'Enter date and time\n(DD/MM HH:mm):\n\ne.g. 05/08 14:00';
     if (step === 't:phone') return 'Enter your phone number:\n(e.g. 0712345678)';
+    if (step === 't:amount') return 'Enter amount to pay (KES):\n(e.g. 1500)\n\nPaid via M-Pesa to the technician wallet.';
     if (step === 't:confirm') {
       const sched = data.bookingType === 'scheduled' ? `Date: ${data.scheduledDate} ${data.scheduledTime}\n` : '';
-      return `Confirm booking:\n\nService: ${data.category}\nArea: ${data.area}\nProblem: ${data.description}\n${sched}Phone: ${data.phone}\n\n1. Confirm\n2. Cancel`;
+      return `Confirm & pay:\n\nService: ${data.category}\nArea: ${data.area}\nProblem: ${data.description}\n${sched}Phone: ${data.phone}\nPay: KES ${data.amount} (M-Pesa)\n\n1. Confirm & Pay\n2. Cancel`;
     }
 
     // Ride
@@ -378,7 +454,7 @@ export default function USSDBooking() {
   const backStep = () => {
     const order = [
       'home',
-      't:svc', 't:area', 't:desc', 't:when', 't:sched', 't:phone', 't:confirm',
+      't:svc', 't:area', 't:desc', 't:when', 't:sched', 't:phone', 't:amount', 't:confirm',
       'r:type', 'r:pickup', 'r:dest', 'r:phone', 'r:confirm',
       'c:cat', 'c:list', 'c:phone', 'c:confirm',
     ];
