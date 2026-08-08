@@ -268,28 +268,79 @@ export default function USSDBooking() {
       return { success: false, message: 'Invalid tool selection.' };
     }
 
-    if (tool.seller_id) {
-      await base44.entities.Notification.create({
-        user_id: tool.seller_id,
-        type: 'booking_new',
-        title: 'New Tool Buyer',
-        message: `A buyer is interested in "${tool.name}" (KES ${tool.price}). Ask them to call ${data.phone}.`,
+    const amount = Number(data.amount) || Number(tool.price) || 0;
+
+    // Credit the seller's in-app wallet immediately
+    let creditedTo = tool.seller_name || 'Fixie Store';
+    let walletOk = false;
+    if (amount > 0) {
+      let wallet = null;
+      if (tool.seller_id) {
+        try { wallet = (await base44.entities.Wallet.filter({ user_id: tool.seller_id }))[0]; } catch (e) {}
+      }
+      if (!wallet && tool.technician_id) {
+        try { wallet = (await base44.entities.Wallet.filter({ technician_id: tool.technician_id }))[0]; } catch (e) {}
+      }
+      try {
+        if (wallet) {
+          const balances = [...(wallet.balances || [])];
+          const idx = balances.findIndex((b) => b.currency === 'KES');
+          if (idx !== -1) balances[idx] = { ...balances[idx], amount: (balances[idx].amount || 0) + amount };
+          else balances.push({ currency: 'KES', amount, currency_symbol: 'KSh' });
+          await base44.entities.Wallet.update(wallet.id, {
+            balances,
+            total_received: (wallet.total_received || 0) + amount,
+          });
+          walletOk = true;
+        } else if (tool.seller_id || tool.technician_id) {
+          // No wallet yet — create one for the seller, credited with the amount
+          wallet = await base44.entities.Wallet.create({
+            user_id: tool.seller_id || undefined,
+            technician_id: tool.technician_id || undefined,
+            wallet_type: tool.technician_id ? 'technician' : 'standard',
+            primary_currency: 'KES',
+            balances: [{ currency: 'KES', amount, currency_symbol: 'KSh' }],
+            total_received: amount,
+          });
+          walletOk = true;
+        }
+      } catch (e) {}
+    }
+
+    // Mark the tool sold / reduce stock
+    try {
+      const newStock = Math.max(0, (tool.stock || 1) - 1);
+      await base44.entities.Tool.update(tool.id, {
+        stock: newStock,
+        status: newStock === 0 ? 'sold' : 'approved',
       });
+    } catch (e) {}
+
+    // Notify the seller
+    if (tool.seller_id) {
+      try {
+        await base44.entities.Notification.create({
+          user_id: tool.seller_id,
+          type: 'payment_received',
+          title: 'Tool Sold — Payment Received',
+          message: `"${tool.name}" bought via USSD for KES ${amount.toLocaleString()}, credited to your wallet. Call ${data.phone} to arrange delivery.`,
+        });
+      } catch (e) {}
     }
 
     return {
       success: true,
       lines: [
-        '✓ Interest sent to seller!',
+        '✓ Payment successful & tool sold!',
         '',
         `Tool: ${tool.name}`,
         `Price: KES ${tool.price}`,
         tool.brand ? `Brand: ${tool.brand}` : '',
         '',
-        `Seller: ${tool.seller_name || 'Fixie Store'}`,
-        `Contact: ${data.phone}`,
+        `Paid: KES ${amount.toLocaleString()} (M-Pesa)`,
+        walletOk ? `→ Credited to ${creditedTo}'s wallet` : '',
         '',
-        'The seller will reach out to you shortly.',
+        `We will call you on ${data.phone} to arrange delivery.`,
         '',
         'Thank you for using Fixie.',
       ].filter(Boolean),
@@ -383,7 +434,12 @@ export default function USSDBooking() {
       if (idx >= 0 && idx < data.tools.length) { patch({ toolIndex: idx }); setStep('c:phone'); }
       return;
     }
-    if (step === 'c:phone') { if (v) { patch({ phone: v }); setStep('c:confirm'); } return; }
+    if (step === 'c:phone') { if (v) { patch({ phone: v }); setStep('c:amount'); } return; }
+    if (step === 'c:amount') {
+      const n = Number(v.replace(/[^0-9.]/g, ''));
+      if (n > 0) { patch({ amount: n }); setStep('c:confirm'); }
+      return;
+    }
     if (step === 'c:confirm') {
       if (v === '1') submit();
       else if (v === '2') reset();
@@ -443,9 +499,13 @@ export default function USSDBooking() {
       return `Available tools:\n\n${list}\n\nEnter the number to buy:`;
     }
     if (step === 'c:phone') return 'Enter your phone number:\n(e.g. 0712345678)';
+    if (step === 'c:amount') {
+      const tool = data.tools[data.toolIndex];
+      return `Enter amount to pay (KES):\nTool price: KES ${tool?.price || 0}\n\nPaid via M-Pesa to the seller wallet.`;
+    }
     if (step === 'c:confirm') {
       const tool = data.tools[data.toolIndex];
-      return `Confirm interest:\n\nTool: ${tool?.name}\nPrice: KES ${tool?.price}\nPhone: ${data.phone}\n\n1. Confirm\n2. Cancel`;
+      return `Confirm & pay:\n\nTool: ${tool?.name}\nPrice: KES ${tool?.price}\nPhone: ${data.phone}\nPay: KES ${data.amount} (M-Pesa)\n\n1. Confirm & Pay\n2. Cancel`;
     }
 
     return '';
@@ -456,7 +516,7 @@ export default function USSDBooking() {
       'home',
       't:svc', 't:area', 't:desc', 't:when', 't:sched', 't:phone', 't:amount', 't:confirm',
       'r:type', 'r:pickup', 'r:dest', 'r:phone', 'r:confirm',
-      'c:cat', 'c:list', 'c:phone', 'c:confirm',
+      'c:cat', 'c:list', 'c:phone', 'c:amount', 'c:confirm',
     ];
     const i = order.indexOf(step);
     if (i > 0) setStep(order[i - 1]);
