@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import NotificationBell from '@/components/notifications/NotificationBell';
+import { useServiceReminders } from '@/hooks/useServiceReminders';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +31,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Scan for upcoming scheduled services and fire 1h / 15m in-app reminders.
+  useServiceReminders(user);
 
   useEffect(() => {
     const loadUser = async () => {

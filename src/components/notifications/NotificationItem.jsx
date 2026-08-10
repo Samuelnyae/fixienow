@@ -19,6 +19,7 @@ const iconMap = {
   booking_started: Play,
   booking_completed: CheckCircle2,
   booking_cancelled: XCircle,
+  booking_reminder: Bell,
   payment_received: CreditCard,
   review_received: Star,
 };
@@ -29,6 +30,7 @@ const colorMap = {
   booking_started: 'bg-purple-100 text-purple-600',
   booking_completed: 'bg-teal-100 text-teal-600',
   booking_cancelled: 'bg-red-100 text-red-600',
+  booking_reminder: 'bg-orange-100 text-orange-600',
   payment_received: 'bg-amber-100 text-amber-600',
   review_received: 'bg-pink-100 text-pink-600',
 };

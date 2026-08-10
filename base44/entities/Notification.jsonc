@@ -14,6 +14,7 @@
         "booking_started",
         "booking_completed",
         "booking_cancelled",
+        "booking_reminder",
         "payment_received",
         "review_received"
       ],
@@ -48,6 +49,10 @@
         },
         "amount": {
           "type": "number"
+        },
+        "reminder_window": {
+          "type": "string",
+          "description": "Reminder window key (1h or 15m) for booking reminders"
         }
       }
     }
