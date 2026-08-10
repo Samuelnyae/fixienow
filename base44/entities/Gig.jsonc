@@ -1,0 +1,92 @@
+{
+  "name": "Gig",
+  "type": "object",
+  "properties": {
+    "customer_id": {
+      "type": "string",
+      "description": "Customer who posted the gig"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "customer_phone": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "description": "Gig category slug (electrician, plumber, boda, tailor, ...)"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short headline of the job"
+    },
+    "description": {
+      "type": "string",
+      "description": "What needs doing"
+    },
+    "budget": {
+      "type": "number",
+      "description": "Customer's budget in KES"
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        }
+      }
+    },
+    "area_name": {
+      "type": "string",
+      "description": "Neighbourhood / area name used for matching"
+    },
+    "needed_by": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the customer needs it done (ISO datetime)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "matched",
+        "completed",
+        "cancelled"
+      ],
+      "default": "open",
+      "description": "Gig lifecycle state"
+    },
+    "matched_technician_id": {
+      "type": "string"
+    },
+    "matched_technician_name": {
+      "type": "string"
+    },
+    "matched_application_id": {
+      "type": "string"
+    },
+    "booked_via": {
+      "type": "string",
+      "enum": [
+        "app",
+        "ussd",
+        "whatsapp",
+        "voice"
+      ],
+      "default": "app",
+      "description": "Channel used to post the gig (for the future voice/USSD layer)"
+    }
+  },
+  "required": [
+    "customer_id",
+    "category",
+    "title",
+    "description"
+  ]
+}

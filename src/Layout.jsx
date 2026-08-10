@@ -9,6 +9,7 @@ import {
   User, 
   Wrench,
   Wallet,
+  Briefcase,
   Menu,
   X,
   LogOut,
@@ -55,6 +56,7 @@ export default function Layout({ children, currentPageName }) {
   const customerNav = [
     { name: 'Home', icon: Home, page: 'Home' },
     { name: 'Services', icon: Search, page: 'Services' },
+    { name: 'Gigs', icon: Briefcase, page: 'GigMatches' },
     { name: 'Bookings', icon: Calendar, page: 'MyBookings' },
     { name: 'Profile', icon: User, page: 'Profile' },
   ];
@@ -62,6 +64,7 @@ export default function Layout({ children, currentPageName }) {
   const technicianNav = [
     { name: 'Dashboard', icon: Home, page: 'TechnicianDashboard' },
     { name: 'Jobs', icon: Wrench, page: 'TechnicianJobs' },
+    { name: 'Gigs', icon: Briefcase, page: 'GigBoard' },
     { name: 'Earnings', icon: Calendar, page: 'TechnicianEarnings' },
     { name: 'Profile', icon: User, page: 'TechnicianProfile' },
   ];

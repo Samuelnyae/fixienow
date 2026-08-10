@@ -280,6 +280,25 @@ export default function Home() {
         </Link>
       </section>
 
+      {/* Same-day gigs — reverse job board */}
+      <section className="max-w-7xl mx-auto px-4 pb-2 pt-4">
+        <Link
+          to="/PostGig"
+          className="block rounded-2xl border border-gray-100 bg-white p-5 sm:p-6 hover:shadow-md transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0">
+              <Zap className="w-6 h-6" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-gray-900">Need it today? Post a same-day gig</h3>
+              <p className="text-sm text-gray-500 truncate">Tell us the job, set your budget — nearby fundis get matched and apply in minutes.</p>
+            </div>
+            <ArrowRight className="w-5 h-5 text-[#0B463C] flex-shrink-0" />
+          </div>
+        </Link>
+      </section>
+
       {/* How Fixie Works */}
       <section className="max-w-7xl mx-auto px-4 py-6">
         <div className="bg-gray-50 rounded-2xl p-6 sm:p-8 border border-gray-100">

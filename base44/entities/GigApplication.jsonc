@@ -1,0 +1,49 @@
+{
+  "name": "GigApplication",
+  "type": "object",
+  "properties": {
+    "gig_id": {
+      "type": "string",
+      "description": "Gig applied to"
+    },
+    "customer_id": {
+      "type": "string",
+      "description": "Owner of the gig (for easy filtering by customer)"
+    },
+    "technician_id": {
+      "type": "string",
+      "description": "Technician entity ID applying"
+    },
+    "technician_name": {
+      "type": "string"
+    },
+    "proposed_price": {
+      "type": "number",
+      "description": "Fundi's offered price in KES"
+    },
+    "message": {
+      "type": "string",
+      "description": "Note to the customer (timing, approach, etc.)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "declined",
+        "withdrawn"
+      ],
+      "default": "pending"
+    },
+    "match_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Client-side match score 0-100 at time of application"
+    }
+  },
+  "required": [
+    "gig_id",
+    "technician_id",
+    "technician_name"
+  ]
+}

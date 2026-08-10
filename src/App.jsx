@@ -20,6 +20,9 @@ import DriverDashboard from '@/pages/DriverDashboard';
 import CreditReadiness from '@/pages/CreditReadiness';
 import RideShare from '@/pages/RideShare';
 import RideHistory from '@/pages/RideHistory';
+import PostGig from '@/pages/PostGig';
+import GigBoard from '@/pages/GigBoard';
+import GigMatches from '@/pages/GigMatches';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -97,6 +100,21 @@ const AuthenticatedApp = () => {
       <Route path="/RideHistory" element={
         <LayoutWrapper currentPageName="RideHistory">
           <RideHistory />
+        </LayoutWrapper>
+      } />
+      <Route path="/PostGig" element={
+        <LayoutWrapper currentPageName="PostGig">
+          <PostGig />
+        </LayoutWrapper>
+      } />
+      <Route path="/GigBoard" element={
+        <LayoutWrapper currentPageName="GigBoard">
+          <GigBoard />
+        </LayoutWrapper>
+      } />
+      <Route path="/GigMatches" element={
+        <LayoutWrapper currentPageName="GigMatches">
+          <GigMatches />
         </LayoutWrapper>
       } />
       {Object.entries(Pages).map(([path, Page]) => (
