@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import TagInput from '@/components/common/TagInput';
+import { TECHNICIAN_SKILLS } from '@/lib/gigMatch';
 
 
 export default function TechnicianRegister() {
@@ -240,7 +241,7 @@ export default function TechnicianRegister() {
                   placeholder="Type a skill and press Enter (e.g. Pipe fitting, Wiring, Painting)..."
                   value={formData.skills}
                   onChange={(skills) => setFormData({ ...formData, skills })}
-                  suggestions={['Mechanic', 'Plumber', 'Electrician', 'Carpenter', 'Painter', 'HVAC', 'Appliance Repair', 'Locksmith', 'Welding', 'Tiling', 'Roofing', 'General Handyman', 'Solar Installation', 'CCTV Installation', 'Generator Repair']}
+                  suggestions={TECHNICIAN_SKILLS.map((s) => s.label)}
                 />
                 <p className="text-sm text-gray-500 mt-1.5">Add as many skills as you want — this helps you get found for more job types.</p>
               </div>

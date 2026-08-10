@@ -23,12 +23,62 @@ export function categoryLabel(category) {
 
 const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
+// Core trade skills technicians can pick. Each maps to a gig category slug so
+// the reverse job board matches them to gigs; a few extra common trades are
+// included for profile richness (no gig category yet).
+export const TECHNICIAN_SKILLS = [
+  { label: 'Plumbing', slug: 'plumber' },
+  { label: 'Electrical', slug: 'electrician' },
+  { label: 'Car maintenance', slug: 'mechanic' },
+  { label: 'Carpentry', slug: 'carpenter' },
+  { label: 'Painting', slug: 'painter' },
+  { label: 'HVAC / Cooling', slug: 'hvac' },
+  { label: 'Appliance repair', slug: 'appliance_repair' },
+  { label: 'Locksmith', slug: 'locksmith' },
+  { label: 'Boda / Delivery', slug: 'boda' },
+  { label: 'Tailoring', slug: 'tailor' },
+  { label: 'Artisan / Crafts', slug: 'artisan' },
+  { label: 'Welding', slug: 'welding' },
+  { label: 'Tiling', slug: 'tiling' },
+  { label: 'Roofing', slug: 'roofing' },
+  { label: 'Solar installation', slug: 'solar' },
+  { label: 'CCTV installation', slug: 'cctv' },
+  { label: 'Generator repair', slug: 'generator' },
+  { label: 'General handyman', slug: 'handyman' },
+];
+
+// Friendly skill label → gig category slug, so "Plumbing" matches a "plumber" gig, etc.
+const SKILL_ALIASES = {
+  plumbing: 'plumber',
+  pipefitting: 'plumber',
+  electrical: 'electrician',
+  electricity: 'electrician',
+  wiring: 'electrician',
+  carmaintenance: 'mechanic',
+  automechanic: 'mechanic',
+  vehicle: 'mechanic',
+  carpentry: 'carpenter',
+  woodworking: 'carpenter',
+  painting: 'painter',
+  hvaccooling: 'hvac',
+  aircon: 'hvac',
+  tailoring: 'tailor',
+  sewing: 'tailor',
+  artisancrafts: 'artisan',
+  handyman: 'handyman',
+};
+
+function resolveSkill(raw) {
+  const n = norm(raw);
+  return SKILL_ALIASES[n] || n;
+}
+
 export function isSkillMatch(technician, category) {
   if (!technician || !category) return false;
   const cat = norm(category);
   const skills = [technician.profession, ...(technician.skills || [])]
     .filter(Boolean)
-    .map(norm);
+    .map(resolveSkill);
   return skills.some((s) => s && (s === cat || s.includes(cat) || cat.includes(s)));
 }
 
