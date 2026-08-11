@@ -43,8 +43,14 @@ export default function GigBoard() {
     return new Set((myAppsQ.data || []).map((a) => a.gig_id));
   }, [myAppsQ.data]);
 
+  const isGuest = !meQ.isLoading && !me;
+
   const scored = useMemo(() => {
-    if (!technician || !gigsQ.data) return [];
+    if (!gigsQ.data) return [];
+    // Guests (not signed in) see all open gigs, unscored, read-only.
+    if (!technician) {
+      return gigsQ.data.map((g) => ({ gig: g, score: 0 }));
+    }
     return gigsQ.data
       .map((g) => ({ gig: g, score: scoreGigForTechnician(g, technician) }))
       .filter((x) => x.score > 0 || isSkillMatch(technician, x.gig.category))
@@ -55,20 +61,6 @@ export default function GigBoard() {
     qc.invalidateQueries({ queryKey: ['myGigApplications', technician?.id] });
     qc.invalidateQueries({ queryKey: ['openGigs'] });
   };
-
-  if (!meQ.isLoading && !me) {
-    return (
-      <Shell title="Same-day gigs">
-        <Empty title="Sign in to see gigs" body="Fundi sign in to browse nearby same-day jobs.">
-          <Button asChild className="bg-[#0B463C] hover:bg-[#0a3d34]">
-            <Link to="/login">
-              <LogIn className="w-4 h-4" /> Sign in
-            </Link>
-          </Button>
-        </Empty>
-      </Shell>
-    );
-  }
 
   if (me && techQ.isSuccess && !technician) {
     return (
@@ -91,9 +83,11 @@ export default function GigBoard() {
     <Shell title="Same-day gigs">
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-gray-500">
-          {technician
-            ? `Matched to your skills${technician.profession ? ` · ${technician.profession}` : ''}`
-            : 'Loading your profile...'}
+          {isGuest
+            ? 'Browse open same-day gigs — sign in to apply.'
+            : technician
+              ? `Matched to your skills${technician.profession ? ` · ${technician.profession}` : ''}`
+              : 'Loading your profile...'}
         </p>
         <Button
           variant="outline"
@@ -111,8 +105,10 @@ export default function GigBoard() {
 
       {!gigsQ.isLoading && scored.length === 0 && (
         <Empty
-          title="No matching gigs right now"
-          body="New same-day gigs show up here automatically. Make sure your skills and service areas are set on your profile."
+          title="No open gigs right now"
+          body={isGuest
+            ? "New same-day gigs show up here automatically — check back soon, or sign in as a fundi to get matched."
+            : "New same-day gigs show up here automatically. Make sure your skills and service areas are set on your profile."}
         />
       )}
 
@@ -123,12 +119,18 @@ export default function GigBoard() {
             <GigCard
               key={gig.id}
               gig={gig}
-              score={score}
+              score={isGuest ? null : score}
               footer={
                 applied ? (
                   <div className="text-sm font-medium text-green-600 inline-flex items-center gap-1.5">
                     <Briefcase className="w-4 h-4" /> Applied
                   </div>
+                ) : isGuest ? (
+                  <Button asChild className="w-full bg-[#0B463C] hover:bg-[#0a3d34]">
+                    <Link to="/login">
+                      <LogIn className="w-4 h-4" /> Sign in to apply
+                    </Link>
+                  </Button>
                 ) : (
                   <Button
                     className="w-full bg-[#0B463C] hover:bg-[#0a3d34]"

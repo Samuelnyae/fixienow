@@ -21,6 +21,7 @@ import {
   Bike,
   Navigation,
   ShoppingBag,
+  Briefcase,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -282,21 +283,38 @@ export default function Home() {
 
       {/* Same-day gigs — reverse job board */}
       <section className="max-w-7xl mx-auto px-4 pb-2 pt-4">
-        <Link
-          to="/PostGig"
-          className="block rounded-2xl border border-gray-100 bg-white p-5 sm:p-6 hover:shadow-md transition-all"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0">
-              <Zap className="w-6 h-6" />
+        <div className="grid sm:grid-cols-2 gap-3">
+          <Link
+            to="/PostGig"
+            className="block rounded-2xl border border-gray-100 bg-white p-5 sm:p-6 hover:shadow-md transition-all"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0">
+                <Zap className="w-6 h-6" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-gray-900">Post a same-day gig</h3>
+                <p className="text-sm text-gray-500 truncate">Tell us the job, set your budget — nearby fundis apply in minutes.</p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-[#0B463C] flex-shrink-0" />
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-gray-900">Need it today? Post a same-day gig</h3>
-              <p className="text-sm text-gray-500 truncate">Tell us the job, set your budget — nearby fundis get matched and apply in minutes.</p>
+          </Link>
+          <Link
+            to="/GigBoard"
+            className="block rounded-2xl border border-gray-100 bg-white p-5 sm:p-6 hover:shadow-md transition-all"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-[#0B463C] text-[#9CE11F] flex items-center justify-center flex-shrink-0">
+                <Briefcase className="w-6 h-6" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-gray-900">Browse open gigs</h3>
+                <p className="text-sm text-gray-500 truncate">See real same-day jobs posted near you — no login needed to look.</p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-[#0B463C] flex-shrink-0" />
             </div>
-            <ArrowRight className="w-5 h-5 text-[#0B463C] flex-shrink-0" />
-          </div>
-        </Link>
+          </Link>
+        </div>
       </section>
 
       {/* How Fixie Works */}
