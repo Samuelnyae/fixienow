@@ -340,7 +340,7 @@ export default function TechnicianRegister() {
           <div className="bg-white rounded-2xl p-6 shadow-sm space-y-6">
             <h2 className="text-lg font-semibold">Upload Documents</h2>
             <p className="text-gray-500 text-sm">
-              Upload your ID and professional certificate for verification
+              Upload your ID and professional certificate for verification — optional for now, you can add them later from your profile.
             </p>
 
             <div className="space-y-4">
@@ -419,7 +419,7 @@ export default function TechnicianRegister() {
               </Button>
               <Button
                 onClick={() => registerMutation.mutate()}
-                disabled={!idDocument || registerMutation.isPending}
+                disabled={registerMutation.isPending}
                 className="flex-1 h-12 bg-teal-600 hover:bg-teal-700"
               >
                 {registerMutation.isPending ? (
