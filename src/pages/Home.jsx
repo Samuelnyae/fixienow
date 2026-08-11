@@ -87,15 +87,15 @@ export default function Home() {
           <div className="max-w-2xl mx-auto text-center">
             {/* Badge */}
             <div className="inline-flex items-center bg-[#197B6B]/40 border border-white/15 rounded-full px-4 py-1.5 mb-6">
-              <span className="text-xs font-medium text-white tracking-wide">Trusted. Verified. Reliable.</span>
+              <span className="text-xs font-medium text-white tracking-wide">Kenya's trusted repair & service marketplace</span>
             </div>
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.25] mb-4 text-white">
-              Expert Help, Right When You Need It
+              Book a certified technician in minutes
             </h1>
 
             <p className="text-white/80 text-sm sm:text-base mb-8 max-w-lg mx-auto leading-relaxed">
-              Connect with certified technicians worldwide for fast, reliable service at your doorstep.
+              Plumbers, electricians, mechanics and more — verified local pros, upfront prices, help at your door. Need a ride or tools? We do that too.
             </p>
 
             {/* Search Bar */}
@@ -103,7 +103,7 @@ export default function Home() {
               <div className="flex-1 relative">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <Input
-                  placeholder="What do you need help with?"
+                  placeholder="Search a service — plumber, electrician, mechanic…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-11 h-12 border-0 text-base focus-visible:ring-0 bg-transparent"
