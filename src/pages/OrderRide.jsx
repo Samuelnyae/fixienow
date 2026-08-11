@@ -63,6 +63,15 @@ export default function OrderRide() {
   const [rideAlert, setRideAlert] = useState(null); // { kind, title, message }
 
   const timers = useRef([]);
+  const nearbyFiredRef = useRef(false);
+  const arrivedFiredRef = useRef(false);
+  const completedFiredRef = useRef(false);
+
+  // Realistic urban speeds (km/h) per ride type, plus a demo acceleration
+  // factor so trips are watchable while still scaling with real distance.
+  const SPEED_KMH = { cab: 35, bodaboda: 30, truck: 25 };
+  const DEMO_ACCEL = 30;
+  const speedKmH = SPEED_KMH[rideType] || 35;
 
   useEffect(() => {
     base44.auth
@@ -77,23 +86,82 @@ export default function OrderRide() {
   const durationMin = useMemo(() => estimateDurationMin(distanceKm), [distanceKm]);
   const fare = useMemo(() => computeFare(rideType, distanceKm, durationMin), [rideType, distanceKm, durationMin]);
 
-  // Animate the driver marker toward its target while the ride is live
+  // Live distance + ETA from the driver's current position to the active target.
+  const distToTarget =
+    phase === 'in_progress' && driverPos && destCoords ? haversineKm(driverPos, destCoords) :
+    phase === 'assigned' && driverPos && pickupCoords ? haversineKm(driverPos, pickupCoords) : 0;
+  const liveEtaMin = Math.max(1, Math.round((distToTarget / speedKmH) * 60));
+
+  // Move the driver marker toward its target at a constant (accelerated) speed
+  // so travel time scales with real distance instead of fixed timers.
   useEffect(() => {
-    if (!['searching', 'assigned', 'in_progress'].includes(phase)) return;
+    if (!['assigned', 'in_progress'].includes(phase)) return;
     const target = phase === 'in_progress' ? destCoords : pickupCoords;
     if (!target) return;
+    const TICK_MS = 400;
+    const degPerTick = ((speedKmH / 3600) * DEMO_ACCEL * (TICK_MS / 1000)) / 111;
     const id = setInterval(() => {
       setDriverPos((prev) => {
         if (!prev) return prev;
-        const step = 0.25;
-        const nextLat = prev.lat + (target.lat - prev.lat) * step;
-        const nextLng = prev.lng + (target.lng - prev.lng) * step;
-        if (Math.abs(nextLat - target.lat) < 0.0005 && Math.abs(nextLng - target.lng) < 0.0005) return prev;
-        return { lat: nextLat, lng: nextLng };
+        const dLat = target.lat - prev.lat;
+        const dLng = target.lng - prev.lng;
+        const distDeg = Math.hypot(dLat, dLng);
+        if (distDeg <= degPerTick) return { lat: target.lat, lng: target.lng };
+        const r = degPerTick / distDeg;
+        return { lat: prev.lat + dLat * r, lng: prev.lng + dLng * r };
       });
-    }, 400);
+    }, TICK_MS);
     return () => clearInterval(id);
-  }, [phase, pickupCoords, destCoords]);
+  }, [phase, pickupCoords, destCoords, speedKmH]);
+
+  // Drive phase transitions off the driver's actual position, not fixed timers.
+  useEffect(() => {
+    if (!driverPos || !ride) return;
+    if (phase === 'assigned' && pickupCoords) {
+      const d = haversineKm(driverPos, pickupCoords);
+      if (d < 0.3 && !nearbyFiredRef.current) {
+        nearbyFiredRef.current = true;
+        setRideAlert({
+          kind: 'nearby',
+          title: `${driver?.name} is nearby`,
+          message: 'Your driver is almost at your pickup location. Get ready to head out.',
+        });
+        sendRideNotification({ user, ride, driver, kind: 'nearby' });
+      }
+      if (d < 0.1 && !arrivedFiredRef.current) {
+        arrivedFiredRef.current = true;
+        (async () => {
+          try {
+            const ip = await base44.entities.Ride.update(ride.id, { status: 'in_progress' });
+            setRide(ip);
+          } catch {}
+          setPhase('in_progress');
+          setRideAlert({
+            kind: 'arrived',
+            title: `${driver?.name} has arrived`,
+            message: 'Your driver is at your pickup location. Please head out to meet them.',
+          });
+          sendRideNotification({ user, ride, driver, kind: 'arrived' });
+        })();
+      }
+    } else if (phase === 'in_progress' && destCoords) {
+      const d = haversineKm(driverPos, destCoords);
+      if (d < 0.1 && !completedFiredRef.current) {
+        completedFiredRef.current = true;
+        (async () => {
+          try {
+            const comp = await base44.entities.Ride.update(ride.id, {
+              status: 'completed',
+              final_fare: fare,
+              payment_status: 'paid',
+            });
+            setRide(comp);
+          } catch {}
+          setPhase('completed');
+        })();
+      }
+    }
+  }, [driverPos, phase, pickupCoords, destCoords, ride, driver, user, fare]);
 
   const useMyLocation = () => {
     if (!navigator.geolocation) return;
@@ -194,6 +262,9 @@ export default function OrderRide() {
     }
 
     try {
+      nearbyFiredRef.current = false;
+      arrivedFiredRef.current = false;
+      completedFiredRef.current = false;
       // Prefer a real, available, verified driver; fall back to the simulated fleet
       let drv = null;
       try {
@@ -226,17 +297,20 @@ export default function OrderRide() {
       });
       setRide(newRide);
       setDriver(drv);
-      // start the driver marker near the pickup
-      setDriverPos({
-        lat: pickupCoords.lat + 0.008,
-        lng: pickupCoords.lng + 0.008,
-      });
+      setDriverPos(null);
       setPhase('searching');
       base44.analytics.track({ eventName: 'ride_requested', properties: { ride_type: rideType, fare } });
 
-      // searching -> assigned (driver found, en route to pickup)
+      // searching -> assigned: driver is matched and placed ~1.5km from pickup,
+      // then drives in at a realistic speed (distance-driven, not a fixed timer).
       timers.current.push(
         setTimeout(async () => {
+          const bearing = Math.random() * 2 * Math.PI;
+          const offsetDeg = 1.5 / 111;
+          const startPos = {
+            lat: pickupCoords.lat + Math.cos(bearing) * offsetDeg,
+            lng: pickupCoords.lng + Math.sin(bearing) * offsetDeg,
+          };
           const assigned = await base44.entities.Ride.update(newRide.id, {
             status: 'assigned',
             driver_id: drv.id,
@@ -246,48 +320,9 @@ export default function OrderRide() {
             vehicle_plate: drv.vehicle_plate,
           });
           setRide(assigned);
+          setDriverPos(startPos);
           setPhase('assigned');
-        }, 3000)
-      );
-
-      // nearby alert — driver approaching pickup (after assignment, before arrival)
-      timers.current.push(
-        setTimeout(() => {
-          setRideAlert({
-            kind: 'nearby',
-            title: `${drv.name} is nearby`,
-            message: 'Your driver is almost at your pickup location. Get ready to head out.',
-          });
-          sendRideNotification({ user, ride: newRide, driver: drv, kind: 'nearby' });
-        }, 6500)
-      );
-
-      // assigned -> in_progress (driver arrived, trip started)
-      timers.current.push(
-        setTimeout(async () => {
-          const ip = await base44.entities.Ride.update(newRide.id, { status: 'in_progress' });
-          setRide(ip);
-          setPhase('in_progress');
-          setRideAlert({
-            kind: 'arrived',
-            title: `${drv.name} has arrived`,
-            message: 'Your driver is at your pickup location. Please head out to meet them.',
-          });
-          sendRideNotification({ user, ride: ip, driver: drv, kind: 'arrived' });
-        }, 10000)
-      );
-
-      // in_progress -> completed (trip done)
-      timers.current.push(
-        setTimeout(async () => {
-          const comp = await base44.entities.Ride.update(newRide.id, {
-            status: 'completed',
-            final_fare: fare,
-            payment_status: 'paid',
-          });
-          setRide(comp);
-          setPhase('completed');
-        }, 20000)
+        }, 2500)
       );
     } catch (e) {
       setError(e.message || 'Could not request your ride. Please try again.');
@@ -303,6 +338,9 @@ export default function OrderRide() {
         await base44.entities.Ride.update(ride.id, { status: 'cancelled' });
       } catch {}
     }
+    nearbyFiredRef.current = false;
+    arrivedFiredRef.current = false;
+    completedFiredRef.current = false;
     setPhase('cancelled');
     setRide(null);
     setDriver(null);
@@ -315,6 +353,9 @@ export default function OrderRide() {
     try {
       await base44.entities.Ride.update(ride.id, { rating });
     } catch {}
+    nearbyFiredRef.current = false;
+    arrivedFiredRef.current = false;
+    completedFiredRef.current = false;
     setPhase('setup');
     setRide(null);
     setRating(0);
@@ -325,6 +366,9 @@ export default function OrderRide() {
   };
 
   const resetToSetup = () => {
+    nearbyFiredRef.current = false;
+    arrivedFiredRef.current = false;
+    completedFiredRef.current = false;
     setPhase('setup');
     setRide(null);
     setRating(0);
@@ -630,7 +674,7 @@ export default function OrderRide() {
             <div className="bg-emerald-50 rounded-2xl border border-emerald-100 p-3 flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
               <p className="text-sm text-emerald-800">
-                <span className="font-semibold">{driver.name}</span> is on the way · arriving in ~{selectedType.eta}
+                <span className="font-semibold">{driver.name}</span> is on the way · arriving in ~{liveEtaMin} min · {distToTarget.toFixed(1)} km away
               </p>
             </div>
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
@@ -683,7 +727,7 @@ export default function OrderRide() {
               </div>
               <div className="text-right">
                 <p className="text-xs text-teal-100">Arriving</p>
-                <p className="font-semibold">~{Math.max(2, durationMin)} min</p>
+                <p className="font-semibold">~{liveEtaMin} min · {distToTarget.toFixed(1)} km</p>
               </div>
             </div>
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center gap-3">
