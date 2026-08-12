@@ -47,7 +47,27 @@ function FitBounds({ pickup, destination }) {
   return null;
 }
 
-export default function RideMap({ pickup, destination, driverPos, driverType }) {
+// While a ride is active, keep the driver marker and their current target
+// (pickup during assigned, destination during in_progress) both in view so
+// the customer can watch the driver approach in real time.
+function TrackDriver({ driverPos, target }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!driverPos) return;
+    if (target) {
+      const bounds = L.latLngBounds([
+        [driverPos.lat, driverPos.lng],
+        [target.lat, target.lng],
+      ]);
+      map.fitBounds(bounds, { padding: [80, 80], maxZoom: 16 });
+    } else {
+      map.setView([driverPos.lat, driverPos.lng], 15);
+    }
+  }, [driverPos?.lat, driverPos?.lng, target?.lat, target?.lng]);
+  return null;
+}
+
+export default function RideMap({ pickup, destination, driverPos, driverType, trackTarget }) {
   const center = pickup || destination || { lat: -1.2864, lng: 36.8233 };
   const emoji = driverType === 'bodaboda' ? '🏍️' : driverType === 'truck' ? '🚚' : '🚗';
   return (
@@ -62,6 +82,7 @@ export default function RideMap({ pickup, destination, driverPos, driverType }) 
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <FitBounds pickup={pickup} destination={destination} />
+      <TrackDriver driverPos={driverPos} target={trackTarget} />
       <Recenter center={pickup || center} />
       {pickup && (
         <Marker position={[pickup.lat, pickup.lng]} icon={pickupIcon}>

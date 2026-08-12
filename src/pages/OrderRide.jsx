@@ -411,6 +411,7 @@ export default function OrderRide() {
           destination={destCoords}
           driverPos={driverPos}
           driverType={liveRideType}
+          trackTarget={phase === 'in_progress' ? destCoords : phase === 'assigned' ? pickupCoords : null}
         />
       </div>
 
