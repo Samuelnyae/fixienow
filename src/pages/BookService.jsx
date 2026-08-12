@@ -98,10 +98,7 @@ export default function BookService() {
     address: '',
     service_area: '',
     technician_id: preselectedTechId || '',
-    guest_name: '',
-    guest_phone: '',
   });
-  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -112,9 +109,8 @@ export default function BookService() {
           setFormData(prev => ({ ...prev, address: userData.default_address.address }));
         }
       } catch (e) {
-        // Guest user — allow booking without an account
+        base44.auth.redirectToLogin(window.location.href);
       }
-      setAuthChecked(true);
     };
     loadUser();
   }, []);
@@ -261,9 +257,9 @@ Return ONLY the id of the best technician and a brief reason.`,
     const tech = selectedTechnician || availableTechnicians.find(t => t.id === techId);
     
     const bookingData = {
-      user_id: user?.id || null,
-      user_name: user?.full_name || formData.guest_name,
-      user_phone: user?.phone || formData.guest_phone,
+      user_id: user.id,
+      user_name: user.full_name,
+      user_phone: user.phone,
       technician_id: techId,
       technician_name: tech?.name,
       category: formData.category,
@@ -284,7 +280,7 @@ Return ONLY the id of the best technician and a brief reason.`,
   const estimatedPrice = basePrices[formData.category] || 500;
   const Icon = iconMap[formData.category] || Wrench;
 
-  if (!authChecked) {
+  if (!user) {
     return <LoadingSpinner text="Loading..." />;
   }
 
@@ -397,25 +393,6 @@ Return ONLY the id of the best technician and a brief reason.`,
         {/* Step 2: Scheduling */}
         {step === 2 && (
           <div className="space-y-6">
-            {!user && (
-              <div className="space-y-3">
-                <Label className="text-base block">Your contact details</Label>
-                <p className="text-sm text-gray-500 -mt-1">No account needed — we'll contact you about this booking.</p>
-                <Input
-                  placeholder="Your name"
-                  value={formData.guest_name}
-                  onChange={(e) => setFormData({ ...formData, guest_name: e.target.value })}
-                  className="h-12"
-                />
-                <Input
-                  placeholder="Phone number (e.g. 0712 345 678)"
-                  value={formData.guest_phone}
-                  onChange={(e) => setFormData({ ...formData, guest_phone: e.target.value })}
-                  className="h-12"
-                  inputMode="tel"
-                />
-              </div>
-            )}
             <div>
               <Label className="text-base mb-3 block">When do you need the service?</Label>
               <RadioGroup
@@ -538,7 +515,7 @@ Return ONLY the id of the best technician and a brief reason.`,
               </Button>
               <Button
                 onClick={() => setStep(3)}
-                disabled={!formData.service_area || !formData.address || (formData.booking_type === 'scheduled' && (!formData.scheduled_date || !formData.scheduled_time)) || (!user && (!formData.guest_name.trim() || !formData.guest_phone.trim()))}
+                disabled={!formData.service_area || !formData.address || (formData.booking_type === 'scheduled' && (!formData.scheduled_date || !formData.scheduled_time))}
                 className="flex-1 h-12 bg-teal-600 hover:bg-teal-700"
               >
                 Continue
@@ -582,13 +559,6 @@ Return ONLY the id of the best technician and a brief reason.`,
                   <span className="text-gray-500">Address</span>
                   <span className="font-medium text-right max-w-[200px] truncate">{formData.address}</span>
                 </div>
-
-                {!user && (
-                  <div className="flex items-center justify-between py-2">
-                    <span className="text-gray-500">Contact</span>
-                    <span className="font-medium text-right max-w-[200px] truncate">{formData.guest_name} · {formData.guest_phone}</span>
-                  </div>
-                )}
 
                 {(selectedTechnician || availableTechnicians.length > 0) && (
                   <div className="flex items-center justify-between py-2">
