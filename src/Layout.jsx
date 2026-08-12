@@ -78,7 +78,7 @@ export default function Layout({ children, currentPageName }) {
   const navItems = isTechnician ? technicianNav : isDriver ? driverNav : customerNav;
 
   // Hide layout on auth pages
-  const hideLayout = ['Login', 'TechnicianRegister'].includes(currentPageName);
+  const hideLayout = ['Login', 'TechnicianRegister', 'AdminDashboard'].includes(currentPageName);
 
   if (hideLayout) {
     return <>{children}</>;
