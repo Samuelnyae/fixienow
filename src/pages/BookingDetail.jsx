@@ -88,7 +88,7 @@ export default function BookingDetail() {
         const userData = await base44.auth.me();
         setUser(userData);
       } catch (e) {
-        base44.auth.redirectToLogin(window.location.href);
+        // Guest user — allow viewing a booking without an account
       }
     };
     loadUser();
