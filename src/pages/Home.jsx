@@ -283,7 +283,7 @@ export default function Home() {
 
       {/* Same-day gigs — reverse job board */}
       <section className="max-w-7xl mx-auto px-4 pb-2 pt-4">
-        <div className="grid sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Link
             to="/PostGig"
             className="block rounded-2xl border border-gray-100 bg-white p-5 sm:p-6 hover:shadow-md transition-all"
