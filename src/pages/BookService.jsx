@@ -19,7 +19,8 @@ import {
   Paintbrush, 
   Wind, 
   Refrigerator, 
-  Key
+  Key,
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -608,8 +609,16 @@ Return ONLY the id of the best technician and a brief reason.`,
               </div>
             </div>
 
-            <div className="bg-amber-50 rounded-xl p-4 text-sm text-amber-800">
-              <p>💡 Final price may vary based on the actual work required. You'll only pay after the job is completed.</p>
+            <div className="rounded-2xl border border-teal-100 bg-teal-50/60 p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-teal-600" />
+                <p className="font-semibold text-teal-800 text-sm">The Fixie Guarantee</p>
+              </div>
+              <ul className="text-sm text-teal-800/80 space-y-1 pl-7 list-disc">
+                <li>Not satisfied? We'll send another technician to fix it free, or refund you.</li>
+                <li>You only pay after the job is completed to your satisfaction.</li>
+                <li>Every technician is ID- and certificate-verified.</li>
+              </ul>
             </div>
 
             {rateLimitError && (

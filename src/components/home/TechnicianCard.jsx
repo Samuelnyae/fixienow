@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { Star, MapPin, CheckCircle2 } from 'lucide-react';
+import { Star, MapPin, ShieldCheck } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import FavoriteButton from '@/components/technician/FavoriteButton';
@@ -36,7 +36,13 @@ export default function TechnicianCard({ technician }) {
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-gray-900 truncate">{technician.name}</h3>
               {technician.verification_status === 'approved' && (
-                <CheckCircle2 className="w-4 h-4 text-teal-600 flex-shrink-0" />
+                <span
+                  title="Fixie verified: ID and professional certificates checked"
+                  className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-teal-700 bg-teal-50 border border-teal-100 rounded-full px-1.5 py-0.5 flex-shrink-0"
+                >
+                  <ShieldCheck className="w-3 h-3" />
+                  Verified
+                </span>
               )}
             </div>
             
