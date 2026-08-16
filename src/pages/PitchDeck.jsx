@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Download, FileText, CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PITCH_SLIDES, generatePitchDeckPDF } from '@/utils/generatePitchDeckPDF';
+import CoverMessage from '@/components/pitch/CoverMessage';
 
 export default function PitchDeck() {
   const [generating, setGenerating] = useState(false);
@@ -75,6 +76,9 @@ export default function PitchDeck() {
             )}
           </div>
         </div>
+
+        {/* Cover message */}
+        <CoverMessage />
 
         {/* Slide previews */}
         <div className="grid md:grid-cols-2 gap-5">
