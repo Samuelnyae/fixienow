@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { Star, MapPin, ShieldCheck } from 'lucide-react';
+import { Star, MapPin } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import FavoriteButton from '@/components/technician/FavoriteButton';
+import VerifiedBadge from '@/components/technician/VerifiedBadge';
 
 export default function TechnicianCard({ technician }) {
   const professionLabels = {
@@ -35,15 +36,7 @@ export default function TechnicianCard({ technician }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-gray-900 truncate">{technician.name}</h3>
-              {technician.verification_status === 'approved' && (
-                <span
-                  title="Fixie verified: ID and professional certificates checked"
-                  className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-teal-700 bg-teal-50 border border-teal-100 rounded-full px-1.5 py-0.5 flex-shrink-0"
-                >
-                  <ShieldCheck className="w-3 h-3" />
-                  Verified
-                </span>
-              )}
+              {technician.verification_status === 'approved' && <VerifiedBadge />}
             </div>
             
             <p className="text-sm text-gray-500 mt-0.5">

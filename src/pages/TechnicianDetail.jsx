@@ -17,6 +17,8 @@ import {
   Award
 } from 'lucide-react';
 import FavoriteButton from '@/components/technician/FavoriteButton';
+import VerifiedBadge from '@/components/technician/VerifiedBadge';
+import VerificationCard from '@/components/technician/VerificationCard';
 import { computeCreditScore, bandFor } from '@/lib/creditScore';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -96,10 +98,7 @@ export default function TechnicianDetail() {
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-2xl md:text-3xl font-bold">{technician.name}</h1>
                 {technician.verification_status === 'approved' && (
-                  <Badge className="bg-white/20 text-white border-0">
-                    <CheckCircle2 className="w-3 h-3 mr-1" />
-                    Verified
-                  </Badge>
+                  <VerifiedBadge variant="onTeal" />
                 )}
                 {(() => {
                   const cs = computeCreditScore({ verification_status: technician.verification_status, rating: technician.rating, total_reviews: technician.total_reviews, total_jobs: technician.total_jobs, wallet_balance: technician.wallet_balance, years_experience: technician.years_experience, has_certificate: !!technician.certificate_url });
@@ -224,6 +223,8 @@ export default function TechnicianDetail() {
                     </div>
                   </div>
                 </div>
+
+                <VerificationCard technician={technician} />
 
                 {technician.is_available && (
                   <Button 
