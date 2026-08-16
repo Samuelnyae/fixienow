@@ -23,6 +23,7 @@ import RideHistory from '@/pages/RideHistory';
 import PostGig from '@/pages/PostGig';
 import GigBoard from '@/pages/GigBoard';
 import GigMatches from '@/pages/GigMatches';
+import PitchDeck from '@/pages/PitchDeck';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -115,6 +116,11 @@ const AuthenticatedApp = () => {
       <Route path="/GigMatches" element={
         <LayoutWrapper currentPageName="GigMatches">
           <GigMatches />
+        </LayoutWrapper>
+      } />
+      <Route path="/PitchDeck" element={
+        <LayoutWrapper currentPageName="PitchDeck">
+          <PitchDeck />
         </LayoutWrapper>
       } />
       {Object.entries(Pages).map(([path, Page]) => (
