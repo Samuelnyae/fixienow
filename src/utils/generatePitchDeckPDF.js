@@ -43,7 +43,7 @@ export const PITCH_SLIDES = [
     body: 'Kenya\u2019s repair, home-services and last-mile transport market is worth billions of shillings and runs almost entirely offline.',
     stats: [
       { value: '40M+', label: 'Kenyans reliant on informal repair & services' },
-      { value: 'KES 2T', label: 'Estimated annual informal services & transport spend' },
+      { value: 'Ksh 2T', label: 'Estimated annual informal services & transport spend' },
       { value: '90%', label: 'Of fundis operate with no digital footprint today' }
     ]
   },
@@ -87,7 +87,7 @@ export const PITCH_SLIDES = [
     body: 'A marketplace commission core, layered with wallet and service fees that scale with usage.',
     stats: [
       { value: '12\u201318%', label: 'Commission on completed service bookings & rides' },
-      { value: 'KES 50', label: 'Flat gig-board posting & match fee per posted job' },
+      { value: 'Ksh 50', label: 'Flat gig-board posting & match fee per posted job' },
       { value: 'Float', label: 'Wallet balances & merchant float earn platform margin' }
     ]
   },
@@ -243,8 +243,8 @@ function closingSlide(doc) {
   doc.text('Get in touch to schedule a deep dive.', MARGIN, 480);
   doc.setFontSize(11);
   doc.setTextColor(180, 210, 205);
-  doc.text('hello@fixie.co.ke', MARGIN, 510);
-  doc.text('fixie.co.ke', MARGIN, 528);
+  doc.text('samuelnyae18@gmail.com', MARGIN, 510);
+  doc.text('https://fixie.base44.app', MARGIN, 528);
 }
 
 export function generatePitchDeckPDF() {
