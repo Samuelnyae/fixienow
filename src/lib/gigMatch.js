@@ -16,6 +16,23 @@ export const GIG_CATEGORIES = [
   { value: 'artisan', label: 'Artisan / Other' },
 ];
 
+// Map a gig category slug to a valid Booking category. Gigs whose trade is one
+// of the repair categories map directly; everything else (boda, tailor,
+// artisan, welding, ...) maps to 'general' so a Booking can still be created.
+const BOOKING_CATEGORY_MAP = {
+  electrician: 'electrician',
+  plumber: 'plumber',
+  mechanic: 'mechanic',
+  carpenter: 'carpenter',
+  painter: 'painter',
+  hvac: 'hvac',
+  appliance_repair: 'appliance_repair',
+  locksmith: 'locksmith',
+};
+export function gigCategoryToBooking(category) {
+  return BOOKING_CATEGORY_MAP[category] || 'general';
+}
+
 export function categoryLabel(category) {
   const c = GIG_CATEGORIES.find((x) => x.value === category);
   return c ? c.label : (category || '').replace(/_/g, ' ');

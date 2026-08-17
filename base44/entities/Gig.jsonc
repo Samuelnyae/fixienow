@@ -71,6 +71,10 @@
     "matched_application_id": {
       "type": "string"
     },
+    "booking_id": {
+      "type": "string",
+      "description": "Booking created when the customer picked a fundi \u2014 links the gig into the booking engine (chat, payment, review)"
+    },
     "booked_via": {
       "type": "string",
       "enum": [

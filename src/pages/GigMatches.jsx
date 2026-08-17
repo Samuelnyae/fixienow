@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import GigCard from '@/components/gig/GigCard';
-import { categoryLabel } from '@/lib/gigMatch';
+import { categoryLabel, gigCategoryToBooking } from '@/lib/gigMatch';
 import { Button } from '@/components/ui/button';
 import { Star, Wallet, MessageSquare, CheckCircle2, Plus, LogIn, Briefcase } from 'lucide-react';
 
 export default function GigMatches() {
   const [params, setParams] = useSearchParams();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const { toast } = useToast();
   const [pickingId, setPickingId] = useState(null);
@@ -42,11 +43,33 @@ export default function GigMatches() {
     setPickingId(app.id);
     try {
       await base44.entities.GigApplication.update(app.id, { status: 'accepted' });
+
+      // Create a Booking from the matched gig so chat, live tracking, payment,
+      // review and loyalty all reuse the existing booking engine.
+      const agreedPrice =
+        app.proposed_price != null ? app.proposed_price
+        : selectedGig.budget != null ? selectedGig.budget : 0;
+      const booking = await base44.entities.Booking.create({
+        user_id: me.id,
+        user_name: me.full_name,
+        user_phone: me.phone,
+        technician_id: app.technician_id,
+        technician_name: app.technician_name,
+        category: gigCategoryToBooking(selectedGig.category),
+        description: selectedGig.description || selectedGig.title,
+        status: 'accepted',
+        booking_type: 'instant',
+        location: selectedGig.location || {},
+        estimated_price: agreedPrice,
+        payment_status: 'pending',
+      });
+
       await base44.entities.Gig.update(selectedGig.id, {
         status: 'matched',
         matched_technician_id: app.technician_id,
         matched_technician_name: app.technician_name,
         matched_application_id: app.id,
+        booking_id: booking.id,
       });
 
       const others = apps.filter((a) => a.id !== app.id && a.status === 'pending');
@@ -63,16 +86,18 @@ export default function GigMatches() {
             user_id: tech.user_id,
             type: 'booking_accepted',
             title: 'Gig matched! 🎉',
-            message: `You were picked for "${selectedGig.title}". Contact the customer to confirm timing.`,
+            message: `You were picked for "${selectedGig.title}". A booking has been created — open it to confirm timing and start the job.`,
+            booking_id: booking.id,
             is_read: false,
             metadata: { category: selectedGig.category, technician_name: app.technician_name },
           });
         }
       } catch (_) {}
 
-      toast({ title: 'Fundi picked!', description: `${app.technician_name} has been notified.` });
+      toast({ title: 'Fundi picked!', description: `${app.technician_name} has been notified. Opening your booking…` });
       qc.invalidateQueries({ queryKey: ['gigApplications', selectedId] });
       qc.invalidateQueries({ queryKey: ['myGigs', me.id] });
+      navigate(`/BookingDetail?id=${booking.id}`);
     } catch (e) {
       toast({ title: 'Could not pick fundi', description: e.message, variant: 'destructive' });
     } finally {
@@ -136,7 +161,13 @@ export default function GigMatches() {
                         ? `Matched: ${g.matched_technician_name || 'a fundi'}`
                         : g.status}
                     </span>
-                    <span className="text-[#0B463C] font-medium">{g.id === selectedId ? 'Viewing' : 'View'}</span>
+                    {g.status === 'matched' && g.booking_id ? (
+                      <Link to={`/BookingDetail?id=${g.booking_id}`} className="text-[#0B463C] font-medium inline-flex items-center gap-1">
+                        Open booking →
+                      </Link>
+                    ) : (
+                      <span className="text-[#0B463C] font-medium">{g.id === selectedId ? 'Viewing' : 'View'}</span>
+                    )}
                   </div>
                 }
               />
