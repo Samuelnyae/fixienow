@@ -18,7 +18,17 @@ import {
   Paintbrush, 
   Wind, 
   Refrigerator, 
-  Key 
+  Key,
+  Car,
+  Scissors,
+  Sparkles,
+  Home,
+  Truck,
+  Sprout,
+  Shield,
+  Baby,
+  Utensils,
+  Shirt
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -46,6 +56,16 @@ const categories = [
   { slug: 'hvac', name: 'HVAC', icon: Wind },
   { slug: 'appliance_repair', name: 'Appliance', icon: Refrigerator },
   { slug: 'locksmith', name: 'Locksmith', icon: Key },
+  { slug: 'driver', name: 'Driver', icon: Car },
+  { slug: 'salonist', name: 'Salonist', icon: Scissors },
+  { slug: 'cleaner', name: 'Cleaner', icon: Sparkles },
+  { slug: 'house_manager', name: 'House Manager', icon: Home },
+  { slug: 'mover', name: 'Mover', icon: Truck },
+  { slug: 'gardener', name: 'Gardener', icon: Sprout },
+  { slug: 'security', name: 'Security', icon: Shield },
+  { slug: 'nanny', name: 'Nanny', icon: Baby },
+  { slug: 'cook', name: 'Cook', icon: Utensils },
+  { slug: 'laundry', name: 'Laundry', icon: Shirt },
 ];
 
 export default function Services() {
