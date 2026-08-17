@@ -43,6 +43,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import PromoCodeInput from '../components/booking/PromoCodeInput';
+import SignInPrompt from '@/components/auth/SignInPrompt';
 
 const iconMap = {
   mechanic: Wrench,
@@ -90,6 +91,7 @@ export default function BookService() {
 
   const [step, setStep] = useState(1);
   const [user, setUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [formData, setFormData] = useState({
     category: preselectedCategory || '',
     description: '',
@@ -110,7 +112,9 @@ export default function BookService() {
           setFormData(prev => ({ ...prev, address: userData.default_address.address }));
         }
       } catch (e) {
-        base44.auth.redirectToLogin(window.location.href);
+        // Not logged in — allow guest browsing; sign-in is only required to confirm.
+      } finally {
+        setAuthChecked(true);
       }
     };
     loadUser();
@@ -254,6 +258,7 @@ Return ONLY the id of the best technician and a brief reason.`,
   });
 
   const handleSubmit = async () => {
+    if (!user) return;
     const techId = formData.technician_id || bestTechnicianId;
     const tech = selectedTechnician || availableTechnicians.find(t => t.id === techId);
     
@@ -281,7 +286,7 @@ Return ONLY the id of the best technician and a brief reason.`,
   const estimatedPrice = basePrices[formData.category] || 500;
   const Icon = iconMap[formData.category] || Wrench;
 
-  if (!user) {
+  if (!authChecked) {
     return <LoadingSpinner text="Loading..." />;
   }
 
@@ -627,32 +632,45 @@ Return ONLY the id of the best technician and a brief reason.`,
               </div>
             )}
 
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setStep(2)}
-                className="flex-1 h-12"
-              >
-                Back
-              </Button>
-              <Button
-                onClick={handleSubmit}
-                disabled={createBookingMutation.isPending}
-                className="flex-1 h-12 bg-teal-600 hover:bg-teal-700"
-              >
-                {createBookingMutation.isPending ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Booking...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-5 h-5 mr-2" />
-                    Confirm Booking
-                  </>
-                )}
-              </Button>
-            </div>
+            {user ? (
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setStep(2)}
+                  className="flex-1 h-12"
+                >
+                  Back
+                </Button>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={createBookingMutation.isPending}
+                  className="flex-1 h-12 bg-teal-600 hover:bg-teal-700"
+                >
+                  {createBookingMutation.isPending ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Booking...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-5 h-5 mr-2" />
+                      Confirm Booking
+                    </>
+                  )}
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setStep(2)}
+                  className="w-full h-12 mb-3"
+                >
+                  Back
+                </Button>
+                <SignInPrompt message="Almost there! Sign in to confirm your booking — it only takes a moment, and your request will be saved to your account for tracking, payment, and support." />
+              </>
+            )}
           </div>
         )}
       </div>

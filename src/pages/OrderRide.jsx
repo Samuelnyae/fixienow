@@ -19,6 +19,7 @@ import RideTypeCard from '@/components/ride/RideTypeCard';
 import RideSafetyPanel from '@/components/ride/RideSafetyPanel';
 import SavedLocations from '@/components/ride/SavedLocations';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import SignInPrompt from '@/components/auth/SignInPrompt';
 import { ShieldCheck, Calendar, Clock, Zap, History, BellRing } from 'lucide-react';
 import { sendRideNotification, requestNotificationPermission } from '@/lib/rideNotifications';
 import { Button } from '@/components/ui/button';
@@ -209,7 +210,7 @@ export default function OrderRide() {
 
   const requestRide = async () => {
     if (!user) {
-      base44.auth.redirectToLogin(window.location.href);
+      setError('Please sign in to confirm your ride.');
       return;
     }
     if (!pickupCoords || !destCoords) {
@@ -606,6 +607,9 @@ export default function OrderRide() {
               <div className="bg-red-50 rounded-xl p-3 text-sm text-red-700 border border-red-100">{error}</div>
             )}
 
+            {!user && pickupCoords && destCoords && (
+              <SignInPrompt message="Almost there! Sign in to request your ride — we only ask now so your trip is saved to your account for live tracking, payment, and safety." />
+            )}
             <Button
               onClick={requestRide}
               disabled={submitting || !pickupCoords || !destCoords || (isScheduled && (!scheduledDate || !scheduledTime))}

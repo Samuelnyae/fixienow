@@ -45,13 +45,16 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const nextParam = new URLSearchParams(window.location.search).get("next");
+  const next = nextParam && nextParam.startsWith("/") ? nextParam : "/";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
       await base44.auth.loginViaEmailPassword(email, password);
-      window.location.href = "/";
+      window.location.href = next;
     } catch (err) {
       setError(err.message || "Invalid email or password");
     } finally {
@@ -59,8 +62,8 @@ export default function Login() {
     }
   };
 
-  const handleGoogle = () => base44.auth.loginWithProvider("google", "/");
-  const handleApple = () => base44.auth.loginWithProvider("apple", "/");
+  const handleGoogle = () => base44.auth.loginWithProvider("google", next);
+  const handleApple = () => base44.auth.loginWithProvider("apple", next);
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -158,7 +161,7 @@ export default function Login() {
                     Login
                   </span>
                   <Link
-                    to="/register"
+                    to={`/register?next=${encodeURIComponent(next)}`}
                     className="pb-3 text-sm font-medium text-gray-400 hover:text-gray-700"
                   >
                     Create Account
@@ -282,7 +285,7 @@ export default function Login() {
 
                 <p className="text-center text-sm text-gray-500 mt-6">
                   Don't have an account?{" "}
-                  <Link to="/register" className="text-[#228B22] font-medium hover:underline">
+                  <Link to={`/register?next=${encodeURIComponent(next)}`} className="text-[#228B22] font-medium hover:underline">
                     Create one
                   </Link>
                 </p>
