@@ -37,3 +37,17 @@ export const debitWallet = async (wallet, amount) => {
   });
   return { ok: true };
 };
+
+// Credit a recipient's wallet by `amount` (KES). Mirrors debitWallet in reverse.
+export const creditWallet = async (wallet, amount) => {
+  const balances = [...(wallet?.balances || [])];
+  const idx = balances.findIndex((b) => b.currency === 'KES');
+  const current = idx !== -1 ? (balances[idx].amount || 0) : 0;
+  if (idx !== -1) balances[idx] = { ...balances[idx], amount: current + amount };
+  else balances.push({ currency: 'KES', amount, currency_symbol: 'KSh' });
+  await base44.entities.Wallet.update(wallet.id, {
+    balances,
+    total_received: (wallet.total_received || 0) + amount,
+  });
+  return { ok: true };
+};

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Loader2, RotateCcw, ChevronLeft } from 'lucide-react';
-import { findCustomerWallet, getKesBalance, debitWallet } from '@/lib/ussdWallet';
+import { findCustomerWallet, getKesBalance, debitWallet, creditWallet } from '@/lib/ussdWallet';
 
 const SERVICES = [
   { key: '1', slug: 'mechanic', label: 'Mechanic' },
@@ -42,6 +42,9 @@ const initialState = {
   amount: '',
   phone: '',
   paymentMethod: '', // 'mpesa' | 'wallet'
+  // wallet
+  recipientPhone: '',
+  sendAmount: '',
 };
 
 export default function USSDBooking() {
@@ -50,11 +53,12 @@ export default function USSDBooking() {
   const [input, setInput] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
+  const [walletResult, setWalletResult] = useState(null);
 
   const patch = (p) => setData((d) => ({ ...d, ...p }));
 
   const reset = () => {
-    setStep('home'); setData(initialState); setInput(''); setResult(null); setSubmitting(false);
+    setStep('home'); setData(initialState); setInput(''); setResult(null); setWalletResult(null); setSubmitting(false);
   };
 
   const creditTechnicianWallet = async (technician, amount) => {
@@ -396,6 +400,127 @@ export default function USSDBooking() {
     };
   };
 
+  const loadWalletBalance = async () => {
+    setSubmitting(true);
+    try {
+      const wallet = await findCustomerWallet(data.phone);
+      if (!wallet) {
+        setWalletResult([
+          `No Fixie wallet linked to ${data.phone}.`,
+          '',
+          'Sign up & top up to use the wallet.',
+        ]);
+      } else {
+        setWalletResult([
+          'Fixie Wallet Balance',
+          '',
+          `KES ${getKesBalance(wallet).toLocaleString()}`,
+          '',
+          'Thank you for using Fixie.',
+        ]);
+      }
+      setStep('w:balance');
+    } catch (e) {
+      setWalletResult(['Could not load balance.', e?.message || '']);
+      setStep('w:balance');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const loadStatement = async () => {
+    setSubmitting(true);
+    try {
+      const wallet = await findCustomerWallet(data.phone);
+      if (!wallet) {
+        setWalletResult([
+          `No Fixie wallet linked to ${data.phone}.`,
+          '',
+          'Sign up & top up to use the wallet.',
+        ]);
+        setStep('w:statement');
+        return;
+      }
+      const txns = await base44.entities.Transaction.filter(
+        { $or: [{ from_wallet_id: wallet.id }, { to_wallet_id: wallet.id }] },
+        '-created_date', 5
+      );
+      if (!txns.length) {
+        setWalletResult([
+          'No recent transactions yet.',
+          '',
+          'Your last 5 wallet transactions will show here.',
+        ]);
+      } else {
+        const lines = ['Recent wallet activity (last 5):', ''];
+        txns.forEach((t, i) => {
+          const isOut = t.from_wallet_id === wallet.id;
+          const sign = isOut ? '-' : '+';
+          const type = (t.transaction_type || 'transaction').replace(/_/g, ' ');
+          lines.push(`${i + 1}. ${sign}KES ${(t.amount || 0).toLocaleString()} — ${type}`);
+        });
+        setWalletResult(lines);
+      }
+      setStep('w:statement');
+    } catch (e) {
+      setWalletResult(['Could not load statement.', e?.message || '']);
+      setStep('w:statement');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const submitWallet = async () => {
+    const amount = Number(data.sendAmount) || 0;
+    if (amount <= 0) return { success: false, message: 'Invalid amount.' };
+
+    const senderWallet = await findCustomerWallet(data.phone);
+    if (!senderWallet) return { success: false, message: `No Fixie wallet linked to ${data.phone}.` };
+    if (getKesBalance(senderWallet) < amount) {
+      return { success: false, message: `Balance KES ${getKesBalance(senderWallet).toLocaleString()} is too low to send KES ${amount.toLocaleString()}.` };
+    }
+    const recipientWallet = await findCustomerWallet(data.recipientPhone);
+    if (!recipientWallet) return { success: false, message: `Recipient ${data.recipientPhone} has no Fixie wallet. Ask them to sign up & top up.` };
+    if (recipientWallet.id === senderWallet.id) return { success: false, message: 'You cannot send money to your own wallet.' };
+
+    const debit = await debitWallet(senderWallet, amount);
+    if (!debit.ok) return { success: false, message: 'Could not debit your wallet. Try again.' };
+    await creditWallet(recipientWallet, amount);
+
+    const txId = `tx_${Date.now()}_${String(senderWallet.id).slice(-4)}`;
+    try {
+      await base44.entities.Transaction.create({
+        transaction_id: txId,
+        from_wallet_id: senderWallet.id,
+        to_wallet_id: recipientWallet.id,
+        from_address: senderWallet.wallet_address || '',
+        to_address: recipientWallet.wallet_address || '',
+        amount,
+        currency: 'KES',
+        transaction_type: 'send',
+        status: 'completed',
+        payment_method: 'wallet',
+        description: `USSD wallet transfer to ${data.recipientPhone}`,
+      });
+    } catch (e) {}
+
+    return {
+      success: true,
+      lines: [
+        '✓ Money sent!',
+        '',
+        `To: ${data.recipientPhone}`,
+        `Amount: KES ${amount.toLocaleString()}`,
+        '',
+        `New balance: KES ${(getKesBalance(senderWallet) - amount).toLocaleString()}`,
+        '',
+        `Ref: ${txId.slice(-8)}`,
+        '',
+        'Thank you for using Fixie Wallet.',
+      ],
+    };
+  };
+
   const submit = async () => {
     setSubmitting(true);
     try {
@@ -403,6 +528,7 @@ export default function USSDBooking() {
       if (data.mode === 'tech') res = await submitTechnician();
       else if (data.mode === 'ride') res = await submitRide();
       else if (data.mode === 'tools') res = await submitTools();
+      else if (data.mode === 'wallet') res = await submitWallet();
       setResult(res);
       setStep('done');
     } catch (e) {
@@ -421,6 +547,7 @@ export default function USSDBooking() {
       if (v === '1') { patch({ mode: 'tech' }); setStep('t:svc'); }
       else if (v === '2') { patch({ mode: 'ride' }); setStep('r:type'); }
       else if (v === '3') { patch({ mode: 'tools' }); setStep('c:cat'); }
+      else if (v === '4') { patch({ mode: 'wallet' }); setStep('w:phone'); }
       return;
     }
 
@@ -477,6 +604,29 @@ export default function USSDBooking() {
       return;
     }
 
+    // Wallet flow
+    if (step === 'w:phone') { if (v) { patch({ phone: v }); setStep('w:menu'); } return; }
+    if (step === 'w:menu') {
+      if (v === '1') loadWalletBalance();
+      else if (v === '2') setStep('w:sendPhone');
+      else if (v === '3') loadStatement();
+      else if (v === '0') reset();
+      return;
+    }
+    if (step === 'w:balance') { setStep('w:menu'); return; }
+    if (step === 'w:statement') { setStep('w:menu'); return; }
+    if (step === 'w:sendPhone') { if (v) { patch({ recipientPhone: v }); setStep('w:sendAmount'); } return; }
+    if (step === 'w:sendAmount') {
+      const n = Number(v.replace(/[^0-9.]/g, ''));
+      if (n > 0) { patch({ sendAmount: n }); setStep('w:sendConfirm'); }
+      return;
+    }
+    if (step === 'w:sendConfirm') {
+      if (v === '1') submit();
+      else if (v === '2') reset();
+      return;
+    }
+
     // Tools flow
     if (step === 'c:cat') {
       const cat = TOOL_CATEGORIES.find((c) => c.key === v);
@@ -525,7 +675,7 @@ export default function USSDBooking() {
 
   const renderScreen = () => {
     if (step === 'home')
-      return 'Welcome to Fixie!\nChoose a service:\n\n1. Book a technician\n2. Get a ride\n3. Buy tools';
+      return 'Welcome to Fixie!\nChoose a service:\n\n1. Book a technician\n2. Get a ride\n3. Buy tools\n4. My Wallet';
 
     // Technician
     if (step === 't:svc')
@@ -550,6 +700,22 @@ export default function USSDBooking() {
     if (step === 'r:phone') return 'Enter your phone number:\n(e.g. 0712345678)';
     if (step === 'r:confirm')
       return `Confirm ride:\n\nType: ${data.rideType}\nFrom: ${data.pickup}\nTo: ${data.destination}\nPhone: ${data.phone}\n\n1. Confirm\n2. Cancel`;
+
+    // Wallet
+    if (step === 'w:phone')
+      return 'Enter the phone number linked to your Fixie wallet:\n(e.g. 0712345678)';
+    if (step === 'w:menu')
+      return 'Fixie Wallet\n\n1. Check balance\n2. Send money\n3. Mini statement\n0. Back';
+    if (step === 'w:balance')
+      return (walletResult ? walletResult.join('\n') : 'Loading...') + '\n\n0. Back';
+    if (step === 'w:statement')
+      return (walletResult ? walletResult.join('\n') : 'Loading...') + '\n\n0. Back';
+    if (step === 'w:sendPhone')
+      return 'Send money — enter recipient phone:\n(Fixie user, e.g. 0712345678)';
+    if (step === 'w:sendAmount')
+      return 'Enter amount to send (KES):\n(e.g. 500)';
+    if (step === 'w:sendConfirm')
+      return `Confirm send:\n\nTo: ${data.recipientPhone}\nAmount: KES ${data.sendAmount}\nFrom: ${data.phone}\n\n1. Confirm & Send\n2. Cancel`;
 
     // Tools
     if (step === 'c:cat')
@@ -580,6 +746,7 @@ export default function USSDBooking() {
       't:svc', 't:area', 't:desc', 't:when', 't:sched', 't:phone', 't:amount', 't:pay', 't:confirm',
       'r:type', 'r:pickup', 'r:dest', 'r:phone', 'r:confirm',
       'c:cat', 'c:list', 'c:phone', 'c:amount', 'c:pay', 'c:confirm',
+      'w:phone', 'w:menu', 'w:balance', 'w:statement', 'w:sendPhone', 'w:sendAmount', 'w:sendConfirm',
     ];
     const i = order.indexOf(step);
     if (i > 0) setStep(order[i - 1]);
