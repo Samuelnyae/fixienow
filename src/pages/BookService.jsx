@@ -20,7 +20,16 @@ import {
   Wind, 
   Refrigerator, 
   Key,
-  ShieldCheck
+  ShieldCheck,
+  Scissors,
+  Sparkles,
+  Home,
+  Truck,
+  Sprout,
+  Shield,
+  Baby,
+  Utensils,
+  Shirt
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,6 +63,15 @@ const iconMap = {
   hvac: Wind,
   appliance_repair: Refrigerator,
   locksmith: Key,
+  salonist: Scissors,
+  cleaner: Sparkles,
+  house_manager: Home,
+  mover: Truck,
+  gardener: Sprout,
+  security: Shield,
+  nanny: Baby,
+  cook: Utensils,
+  laundry: Shirt,
 };
 
 const categoryLabels = {
@@ -65,6 +83,16 @@ const categoryLabels = {
   hvac: 'HVAC',
   appliance_repair: 'Appliance Repair',
   locksmith: 'Locksmith',
+  salonist: 'Salonist',
+  cleaner: 'Cleaner',
+  house_manager: 'House Manager',
+  mover: 'Mover',
+  gardener: 'Gardener',
+  security: 'Security',
+  nanny: 'Nanny',
+  cook: 'Cook',
+  laundry: 'Laundry',
+  general: 'General',
 };
 
 const basePrices = {
@@ -76,6 +104,25 @@ const basePrices = {
   hvac: 800,
   appliance_repair: 500,
   locksmith: 300,
+  salonist: 500,
+  cleaner: 400,
+  house_manager: 600,
+  mover: 800,
+  gardener: 500,
+  security: 700,
+  nanny: 500,
+  cook: 600,
+  laundry: 400,
+  general: 500,
+};
+
+// Map a raw profession/category string (e.g. "Nanny", "General Handyman") to a
+// valid Booking.category slug. Anything not recognized falls back to 'general'.
+const VALID_BOOKING_CATEGORIES = Object.keys(categoryLabels);
+const normalizeBookingCategory = (raw) => {
+  if (!raw) return '';
+  const slug = raw.toLowerCase().trim().replace(/\s+/g, '_');
+  return VALID_BOOKING_CATEGORIES.includes(slug) ? slug : 'general';
 };
 
 const timeSlots = [
@@ -268,7 +315,7 @@ Return ONLY the id of the best technician and a brief reason.`,
       user_phone: actingUser.phone,
       technician_id: techId,
       technician_name: tech?.name,
-      category: formData.category,
+      category: normalizeBookingCategory(formData.category),
       description: formData.description,
       booking_type: formData.booking_type,
       scheduled_date: formData.scheduled_date ? format(formData.scheduled_date, 'yyyy-MM-dd') : null,
@@ -283,8 +330,9 @@ Return ONLY the id of the best technician and a brief reason.`,
     createBookingMutation.mutate(bookingData);
   };
 
-  const estimatedPrice = basePrices[formData.category] || 500;
-  const Icon = iconMap[formData.category] || Wrench;
+  const displayCategory = normalizeBookingCategory(formData.category);
+  const estimatedPrice = basePrices[displayCategory] || 500;
+  const Icon = iconMap[displayCategory] || Wrench;
 
   if (!authChecked) {
     return <LoadingSpinner text="Loading..." />;
@@ -337,7 +385,7 @@ Return ONLY the id of the best technician and a brief reason.`,
                   <div>
                     <p className="font-semibold">{selectedTechnician.name}</p>
                     <p className="text-sm text-teal-600">
-                      {categoryLabels[selectedTechnician.profession]}
+                      {categoryLabels[normalizeBookingCategory(selectedTechnician.profession)] || selectedTechnician.profession}
                     </p>
                   </div>
                 </div>

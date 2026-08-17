@@ -30,6 +30,15 @@
         "hvac",
         "appliance_repair",
         "locksmith",
+        "salonist",
+        "cleaner",
+        "house_manager",
+        "mover",
+        "gardener",
+        "security",
+        "nanny",
+        "cook",
+        "laundry",
         "general"
       ],
       "description": "Service category. 'general' is used for gigs whose trade is not one of the repair categories (e.g. boda, tailor, artisan)."
