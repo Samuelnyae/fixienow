@@ -19,7 +19,7 @@ import RideTypeCard from '@/components/ride/RideTypeCard';
 import RideSafetyPanel from '@/components/ride/RideSafetyPanel';
 import SavedLocations from '@/components/ride/SavedLocations';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import SignInPrompt from '@/components/auth/SignInPrompt';
+import InlineAuthPanel from '@/components/auth/InlineAuthPanel';
 import { ShieldCheck, Calendar, Clock, Zap, History, BellRing } from 'lucide-react';
 import { sendRideNotification, requestNotificationPermission } from '@/lib/rideNotifications';
 import { Button } from '@/components/ui/button';
@@ -208,8 +208,8 @@ export default function OrderRide() {
 
   const isScheduled = bookingType === 'scheduled';
 
-  const requestRide = async () => {
-    if (!user) {
+  const requestRide = async (actingUser = user) => {
+    if (!actingUser) {
       setError('Please sign in to confirm your ride.');
       return;
     }
@@ -608,7 +608,10 @@ export default function OrderRide() {
             )}
 
             {!user && pickupCoords && destCoords && (
-              <SignInPrompt message="Almost there! Sign in to request your ride — we only ask now so your trip is saved to your account for live tracking, payment, and safety." />
+              <InlineAuthPanel
+                message="Almost there! Create your account (or sign in) right here to request your ride — we only ask now so your trip is saved for live tracking, payment, and safety."
+                onSuccess={(u) => { setUser(u); requestRide(u); }}
+              />
             )}
             <Button
               onClick={requestRide}

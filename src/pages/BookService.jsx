@@ -43,7 +43,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import PromoCodeInput from '../components/booking/PromoCodeInput';
-import SignInPrompt from '@/components/auth/SignInPrompt';
+import InlineAuthPanel from '@/components/auth/InlineAuthPanel';
 
 const iconMap = {
   mechanic: Wrench,
@@ -257,15 +257,15 @@ Return ONLY the id of the best technician and a brief reason.`,
     },
   });
 
-  const handleSubmit = async () => {
-    if (!user) return;
+  const handleSubmit = async (actingUser = user) => {
+    if (!actingUser) return;
     const techId = formData.technician_id || bestTechnicianId;
     const tech = selectedTechnician || availableTechnicians.find(t => t.id === techId);
     
     const bookingData = {
-      user_id: user.id,
-      user_name: user.full_name,
-      user_phone: user.phone,
+      user_id: actingUser.id,
+      user_name: actingUser.full_name || actingUser.email,
+      user_phone: actingUser.phone,
       technician_id: techId,
       technician_name: tech?.name,
       category: formData.category,
@@ -668,7 +668,10 @@ Return ONLY the id of the best technician and a brief reason.`,
                 >
                   Back
                 </Button>
-                <SignInPrompt message="Almost there! Sign in to confirm your booking — it only takes a moment, and your request will be saved to your account for tracking, payment, and support." />
+                <InlineAuthPanel
+                  message="Almost there! Create your account (or sign in) right here to confirm your booking — it only takes a moment, and your request is saved for tracking, payment, and support."
+                  onSuccess={(u) => { setUser(u); handleSubmit(u); }}
+                />
               </>
             )}
           </div>
