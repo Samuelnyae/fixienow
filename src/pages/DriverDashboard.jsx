@@ -10,6 +10,7 @@ import EmptyState from '@/components/common/EmptyState';
 import CreditScoreCard from '@/components/credit/CreditScoreCard';
 import { driverProfile } from '@/lib/creditScore';
 import { useWalletStats } from '@/hooks/useWalletStats';
+import { settleRidePayment } from '@/lib/rideSettlement';
 
 const VEHICLE_ICON = { cab: Car, bodaboda: Bike, truck: Truck };
 const STATUS_FLOW = ['searching', 'assigned', 'in_progress', 'completed'];
@@ -50,15 +51,11 @@ export default function DriverDashboard() {
 
   const advanceMutation = useMutation({
     mutationFn: async ({ ride, nextStatus }) => {
-      const updated = await base44.entities.Ride.update(ride.id, { status: nextStatus, final_fare: nextStatus === 'completed' ? (ride.estimated_fare || ride.final_fare || 0) : ride.final_fare, payment_status: nextStatus === 'completed' ? 'paid' : ride.payment_status });
       if (nextStatus === 'completed') {
         const fare = ride.estimated_fare || ride.final_fare || 0;
-        await base44.entities.Driver.update(driver.id, {
-          total_trips: (driver.total_trips || 0) + 1,
-          wallet_balance: (driver.wallet_balance || 0) + fare,
-        });
+        return await settleRidePayment({ ride, driver, fare });
       }
-      return updated;
+      return await base44.entities.Ride.update(ride.id, { status: nextStatus });
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['myRides', driver?.id]);

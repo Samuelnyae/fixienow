@@ -22,6 +22,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import InlineAuthPanel from '@/components/auth/InlineAuthPanel';
 import { ShieldCheck, Calendar, Clock, Zap, History, BellRing } from 'lucide-react';
 import { sendRideNotification, requestNotificationPermission } from '@/lib/rideNotifications';
+import { settleRidePayment } from '@/lib/rideSettlement';
 import { Button } from '@/components/ui/button';
 import {
   RIDE_TYPES,
@@ -151,12 +152,8 @@ export default function OrderRide() {
         completedFiredRef.current = true;
         (async () => {
           try {
-            const comp = await base44.entities.Ride.update(ride.id, {
-              status: 'completed',
-              final_fare: fare,
-              payment_status: 'paid',
-            });
-            setRide(comp);
+            const res = await settleRidePayment({ ride, driver, fare });
+            setRide(res?.ride || ride);
           } catch {}
           setPhase('completed');
         })();
