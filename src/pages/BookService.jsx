@@ -250,8 +250,6 @@ Return ONLY the id of the best technician and a brief reason.`,
   const [rateLimitError, setRateLimitError] = useState(null);
   const [discount, setDiscount] = useState(0);
   const [promoCode, setPromoCode] = useState('');
-  const [guestInfo, setGuestInfo] = useState({ name: '', phone: '' });
-  const [showAuth, setShowAuth] = useState(false);
 
   const createBookingMutation = useMutation({
     mutationFn: async (bookingData) => {
@@ -306,14 +304,15 @@ Return ONLY the id of the best technician and a brief reason.`,
     },
   });
 
-  const handleSubmit = async (actingUser = user, guest = null) => {
+  const handleSubmit = async (actingUser = user) => {
+    if (!actingUser) return;
     const techId = formData.technician_id || bestTechnicianId;
     const tech = selectedTechnician || availableTechnicians.find(t => t.id === techId);
 
     const bookingData = {
-      user_id: actingUser?.id || null,
-      user_name: actingUser?.full_name || actingUser?.email || guest?.name || '',
-      user_phone: actingUser?.phone || guest?.phone || '',
+      user_id: actingUser.id,
+      user_name: actingUser.full_name || actingUser.email,
+      user_phone: actingUser.phone,
       technician_id: techId,
       technician_name: tech?.name,
       category: normalizeBookingCategory(formData.category),
@@ -691,7 +690,7 @@ Return ONLY the id of the best technician and a brief reason.`,
                   Back
                 </Button>
                 <Button
-                  onClick={() => handleSubmit()}
+                  onClick={handleSubmit}
                   disabled={createBookingMutation.isPending}
                   className="flex-1 h-12 bg-teal-600 hover:bg-teal-700"
                 >
@@ -709,76 +708,19 @@ Return ONLY the id of the best technician and a brief reason.`,
                 </Button>
               </div>
             ) : (
-              <div className="space-y-3">
-                {/* Guest checkout — no account needed */}
-                {!showAuth && (
-                  <div className="rounded-2xl border border-teal-100 bg-teal-50/40 p-4 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className="w-5 h-5 text-teal-600" />
-                      <p className="font-semibold text-teal-800 text-sm">Book as a guest</p>
-                    </div>
-                    <p className="text-sm text-teal-800/80">
-                      No account needed. We just need your name and phone so your technician can reach you.
-                    </p>
-                    <div className="grid grid-cols-1 gap-3">
-                      <Input
-                        placeholder="Your name"
-                        value={guestInfo.name}
-                        onChange={(e) => setGuestInfo({ ...guestInfo, name: e.target.value })}
-                        className="h-12"
-                      />
-                      <Input
-                        placeholder="Phone (e.g. 254700000000)"
-                        value={guestInfo.phone}
-                        onChange={(e) => setGuestInfo({ ...guestInfo, phone: e.target.value })}
-                        className="h-12"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => setStep(2)}
-                    className="flex-1 h-12"
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    onClick={() => handleSubmit(null, guestInfo)}
-                    disabled={createBookingMutation.isPending || !guestInfo.name || !guestInfo.phone}
-                    className="flex-1 h-12 bg-teal-600 hover:bg-teal-700"
-                  >
-                    {createBookingMutation.isPending ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Booking...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="w-5 h-5 mr-2" />
-                        Confirm as guest
-                      </>
-                    )}
-                  </Button>
-                </div>
-
-                {!showAuth ? (
-                  <button
-                    type="button"
-                    onClick={() => setShowAuth(true)}
-                    className="w-full text-sm text-teal-700 hover:underline"
-                  >
-                    Already have an account? Sign in for tracking &amp; history
-                  </button>
-                ) : (
-                  <InlineAuthPanel
-                    message="Sign in (or create your account) to save this booking to your history for tracking, payment, and support."
-                    onSuccess={(u) => { setUser(u); setShowAuth(false); handleSubmit(u); }}
-                  />
-                )}
-              </div>
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setStep(2)}
+                  className="w-full h-12 mb-3"
+                >
+                  Back
+                </Button>
+                <InlineAuthPanel
+                  message="Almost there! Create your account (or sign in) right here to confirm your booking — it only takes a moment, and your request is saved for tracking, payment, and support."
+                  onSuccess={(u) => { setUser(u); handleSubmit(u); }}
+                />
+              </>
             )}
           </div>
         )}
