@@ -44,6 +44,7 @@ export default function TechnicianRegister() {
   const [idDocument, setIdDocument] = useState(null);
   const [certificate, setCertificate] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [areaSuggestions, setAreaSuggestions] = useState([]);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -60,6 +61,20 @@ export default function TechnicianRegister() {
       }
     };
     loadUser();
+  }, []);
+
+  // Load existing service areas so the technician's area picker stays in sync
+  // with whatever areas already exist (admin-managed or added by other fundis).
+  useEffect(() => {
+    const loadAreas = async () => {
+      try {
+        const areas = await base44.entities.ServiceArea.list('-created_date', 200);
+        setAreaSuggestions(areas.map((a) => a.name).filter(Boolean));
+      } catch (e) {
+        // Non-fatal — suggestions stay empty
+      }
+    };
+    loadAreas();
   }, []);
 
   const registerMutation = useMutation({
@@ -330,7 +345,7 @@ export default function TechnicianRegister() {
                 placeholder="Type an area and press Enter (e.g. Westlands, Kilimani, Lavington)..."
                 value={formData.service_areas}
                 onChange={(areas) => setFormData({ ...formData, service_areas: areas })}
-                suggestions={['Westlands', 'Kilimani', 'Lavington', 'Karen', 'Runda', 'Kasarani', 'Embakasi', 'Ruaka', 'Ngong Road', 'Industrial Area', 'CBD', 'South B', 'South C', 'Eastleigh']}
+                suggestions={areaSuggestions}
               />
               <p className="text-sm text-gray-500 mt-1">Add all the areas you can serve to reach more customers.</p>
             </div>
