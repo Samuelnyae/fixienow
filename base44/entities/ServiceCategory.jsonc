@@ -7,16 +7,7 @@
     },
     "slug": {
       "type": "string",
-      "enum": [
-        "mechanic",
-        "plumber",
-        "electrician",
-        "carpenter",
-        "painter",
-        "hvac",
-        "appliance_repair",
-        "locksmith"
-      ]
+      "description": "Category slug (e.g. plumber, electrician). Open-ended so new technician skills can be synced in."
     },
     "icon": {
       "type": "string"

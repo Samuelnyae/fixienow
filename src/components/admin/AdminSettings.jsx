@@ -3,12 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
 import { Settings as SettingsIcon, ShieldCheck, Percent, MapPin, Wallet, Bell } from 'lucide-react';
+import ServiceAreaManager from './ServiceAreaManager';
 
 function cls(...parts) { return parts.filter(Boolean).join(' '); }
 
 export default function AdminSettings() {
   const { data: areas = [] } = useQuery({
-    queryKey: ['adminSettingsAreas'],
+    queryKey: ['serviceAreas'],
     queryFn: () => base44.entities.ServiceArea.list('-created_date', 200),
   });
   const { data: promoCodes = [] } = useQuery({
@@ -61,34 +62,22 @@ export default function AdminSettings() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-emerald-600" /> Service Areas
-          </h3>
-          {areas.length === 0 ? (
-            <p className="text-sm text-gray-500 py-6 text-center">No service areas configured.</p>
-          ) : (
-            <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
-              {areas.slice(0, 40).map((a) => (
-                <span key={a.id} className={cls('text-xs px-2.5 py-1 rounded-full border', a.is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-gray-50 text-gray-400 border-gray-100')}>
-                  {a.name}{a.county ? (', ' + a.county) : ''}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+          <MapPin className="w-4 h-4 text-emerald-600" /> Service Areas
+        </h3>
+        <ServiceAreaManager />
+      </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" /> Compliance &amp; Trust
-          </h3>
-          <div className="space-y-2.5 text-sm">
-            <div className="flex justify-between"><span className="text-gray-500">CBK License</span><span className="font-medium text-emerald-700">Active</span></div>
-            <div className="flex justify-between"><span className="text-gray-500">Escrow Model</span><span className="font-medium text-gray-900">Hold-and-release</span></div>
-            <div className="flex justify-between"><span className="text-gray-500">KYC Verification</span><span className="font-medium text-gray-900">Mandatory for fundis</span></div>
-            <div className="flex justify-between"><span className="text-gray-500">Dispute Window</span><span className="font-medium text-gray-900">7 days post-job</span></div>
-          </div>
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-emerald-600" /> Compliance &amp; Trust
+        </h3>
+        <div className="space-y-2.5 text-sm">
+          <div className="flex justify-between"><span className="text-gray-500">CBK License</span><span className="font-medium text-emerald-700">Active</span></div>
+          <div className="flex justify-between"><span className="text-gray-500">Escrow Model</span><span className="font-medium text-gray-900">Hold-and-release</span></div>
+          <div className="flex justify-between"><span className="text-gray-500">KYC Verification</span><span className="font-medium text-gray-900">Mandatory for fundis</span></div>
+          <div className="flex justify-between"><span className="text-gray-500">Dispute Window</span><span className="font-medium text-gray-900">7 days post-job</span></div>
         </div>
       </div>
 

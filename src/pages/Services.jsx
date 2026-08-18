@@ -100,6 +100,19 @@ export default function Services() {
     },
   });
 
+  // Dynamic categories synced from ServiceCategory records (e.g. new skills
+  // added by technicians during registration that aren't in the hardcoded list).
+  const { data: dynamicCategories = [] } = useQuery({
+    queryKey: ['serviceCategories'],
+    queryFn: () => base44.entities.ServiceCategory.list('-created_date', 100),
+  });
+
+  const knownSlugs = new Set(categories.map((c) => c.slug));
+  const extraCategories = dynamicCategories
+    .filter((c) => c.is_active !== false && c.slug && !knownSlugs.has(c.slug))
+    .map((c) => ({ slug: c.slug, name: c.name || c.slug, icon: Wrench }));
+  const allCategories = [...categories, ...extraCategories];
+
   const favoriteIds = new Set(favorites.map((f) => f.technician_id));
 
   const filteredTechnicians = technicians.filter((tech) => {
@@ -232,7 +245,7 @@ export default function Services() {
                 <span className="text-sm font-medium">Favorites ({favorites.length})</span>
               </button>
             )}
-            {categories.map((cat) => {
+            {allCategories.map((cat) => {
               const Icon = cat.icon;
               const isActive = selectedCategory === cat.slug;
               return (

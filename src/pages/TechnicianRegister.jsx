@@ -119,6 +119,32 @@ export default function TechnicianRegister() {
         }
       }
 
+      // Sync any new skills/profession to the ServiceCategory entity so they
+      // appear as filterable categories on the Services page.
+      try {
+        const slugify = (s) => String(s || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+        const allSkills = [...(formData.skills || [])];
+        if (formData.profession) allSkills.unshift(formData.profession);
+        const slugs = [...new Set(allSkills.map(slugify).filter(Boolean))];
+
+        if (slugs.length > 0) {
+          const existing = await base44.entities.ServiceCategory.list('-created_date', 200);
+          const existingSlugs = new Set(existing.map((c) => (c.slug || '').toLowerCase()));
+          const toCreate = slugs
+            .filter((slug) => !existingSlugs.has(slug))
+            .map((slug) => ({
+              name: slug.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+              slug,
+              is_active: true,
+            }));
+          if (toCreate.length > 0) {
+            await base44.entities.ServiceCategory.bulkCreate(toCreate);
+          }
+        }
+      } catch (e) {
+        console.warn('ServiceCategory sync failed:', e);
+      }
+
       // Update user type
       if (user) {
         await base44.auth.updateMe({ user_type: 'technician' });
