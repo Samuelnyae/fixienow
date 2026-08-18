@@ -8,14 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { GIG_CATEGORIES } from '@/lib/gigMatch';
+import { GIG_AREAS as AREAS } from '@/lib/gigAreas';
 import { MapPin, Wallet, ArrowLeft, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const AREAS = [
-  'Westlands', 'Kilimani', 'Lavington', 'Kasarani', 'Embakasi', 'Ruaka',
-  'Ngong Road', 'Industrial Area', 'CBD', 'Karen', 'Rongai', 'Thika Road',
-  'Other',
-];
 
 export default function PostGig() {
   const navigate = useNavigate();
@@ -28,7 +23,7 @@ export default function PostGig() {
     title: '',
     description: '',
     budget: '',
-    area_name: 'Westlands',
+    area_name: 'CBD',
     address: '',
     neededByHours: '3',
   });
@@ -149,7 +144,7 @@ export default function PostGig() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="area">Area</Label>
+          <Label htmlFor="area">Area / Town</Label>
           <select
             id="area"
             value={form.area_name}
@@ -160,12 +155,22 @@ export default function PostGig() {
               <option key={a} value={a}>{a}</option>
             ))}
           </select>
+          <p className="text-xs text-gray-400">Pick anywhere in Kenya — fundis nationwide can apply.</p>
         </div>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="address">Address / landmark</Label>
+        {form.area_name === 'Other' && (
+          <div className="space-y-1.5">
+            <Label htmlFor="areaCustom">Specify your area</Label>
+            <Input id="areaCustom" value={form.address} onChange={(e) => set('address', e.target.value)} placeholder="e.g. Ongata Rongai, Kikuyu town, etc." />
+          </div>
+        )}
+
+        {form.area_name !== 'Other' && (
+          <div className="space-y-1.5">
+            <Label htmlFor="address">Address / landmark</Label>
           <Input id="address" value={form.address} onChange={(e) => set('address', e.target.value)} placeholder="e.g. Appt 4B, near Sarit Centre" />
         </div>
+        )}
 
         <Button type="submit" disabled={saving} className="w-full bg-[#0B463C] hover:bg-[#0a3d34] h-11">
           {saving ? 'Posting...' : 'Post gig & match fundis'}

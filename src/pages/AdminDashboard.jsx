@@ -32,6 +32,15 @@ import AdminDriversManager from '../components/admin/AdminDriversManager';
 import AdminSidebar from '../components/admin/AdminSidebar';
 import AdminTopbar from '../components/admin/AdminTopbar';
 import AdminOverview from '../components/admin/AdminOverview';
+import AdminJobs from '../components/admin/AdminJobs';
+import AdminGigs from '../components/admin/AdminGigs';
+import AdminEarnings from '../components/admin/AdminEarnings';
+import AdminReviews from '../components/admin/AdminReviews';
+import AdminDisputes from '../components/admin/AdminDisputes';
+import AdminUsers from '../components/admin/AdminUsers';
+import AdminPayments from '../components/admin/AdminPayments';
+import AdminAnalytics from '../components/admin/AdminAnalytics';
+import AdminSettings from '../components/admin/AdminSettings';
 
 const NAV_TITLES = {
   dashboard: { title: 'Welcome back, Admin 👋', subtitle: "Here's what's happening on Fixie today." },
@@ -157,9 +166,15 @@ export default function AdminDashboard() {
 
           {activeNav === 'drivers' && <AdminDriversManager user={user} />}
 
-          {['jobs', 'gigs', 'earnings', 'reviews', 'disputes', 'users', 'payments', 'analytics', 'settings'].includes(activeNav) && (
-            <PlaceholderView label={head.title} />
-          )}
+          {activeNav === 'jobs' && <AdminJobs />}
+          {activeNav === 'gigs' && <AdminGigs />}
+          {activeNav === 'earnings' && <AdminEarnings payments={payments} technicians={technicians} />}
+          {activeNav === 'reviews' && <AdminReviews />}
+          {activeNav === 'disputes' && <AdminDisputes />}
+          {activeNav === 'users' && <AdminUsers />}
+          {activeNav === 'payments' && <AdminPayments payments={payments} />}
+          {activeNav === 'analytics' && <AdminAnalytics bookings={bookings} payments={payments} technicians={technicians} />}
+          {activeNav === 'settings' && <AdminSettings />}
         </main>
       </div>
     </div>
