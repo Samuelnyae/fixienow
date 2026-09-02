@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import TagInput from '@/components/common/TagInput';
+import InlineAuthPanel from '@/components/auth/InlineAuthPanel';
 import { TECHNICIAN_SKILLS } from '@/lib/gigMatch';
 
 
@@ -78,7 +79,7 @@ export default function TechnicianRegister() {
   }, []);
 
   const registerMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (actingUser) => {
       setUploading(true);
       
       let idDocUrl = '';
@@ -94,7 +95,7 @@ export default function TechnicianRegister() {
       }
 
       const techData = {
-        user_id: user?.id,
+        user_id: actingUser?.id,
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
@@ -161,7 +162,7 @@ export default function TechnicianRegister() {
       }
 
       // Update user type
-      if (user) {
+      if (actingUser) {
         await base44.auth.updateMe({ user_type: 'technician' });
       }
 
@@ -454,14 +455,14 @@ export default function TechnicianRegister() {
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setStep(2)} className="flex-1 h-12">
-                Back
-              </Button>
+            <Button variant="outline" onClick={() => setStep(2)} className="w-full h-12 mb-3">
+              Back
+            </Button>
+            {user ? (
               <Button
-                onClick={() => registerMutation.mutate()}
+                onClick={() => registerMutation.mutate(user)}
                 disabled={registerMutation.isPending}
-                className="flex-1 h-12 bg-teal-600 hover:bg-teal-700"
+                className="w-full h-12 bg-teal-600 hover:bg-teal-700"
               >
                 {registerMutation.isPending ? (
                   <>
@@ -472,7 +473,12 @@ export default function TechnicianRegister() {
                   'Submit Application'
                 )}
               </Button>
-            </div>
+            ) : (
+              <InlineAuthPanel
+                message="Create your Fixie account (or sign in) to submit your technician application — this links your profile so you can receive jobs, chat with customers, and get paid."
+                onSuccess={(u) => { setUser(u); registerMutation.mutate(u); }}
+              />
+            )}
           </div>
         )}
 
