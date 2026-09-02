@@ -3,7 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -24,6 +24,8 @@ import PostGig from '@/pages/PostGig';
 import GigBoard from '@/pages/GigBoard';
 import GigMatches from '@/pages/GigMatches';
 import PitchDeck from '@/pages/PitchDeck';
+import { useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -41,6 +43,7 @@ const LoadingScreen = () => (
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
+  const location = useLocation();
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -54,7 +57,15 @@ const AuthenticatedApp = () => {
   }
 
   return (
-    <Routes>
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, x: 24 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -24 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
+      >
+      <Routes location={location}>
       {/* Auth routes — public */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
@@ -136,12 +147,30 @@ const AuthenticatedApp = () => {
       ))}
 
       <Route path="*" element={<PageNotFound />} />
-    </Routes>
+      </Routes>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
 
 function App() {
+  // Global system dark mode detection — attach/remove .dark on <html> app-wide.
+  // Honors a stored manual preference (set from the admin toggle); otherwise follows the OS.
+  useEffect(() => {
+    const root = document.documentElement;
+    const applyDark = (isDark) => root.classList.toggle('dark', isDark);
+
+    const stored = localStorage.getItem('fixie-theme');
+    applyDark(stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = (e) => {
+      if (!localStorage.getItem('fixie-theme')) applyDark(e.matches);
+    };
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
 
   return (
     <AuthProvider>

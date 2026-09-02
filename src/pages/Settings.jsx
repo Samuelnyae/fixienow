@@ -12,12 +12,24 @@ import {
   HelpCircle,
   FileText,
   ChevronRight,
-  Loader2
+  Loader2,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog';
 
 export default function Settings() {
   const [user, setUser] = useState(null);
@@ -48,6 +60,15 @@ export default function Settings() {
     mutationFn: (newSettings) => base44.auth.updateMe({ settings: newSettings }),
     onSuccess: (updatedUser) => {
       setUser(updatedUser);
+    },
+  });
+
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: () => base44.entities.User.delete(user?.id),
+    onSuccess: async () => {
+      await base44.auth.logout('/login');
     },
   });
 
@@ -157,6 +178,65 @@ export default function Settings() {
             </div>
             <ChevronRight className="w-5 h-5 text-gray-400" />
           </button>
+        </div>
+
+        {/* Danger Zone */}
+        <div className="bg-white rounded-2xl p-6 border border-red-100">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+              <Trash2 className="w-5 h-5 text-red-600" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-gray-900">Delete Account</h2>
+              <p className="text-sm text-gray-500">Permanently remove your profile and sign out</p>
+            </div>
+          </div>
+          <Button
+            variant="destructive"
+            onClick={() => setShowDeleteDialog(true)}
+            className="w-full sm:w-auto"
+          >
+            Delete Account
+          </Button>
+
+          <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
+                  Delete your account?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  This permanently deletes your Fixie profile and signs you out. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              {deleteAccountMutation.isError && (
+                <p className="text-sm text-red-600">
+                  {deleteAccountMutation.error?.message || 'Could not delete your account. Please try again.'}
+                </p>
+              )}
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={deleteAccountMutation.isPending}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  disabled={deleteAccountMutation.isPending}
+                  className="bg-red-600 text-white hover:bg-red-700"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    deleteAccountMutation.mutate();
+                  }}
+                >
+                  {deleteAccountMutation.isPending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    'Delete Account'
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
 
         {/* App Info */}

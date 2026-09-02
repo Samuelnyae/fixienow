@@ -85,4 +85,23 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
+
+  [class*="overflow-y-auto"],
+  [class*="overflow-auto"],
+  [class*="overflow-y-scroll"] {
+    overscroll-behavior-y: none;
+  }
+
+  button,
+  a,
+  nav,
+  svg {
+    -webkit-user-select: none;
+    user-select: none;
+  }
 }

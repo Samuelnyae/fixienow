@@ -1,27 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Bell, Moon, Sun, Menu, Calendar } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 
-function getInitialDark() {
-  if (typeof window === 'undefined') return false;
-  const stored = localStorage.getItem('fixie-theme');
-  if (stored) return stored === 'dark';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches;
-}
-
 export default function AdminTopbar({ user, onMenu, title, subtitle }) {
   const navigate = useNavigate();
-  const [dark, setDark] = useState(getInitialDark);
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
   const today = format(new Date(), 'MMM d, yyyy');
 
-  useEffect(() => {
-    const root = document.documentElement;
-    if (dark) root.classList.add('dark');
-    else root.classList.remove('dark');
-    localStorage.setItem('fixie-theme', dark ? 'dark' : 'light');
-  }, [dark]);
+  const toggleDark = () => {
+    const next = !dark;
+    document.documentElement.classList.toggle('dark', next);
+    localStorage.setItem('fixie-theme', next ? 'dark' : 'light');
+    setDark(next);
+  };
 
   return (
     <header className="sticky top-0 z-20 bg-white/90 dark:bg-slate-900 backdrop-blur border-b border-gray-100 dark:border-slate-800">
@@ -61,7 +54,7 @@ export default function AdminTopbar({ user, onMenu, title, subtitle }) {
         </button>
 
         <button
-          onClick={() => setDark((v) => !v)}
+          onClick={toggleDark}
           className="w-9 h-9 flex items-center justify-center rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
           title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
         >
