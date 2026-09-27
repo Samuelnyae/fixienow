@@ -76,7 +76,7 @@ export default function AdminSettings() {
         <div className="space-y-2.5 text-sm">
           <div className="flex justify-between"><span className="text-gray-500">CBK License</span><span className="font-medium text-emerald-700">Active</span></div>
           <div className="flex justify-between"><span className="text-gray-500">Escrow Model</span><span className="font-medium text-gray-900">Hold-and-release</span></div>
-          <div className="flex justify-between"><span className="text-gray-500">KYC Verification</span><span className="font-medium text-gray-900">Mandatory for fundis</span></div>
+          <div className="flex justify-between"><span className="text-gray-500">KYC &amp; Identity</span><span className="font-medium text-gray-900">Handled by PayHero</span></div>
           <div className="flex justify-between"><span className="text-gray-500">Dispute Window</span><span className="font-medium text-gray-900">7 days post-job</span></div>
         </div>
       </div>
